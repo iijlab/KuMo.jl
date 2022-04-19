@@ -1,0 +1,13 @@
+name = "KuMo"
+uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
+authors = ["azzaare <jf@baffier.fr> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1.7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
