@@ -9,16 +9,16 @@ using PrettyTables
 using Random
 
 # SECTION - exports
-export scenario
 export make_df
+export scenario
 export simulate
 
 # SECTION - includes
 include("data.jl")
-include("topology.jl")
+include("resource.jl")
 include("user.jl")
 include("job.jl")
 include("scenario.jl")
-include("run.jl")
+include("simulate.jl")
 
 end

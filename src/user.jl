@@ -10,7 +10,7 @@ function splat(pr::PeriodicRequests, scenario_duration)
     return fill(pr.job, length(sequence))
 end
 
-struct User{R <: AbstractRequests}
+struct User{R<:AbstractRequests}
     job_requests::R
     location::Int
 end

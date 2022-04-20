@@ -1,9 +1,9 @@
 struct Scenario
-    data::Dict{Int, Data}
+    data::Dict{Int,Data}
     duration::Int
-    links::Dict{Tuple{Int, Int}, Link}
-    nodes::Dict{Int, Node}
-    users::Dict{Int, User}
+    links::Dict{Tuple{Int,Int},Link}
+    nodes::Dict{Int,Node}
+    users::Dict{Int,User}
 end
 
 const DEFAULT_LINKS = [
@@ -31,24 +31,24 @@ const DEFAULT_USERS = 100
 const DEFAULT_DURATION = 1000
 
 function scenario(;
-    duration = DEFAULT_DURATION,
-    links = DEFAULT_LINKS,
-    nodes = DEFAULT_NODES,
-    users = DEFAULT_USERS,
-    )
-    _links = Dict{Tuple{Int, Int}, Link}()
+    duration=DEFAULT_DURATION,
+    links=DEFAULT_LINKS,
+    nodes=DEFAULT_NODES,
+    users=DEFAULT_USERS
+)
+    _links = Dict{Tuple{Int,Int},Link}()
     foreach(l -> push!(_links, l[1] => Link(l[2])), links)
 
-    _nodes = Dict{Int, Node}()
+    _nodes = Dict{Int,Node}()
     foreach(n -> push!(_nodes, n[1] => Node(n[2], 0)), nodes)
 
-    _users = Dict{Int, User}()
-    _data = Dict{Int, Data}()
+    _users = Dict{Int,User}()
+    _data = Dict{Int,Data}()
 
     locations = 1:length(nodes)
 
     for i in 1:users
-        push!(_users, i => user(1/20, rand(locations)))
+        push!(_users, i => user(1 / 20, rand(locations)))
         push!(_data, i => Data(rand(locations)))
     end
 
@@ -57,13 +57,13 @@ end
 
 function make_df(s::Scenario)
     df = DataFrame(
-        backend = Int[],
-        containers = Int[],
-        data_location = Int[],
-        duration = Float64[],
-        frontend = Int[],
-        user_id = Int[],
-        user_location = Int[],
+        backend=Int[],
+        containers=Int[],
+        data_location=Int[],
+        duration=Float64[],
+        frontend=Int[],
+        user_id=Int[],
+        user_location=Int[],
     )
 
     for u in s.users
