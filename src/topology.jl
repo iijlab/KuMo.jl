@@ -1,5 +1,6 @@
-struct Node
+mutable struct Node
     capacity::Int
+    current::Int
 end
 
 struct Link

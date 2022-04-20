@@ -40,7 +40,7 @@ function scenario(;
     foreach(l -> push!(_links, l[1] => Link(l[2])), links)
 
     _nodes = Dict{Int, Node}()
-    foreach(n -> push!(_nodes, n[1] => Node(n[2])), nodes)
+    foreach(n -> push!(_nodes, n[1] => Node(n[2], 0)), nodes)
 
     _users = Dict{Int, User}()
     _data = Dict{Int, Data}()
