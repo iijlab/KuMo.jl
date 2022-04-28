@@ -2,5 +2,7 @@ using KuMo
 using Test
 
 @testset "KuMo.jl" begin
-    # Write your tests here.
+    sim = simulate(scenario(), 1000)
+    sleep(20)
+    @test sim.n_avail_items > 2000000
 end
