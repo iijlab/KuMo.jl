@@ -10,6 +10,7 @@ using Random
 
 # SECTION - exports
 export make_df
+export predict_cost
 export pseudo_cost
 export scenario
 export simulate

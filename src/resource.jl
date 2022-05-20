@@ -14,7 +14,12 @@ struct Link <: AbstractResource
     Link(cap, cur=0) = new(cap, cur)
 end
 
-function pseudo_cost(r)
-    ρ = r.current / r.capacity
+function pseudo_cost(r, charge=0)
+    ρ = (r.current + charge) / r.capacity
     return (2 * ρ - 1)^2 / (1 - ρ) + 1
+end
+
+
+function predict_cost(resource, charge)
+    return pseudo_cost(resource, charge) - pseudo_cost(resource)
 end

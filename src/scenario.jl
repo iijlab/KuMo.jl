@@ -87,3 +87,7 @@ function make_df(s::Scenario)
 
     return df
 end
+
+function predict_best_cost(s::Scenario, charge)
+    predictions = Dict(keys(s.nodes), map(v -> predict_cost(v, charge), values(s.nodes)))
+end
