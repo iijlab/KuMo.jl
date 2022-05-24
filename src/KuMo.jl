@@ -3,6 +3,7 @@ module KuMo
 # SECTION - usings and imports
 
 using DataFrames
+using Dictionaries
 using Distributions
 using DrWatson
 using PrettyTables

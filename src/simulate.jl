@@ -2,7 +2,7 @@ function simulate(s::Scenario, acceleration=20)
     tasks = Vector{Pair{Float64,Job}}()
 
     for u in s.users
-        jr = u[2].job_requests
+        jr = u.job_requests
         j = jr.job
         p = jr.period
 

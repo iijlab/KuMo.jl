@@ -19,7 +19,4 @@ function pseudo_cost(r, charge=0)
     return (2 * ρ - 1)^2 / (1 - ρ) + 1
 end
 
-
-function predict_cost(resource, charge)
-    return pseudo_cost(resource, charge) - pseudo_cost(resource)
-end
+predict_cost(resource, charge) = pseudo_cost(resource, charge) - pseudo_cost(resource)
