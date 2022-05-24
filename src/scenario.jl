@@ -89,5 +89,10 @@ function make_df(s::Scenario)
 end
 
 function predict_best_cost(s::Scenario, charge)
-    predictions = Dictionary(keys(s.nodes), map(v -> predict_cost(v, charge), values(s.nodes)))
+    links = s.links
+    nodes = s.nodes
+    nodes_costs = sort!(map(n -> predict_cost(n, charge), nodes))
+    links_costs = map(l -> predict_cost(l, charge), links)
+    @info "predicted costs:" nodes_costs links_costs
+    return last(pairs(nodes_costs))
 end
