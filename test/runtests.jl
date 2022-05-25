@@ -9,9 +9,5 @@ using Test
     predict_cost(r1, 5)
     predict_cost(r2, 10)
 
-    @info predict_best_cost(scenario(), 20)
-
     sim = simulate(scenario(), 1000)
-    sleep(20)
-    @test sim.n_avail_items > 2000000
 end

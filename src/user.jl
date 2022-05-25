@@ -1,6 +1,6 @@
 abstract type AbstractRequests end
 
-struct PeriodicRequests{J} <: AbstractRequests
+struct PeriodicRequests{J<:AbstractJob} <: AbstractRequests
     job::J
     period::Float64
 end
