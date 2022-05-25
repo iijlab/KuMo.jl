@@ -17,6 +17,7 @@ function mincost_flow end
 ) where {AG<:Graphs.AbstractGraph}
 
     m = JuMP.Model(optimizer)
+    JuMP.set_silent(m)
 
     register(m, :pseudo_cost, 3, pseudo_cost; autodiff=true)
     vtxs = vertices(g)
@@ -80,6 +81,5 @@ function mincost_flow end
         (i, j) = Tuple(e)
         result_flow[i, j] = round(JuMP.value(f[i, j]))
     end
-    pretty_table(result_flow)
-    return result_flow
+    return result_flow, JuMP.objective_value(m)
 end
