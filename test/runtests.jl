@@ -53,7 +53,19 @@ using SparseArrays
 
     # KuMo.make_df(scenario())
 
-    times, snaps = simulate(scenario(), Ipopt.Optimizer; acceleration = 1)
+    @info "Starting simulation 1"
+    println()
+    times, snaps = simulate(SCENARIO_1, Ipopt.Optimizer; acceleration = 1)
     @info "Running times" times
+    println()
     make_df(snaps)
+    println()
+
+    @info "Starting simulation 2"
+    println()
+    times, snaps = simulate(SCENARIO_2, Ipopt.Optimizer; acceleration = 1)
+    @info "Running times" times
+    println()
+    make_df(snaps)
+    println()
 end

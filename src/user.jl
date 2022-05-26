@@ -15,4 +15,6 @@ struct User{R<:AbstractRequests}
     location::Int
 end
 
-user(period, location) = User(PeriodicRequests(rand_job(), period), location)
+function user(period, location, job_distribution)
+    return User(PeriodicRequests(rand_job(job_distribution), period), location)
+end

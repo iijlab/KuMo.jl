@@ -128,7 +128,7 @@ function simulate(s::Scenario, optimizer; acceleration=1)
         # @info u j current_cap best_links s.nodes
         # pretty_table(current_cap)
         # ii == 2 && break
-        mod(ii, round(length(tasks)/1000)) == 0 && @info("Iteration $ii/$(length(tasks)): $(time() - start_simulation) seconds passed")
+        mod(ii, round(length(tasks)/20)) == 0 && @info("Iteration $ii/$(length(tasks)): $(time() - start_simulation) seconds passed")
     end
 
     push!(times, "end_queue" => time() - start_simulation)

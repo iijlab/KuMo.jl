@@ -6,36 +6,7 @@ struct Scenario
     users::Dictionary{Int,User}
 end
 
-const DEFAULT_LINKS = [
-    (1, 2) => 1000,
-    (1, 3) => 1000,
-    (2, 3) => 1000,
-    (2, 4) => 1000,
-    (3, 5) => 1000,
-    (4, 5) => 1000,
-    (4, 6) => 1000,
-    (5, 6) => 1000,
-]
-
-const DEFAULT_NODES = [
-    1 => 30,
-    2 => 30,
-    3 => 30,
-    4 => 30,
-    5 => 30,
-    6 => 30,
-]
-
-const DEFAULT_USERS = 12
-
-const DEFAULT_DURATION = 1000
-
-function scenario(;
-    duration=DEFAULT_DURATION,
-    links=DEFAULT_LINKS,
-    nodes=DEFAULT_NODES,
-    users=DEFAULT_USERS
-)
+function scenario(duration, links, nodes, users, job_distribution, request_rate)
     _links = Dictionary{Tuple{Int,Int},Link}()
     foreach(l -> set!(_links, l[1], Link(l[2])), links)
 
@@ -48,7 +19,7 @@ function scenario(;
     locations = 1:length(nodes)
 
     for i in 1:users
-        set!(_users, i, user(1., rand(locations)))
+        set!(_users, i, user(request_rate, rand(locations), job_distribution))
         set!(_data, i, Data(rand(locations)))
     end
 

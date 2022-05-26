@@ -22,6 +22,10 @@ export pseudo_cost
 export scenario
 export simulate
 
+export DEFAULT_SCENARIO
+export SCENARIO_1
+export SCENARIO_2
+
 # SECTION - includes
 include("data.jl")
 include("resource.jl")
@@ -30,5 +34,9 @@ include("user.jl")
 include("scenario.jl")
 include("mincostflow.jl")
 include("simulate.jl")
+
+include("scenarii/default_scenario.jl")
+include("scenarii/scenario1.jl")
+include("scenarii/scenario2.jl")
 
 end
