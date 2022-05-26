@@ -1,4 +1,17 @@
+struct SnapShot
+    links::SparseMatrixCSC{Float64, Int64}
+    nodes::SparseVector{Float64, Int64}
+    total::Float64
+    selected::Int
+    duration::Float64
+    solving_time::Float64
+end
+
 function simulate(s::Scenario, optimizer; acceleration=1)
+    times = Dict{String, Float64}()
+    snapshots = Vector{SnapShot}()
+    start_simulation = time()
+
     tasks = Vector{Pair{Float64,Tuple{Int,Job}}}()
 
     all_queue = false
@@ -13,6 +26,8 @@ function simulate(s::Scenario, optimizer; acceleration=1)
 
     c = Channel{Tuple{Int,Job}}(10^7)
 
+    push!(times, "start_tasks" => time() - start_simulation)
+
     for (i, t) in enumerate(tasks)
         @async begin
             sleep(t[1] / acceleration)
@@ -20,6 +35,8 @@ function simulate(s::Scenario, optimizer; acceleration=1)
             i == length(tasks) && (all_queue = true)
         end
     end
+
+    push!(times, "init_queue" => time() - start_simulation)
 
     ii = 0
 
@@ -40,9 +57,14 @@ function simulate(s::Scenario, optimizer; acceleration=1)
     current_cap = spzeros(nvtx, nvtx)
     demands = spzeros(nvtx)
 
+    push!(times, "start_queue" => time() - start_simulation)
+
     while !all_queue || isready(c)
+        start_iteration = time()
         ii += 1
         u, j = take!(c)
+
+        start_solving = time() - start_iteration
 
         add_edge!(g, nvtx - 1, u)
         add_edge!(g, nvtx - 1, j.data_location)
@@ -61,7 +83,7 @@ function simulate(s::Scenario, optimizer; acceleration=1)
             add_edge!(g, i, nvtx)
             aux_cap = deepcopy(current_cap)
             aux_cap[i, nvtx] = j.backend + j.frontend
-            # @info "Debug" g demands capacities current_cap
+            # @info "Debug" g demands capacities aux_cap
             f, links_cost = mincost_flow(g, demands, capacities, aux_cap, optimizer)
             cost = node_cost + links_cost
             if cost < best_cost
@@ -72,7 +94,6 @@ function simulate(s::Scenario, optimizer; acceleration=1)
                 # @info "obj val" cost
             end
             rem_edge!(g, i, nvtx)
-            aux_cap[i, nvtx] = 0.0
         end
 
         rem_edge!(g, nvtx - 1, u)
@@ -93,9 +114,46 @@ function simulate(s::Scenario, optimizer; acceleration=1)
             s.nodes[best_node].current -= j.containers
         end
 
+        links = deepcopy(current_cap[1:nvtx-2, 1:nvtx-2])
+        nodes = spzeros(nvtx-2)
+        for (id, n) in pairs(s.nodes)
+            nodes[id] = n.current
+        end
+        duration = time() - start_iteration
+
+        snap = SnapShot(links, nodes, best_cost, best_node, duration, duration - start_solving)
+
+        push!(snapshots, snap)
+
         # @info u j current_cap best_links s.nodes
-        # ii == 100 && break
+        # pretty_table(current_cap)
+        # ii == 2 && break
+        mod(ii, round(length(tasks)/1000)) == 0 && @info("Iteration $ii/$(length(tasks)): $(time() - start_simulation) seconds passed")
     end
 
-    return c
+    push!(times, "end_queue" => time() - start_simulation)
+
+    return times, snapshots
+end
+
+function make_df(snapshots::Vector{SnapShot})
+    df = DataFrame(
+        total=Float64[],
+        selected=Int[],
+        duration=Float64[],
+        solving_time=Float64[],
+    )
+
+    for snap in snapshots
+        push!(df, (
+            snap.total,
+            snap.selected,
+            snap.duration,
+            snap.solving_time,
+        ))
+    end
+
+    pretty_table(describe(df))
+
+    return df
 end

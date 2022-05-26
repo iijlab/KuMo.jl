@@ -11,7 +11,7 @@ using JuMP
 using PrettyTables
 using Random
 using SimpleTraits
-using SparseArrays: spzeros
+using SparseArrays
 
 # SECTION - exports
 export make_df

@@ -18,6 +18,7 @@ function mincost_flow end
 
     m = JuMP.Model(optimizer)
     JuMP.set_silent(m)
+    JuMP.set_optimizer_attribute(m, "tol", 0.01)
 
     register(m, :pseudo_cost, 3, pseudo_cost; autodiff=true)
     vtxs = vertices(g)

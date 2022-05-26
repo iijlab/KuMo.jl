@@ -26,7 +26,7 @@ const DEFAULT_NODES = [
     6 => 30,
 ]
 
-const DEFAULT_USERS = 100
+const DEFAULT_USERS = 12
 
 const DEFAULT_DURATION = 1000
 
@@ -48,7 +48,7 @@ function scenario(;
     locations = 1:length(nodes)
 
     for i in 1:users
-        set!(_users, i, user(1 / 20, rand(locations)))
+        set!(_users, i, user(1., rand(locations)))
         set!(_data, i, Data(rand(locations)))
     end
 
@@ -89,9 +89,6 @@ function make_df(s::Scenario)
 end
 
 function predict_best_cost(s::Scenario, j::Job)
-
-
-
     links = s.links
     nodes = s.nodes
     nodes_costs = sort!(map(n -> predict_cost(n, charge), nodes))

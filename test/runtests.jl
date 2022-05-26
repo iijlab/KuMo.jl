@@ -51,5 +51,9 @@ using SparseArrays
     predict_cost(r1, 5)
     predict_cost(r2, 10)
 
-    sim = simulate(scenario(), Ipopt.Optimizer)
+    # KuMo.make_df(scenario())
+
+    times, snaps = simulate(scenario(), Ipopt.Optimizer; acceleration = 1)
+    @info "Running times" times
+    make_df(snaps)
 end
