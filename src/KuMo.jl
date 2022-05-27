@@ -33,6 +33,7 @@ include("job.jl")
 include("user.jl")
 include("scenario.jl")
 include("mincostflow.jl")
+include("shortest_paths.jl")
 include("simulate.jl")
 
 include("scenarii/default_scenario.jl")
