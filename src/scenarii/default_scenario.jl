@@ -30,7 +30,7 @@ const DEFAULT_JOB_DISTRIBUTIONS = job_distributions(
     frontend=30 => 10,
 )
 
-const DEFAULT_REQUEST_RATE = 1/20
+const DEFAULT_REQUEST_RATE = 1 / 20
 
 const DEFAULT_SCENARIO = scenario(
     DEFAULT_DURATION,

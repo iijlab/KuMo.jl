@@ -45,17 +45,17 @@ using SparseArrays
 
     flow = mincost_flow(g, demands, capacities, current_cap, Ipopt.Optimizer)
 
-    r1 = KuMo.Node(30, 15)
-    r2 = KuMo.Node(45, 20)
+    # r1 = KuMo.Resource(30)
+    # r2 = KuMo.Resource(45)
 
-    predict_cost(r1, 5)
-    predict_cost(r2, 10)
+    # predict_cost(r1, 15, 5)
+    # predict_cost(r2, 20, 10)
 
     # KuMo.make_df(scenario())
 
     @info "Starting simulation 1"
     println()
-    times, snaps = simulate(SCENARIO_1, Ipopt.Optimizer; acceleration = 1)
+    times, snaps = simulate(SCENARIO_1, MinCostFlow(Ipopt.Optimizer); acceleration=1)
     @info "Running times" times
     println()
     make_df(snaps)
@@ -63,7 +63,7 @@ using SparseArrays
 
     @info "Starting simulation 2"
     println()
-    times, snaps = simulate(SCENARIO_2, Ipopt.Optimizer; acceleration = 1)
+    times, snaps = simulate(SCENARIO_2, MinCostFlow(Ipopt.Optimizer); acceleration=1)
     @info "Running times" times
     println()
     make_df(snaps)

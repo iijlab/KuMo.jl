@@ -1,8 +1,10 @@
-function pseudo_cost(current, capacity, charge=0)
-    ρ = (current + charge) / capacity
-    isapprox(1.0, ρ) || ρ > 1.0 && return typemax(Float64)
-    return (2 * ρ - 1)^2 / (1 - ρ) + 1
+abstract type AbstractAlgorithm end
+
+struct MinCostFlow{O<:MathOptInterface.AbstractOptimizer} <: AbstractAlgorithm
+    optimizer::Type{O}
 end
+
+struct ShortestPath <: AbstractAlgorithm end
 
 function mincost_flow end
 
@@ -20,33 +22,21 @@ function mincost_flow end
     JuMP.set_silent(m)
     JuMP.set_optimizer_attribute(m, "tol", 0.01)
 
-    register(m, :pseudo_cost, 3, pseudo_cost; autodiff=true)
+    register(m, :pseudo_cost, 2, pseudo_cost; autodiff=true)
     vtxs = vertices(g)
 
     source_nodes = [v for v in vtxs if v in source_nodes || node_demand[v] < 0]
     sink_nodes = [v for v in vtxs if v in sink_nodes || node_demand[v] > 0]
 
-    # edgs = map(e -> (src(e), dst(e)), edges(g))
     sg, _ = induced_subgraph(g, 1:(nv(g)-2))
 
     @variable(m, 0 <= f[i=vtxs, j=vtxs; (i, j) in Graphs.edges(g)] <= abs(edge_capacity[i, j] - edge_current_cap[i, j]))
-    # @constraint(m, 0 <= f[i=vtxs, j=vtxs; (i, j) in Graphs.edges(g)] <= abs(edge_capacity[i, j] - edge_current_cap[i, j]))
-    # for e in Graphs.edges(g)
-    #     set_integer(f[src(e), dst(e)])
-    # end
 
-    @NLobjective(m, Min, sum(f[src(e), dst(e)] * pseudo_cost(
-        edge_current_cap[src(e), dst(e)],
+
+    @NLobjective(m, Min, sum(1.0 * pseudo_cost(
         edge_capacity[src(e), dst(e)],
-        f[src(e), dst(e)]
+        edge_current_cap[src(e), dst(e)] + f[src(e), dst(e)],
     ) for e in Graphs.edges(sg)))
-    # @NLobjective(m, Min, sum(
-    #     pseudo_cost(
-    #         edge_current_cap[src(e), dst(e)],
-    #         edge_capacity[src(e), dst(e)],
-    #         f[src(e), dst(e)]
-    #     )) for e in edgs
-    # )
 
 
     for v in Graphs.vertices(g)
@@ -74,10 +64,7 @@ function mincost_flow end
     optimize!(m)
     ts = termination_status(m)
     result_flow = spzeros(nv(g), nv(g))
-    # if ts != MOI.OPTIMAL
-    #     @warn "Problem does not have an optimal solution, status: $(ts)"
-    #     return result_flow
-    # end
+
     for e in Graphs.edges(g)
         (i, j) = Tuple(e)
         result_flow[i, j] = round(JuMP.value(f[i, j]))

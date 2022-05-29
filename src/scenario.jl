@@ -1,17 +1,16 @@
 struct Scenario
     data::Dictionary{Int,Data}
     duration::Int
-    links::Dictionary{Tuple{Int,Int},Link}
-    nodes::Dictionary{Int,Node}
+    topology::Topology{Int,Int}
     users::Dictionary{Int,User}
 end
 
 function scenario(duration, links, nodes, users, job_distribution, request_rate)
-    _links = Dictionary{Tuple{Int,Int},Link}()
-    foreach(l -> set!(_links, l[1], Link(l[2])), links)
+    _links = Dictionary{Tuple{Int,Int},Resource{Int}}()
+    foreach(l -> set!(_links, l[1], Resource(l[2])), links)
 
-    _nodes = Dictionary{Int,Node}()
-    foreach(n -> set!(_nodes, n[1], Node(n[2], 0)), nodes)
+    _nodes = Dictionary{Int,Resource{Int}}()
+    foreach(n -> set!(_nodes, n[1], Resource(n[2])), nodes)
 
     _users = Dictionary{Int,User}()
     _data = Dictionary{Int,Data}()
@@ -23,7 +22,9 @@ function scenario(duration, links, nodes, users, job_distribution, request_rate)
         set!(_data, i, Data(rand(locations)))
     end
 
-    return Scenario(_data, duration, _links, _nodes, _users)
+    topo = Topology(_nodes, _links)
+
+    return Scenario(_data, duration, topo, _users)
 end
 
 function make_df(s::Scenario)

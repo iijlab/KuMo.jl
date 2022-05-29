@@ -8,6 +8,7 @@ using Distributions
 using DrWatson
 using Graphs
 using JuMP
+using MathOptInterface
 using PrettyTables
 using Random
 using SimpleTraits
@@ -22,6 +23,9 @@ export pseudo_cost
 export scenario
 export simulate
 
+export MinCostFlow
+export ShortestPath
+
 export DEFAULT_SCENARIO
 export SCENARIO_1
 export SCENARIO_2
@@ -29,11 +33,11 @@ export SCENARIO_2
 # SECTION - includes
 include("data.jl")
 include("resource.jl")
+include("paths.jl")
+include("topology.jl")
 include("job.jl")
 include("user.jl")
 include("scenario.jl")
-include("mincostflow.jl")
-include("shortest_paths.jl")
 include("simulate.jl")
 
 include("scenarii/default_scenario.jl")
