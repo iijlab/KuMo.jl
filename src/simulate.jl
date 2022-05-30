@@ -92,7 +92,66 @@ function inner_queue(g, u, j, nodes, capacities, demands, state, ::ShortestPath)
     return best_links, best_cost, best_node
 end
 
-function simulate(s::Scenario, algo; acceleration=1)
+function make_df(snapshots::Vector{SnapShot})
+    snap = first(snapshots)
+    links = snap.state.links
+    nodes = snap.state.nodes
+
+    entries = Vector{Pair{String, Float64}}()
+
+    rows = rowvals(nodes)
+    vals = nonzeros(nodes)
+    n = length(nodes)
+    for j in rows
+        val = vals[j]
+        push!(entries, string(j) => val)
+    end
+
+    rows = rowvals(links)
+    vals = nonzeros(links)
+    n = length(links)
+    for j = 1:n
+        for i in nzrange(nodes, j)
+            row = rows[i]
+            val = vals[i]
+            push!(entries, string((row, j)) => val)
+        end
+    end
+
+    @warn "debug" entries
+
+    # iter = Iterators.flatten([
+    #     snap.state.nodes,
+    #     snap.state.links,
+    #     snap.total,
+    #     snap.selected,
+    #     snap.duration,
+    #     snap.solving_time,
+    # ])
+    # iter
+
+    df = DataFrame(
+        total=Float64[],
+        selected=Int[],
+        duration=Float64[],
+        solving_time=Float64[],
+    )
+
+    for snap in snapshots
+        push!(df, (
+            snap.total,
+            snap.selected,
+            snap.duration,
+            snap.solving_time,
+        ))
+    end
+
+    pretty_table(describe(df))
+
+    return df
+end
+
+function simulate(s::Scenario, algo; speed=1, output="")
     @info "Debug" algo
     times = Dict{String,Float64}()
     snapshots = Vector{SnapShot}()
@@ -116,7 +175,7 @@ function simulate(s::Scenario, algo; acceleration=1)
 
     for (i, t) in enumerate(tasks)
         @async begin
-            sleep(t[1] / acceleration)
+            sleep(t[1] / speed)
             put!(c, t[2])
             i == length(tasks) && (all_queue = true)
         end
@@ -148,7 +207,7 @@ function simulate(s::Scenario, algo; acceleration=1)
         state.nodes[best_node] += j.containers
 
         @async begin
-            sleep(j.duration / acceleration)
+            sleep(j.duration / speed)
             for i in 1:n, j in 1:n
                 current_cap[i, j] -= best_links[i, j]
             end
@@ -168,27 +227,11 @@ function simulate(s::Scenario, algo; acceleration=1)
 
     push!(times, "end_queue" => time() - start_simulation)
 
-    return times, snapshots
-end
-
-function make_df(snapshots::Vector{SnapShot})
-    df = DataFrame(
-        total=Float64[],
-        selected=Int[],
-        duration=Float64[],
-        solving_time=Float64[],
-    )
-
-    for snap in snapshots
-        push!(df, (
-            snap.total,
-            snap.selected,
-            snap.duration,
-            snap.solving_time,
-        ))
+    df_snaps = make_df(snapshots)
+    if !isempty(output)
+        CSV.write(joinpath(datadir(), output), df_snaps)
+        @info "Output written in $(datadir())"
     end
 
-    pretty_table(describe(df))
-
-    return df
+    return times, snapshots
 end

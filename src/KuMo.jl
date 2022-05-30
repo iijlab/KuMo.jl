@@ -2,6 +2,7 @@ module KuMo
 
 # SECTION - usings and imports
 
+using CSV
 using DataFrames
 using Dictionaries
 using Distributions
