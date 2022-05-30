@@ -56,20 +56,44 @@ function inner_queue(g, u, j, nodes, capacities, demands, state, algo::MinCostFl
     return best_links, best_cost, best_node
 end
 
+function retrieve_path(u, v, paths)
+    path = Vector{Pair{Int,Int}}()
+    w = v
+    while w != u
+        x = paths.parents[w]
+        push!(path, w => x)
+        w = x
+    end
+    return path
+end
+
 function inner_queue(g, u, j, nodes, capacities, demands, state, ::ShortestPath)
+    nvtx = nv(g)
     best_links = spzeros(nvtx, nvtx)
     best_node = 0
     best_cost = Inf
 
-    costs = map((r, c) -> pseudo_cost(r, c), zip(capacities, state.links))
+    node_costs = map(v -> pseudo_cost(v, j.containers), nodes)
 
-    @info dijkstra_shortest_paths(g, [u, j.data_location], costs; all_paths=true, trackvertices=true)
+    f(x) = pseudo_cost(x...)
 
+    link_costs = map(f, zip(capacities, state.links))
+
+    paths_user = dijkstra_shortest_paths(g, u, link_costs; trackvertices=true)
+    paths_data = dijkstra_shortest_paths(g, j.data_location, link_costs; trackvertices=true)
+    best_cost, best_node = findmin(paths_user.dists + paths_data.dists + [node_costs[i] for i in keys(node_costs)])
+
+    path_user = retrieve_path(u, best_node, paths_user)
+    path_data = retrieve_path(j.data_location, best_node, paths_data)
+
+    foreach(p -> best_links[p.first, p.second] = j.frontend, path_user)
+    foreach(p -> best_links[p.first, p.second] = j.backend, path_data)
 
     return best_links, best_cost, best_node
 end
 
 function simulate(s::Scenario, algo; acceleration=1)
+    @info "Debug" algo
     times = Dict{String,Float64}()
     snapshots = Vector{SnapShot}()
     start_simulation = time()
@@ -139,9 +163,6 @@ function simulate(s::Scenario, algo; acceleration=1)
 
         push!(snapshots, snap)
 
-        # @info u j current_cap best_links s.nodes
-        # pretty_table(current_cap)
-        # ii == 2 && break
         mod(ii, round(length(tasks) / 20)) == 0 && @info("Iteration $ii/$(length(tasks)): $(time() - start_simulation) seconds passed")
     end
 

@@ -55,7 +55,7 @@ using SparseArrays
 
     @info "Starting simulation 1"
     println()
-    times, snaps = simulate(SCENARIO_1, MinCostFlow(Ipopt.Optimizer); acceleration=1)
+    times, snaps = simulate(SCENARIO_1, ShortestPath(); acceleration=1)
     @info "Running times" times
     println()
     make_df(snaps)
