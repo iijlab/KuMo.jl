@@ -32,7 +32,7 @@ const DEFAULT_JOB_DISTRIBUTIONS = job_distributions(
 
 const DEFAULT_REQUEST_RATE = 1 / 20
 
-const DEFAULT_SCENARIO = scenario(
+default_scenario() = scenario(
     DEFAULT_DURATION,
     DEFAULT_LINKS,
     DEFAULT_NODES,

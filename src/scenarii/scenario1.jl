@@ -1,21 +1,21 @@
 const LINKS_1 = [
-    (1, 2) => 100,
-    (1, 3) => 100,
-    (2, 3) => 100,
-    (2, 4) => 100,
-    (3, 5) => 100,
-    (4, 5) => 100,
-    (4, 6) => 100,
-    (5, 6) => 100,
+    (1, 2) => 1000,
+    (1, 3) => 1000,
+    (2, 3) => 1000,
+    (2, 4) => 1000,
+    (3, 5) => 1000,
+    (4, 5) => 1000,
+    (4, 6) => 1000,
+    (5, 6) => 1000,
 ]
 
 const NODES_1 = [
-    1 => 30,
-    2 => 30,
-    3 => 30,
-    4 => 30,
-    5 => 30,
-    6 => 30,
+    1 => 100,
+    2 => 100,
+    3 => 100,
+    4 => 100,
+    5 => 100,
+    6 => 100,
 ]
 
 const USERS_1 = 10
@@ -23,16 +23,16 @@ const USERS_1 = 10
 const DURATION_1 = 100
 
 const JOB_DISTRIBUTIONS_1 = job_distributions(
-    backend=60 => 20,
+    backend=50 => 20,
     container=3 => 1,
     data_locations=1:6,
-    duration=10 => 5,
+    duration=5 => 2,
     frontend=30 => 10,
 )
 
-const REQUEST_RATE_1 = 1.
+const REQUEST_RATE_1 = 1.0
 
-const SCENARIO_1 = scenario(
+scenario_1() = scenario(
     DURATION_1,
     LINKS_1,
     NODES_1,

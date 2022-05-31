@@ -32,7 +32,7 @@ const USERS_2 = 100
 
 # const REQUEST_RATE_1 = 1.
 
-const SCENARIO_2 = scenario(
+scenario_2() = scenario(
     DURATION_1,
     LINKS_1,
     NODES_1,

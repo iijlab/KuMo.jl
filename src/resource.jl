@@ -7,8 +7,10 @@ end
 capacity(r::R) where {R<:AbstractResource} = r.capacity
 
 function pseudo_cost(cap, charge)
+    cap == 0 && return 0.0
     ρ = charge / cap
-    isapprox(1.0, ρ) || ρ > 1.0 && return typemax(Float64)
+    # @info "debug" cap charge ρ
+    isapprox(1.0, ρ) || ρ > 1.0 && (@warn("Error in pseudo_cost", charge, cap); return Inf)
     return (2 * ρ - 1)^2 / (1 - ρ) + 1
 end
 
