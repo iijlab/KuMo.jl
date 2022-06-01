@@ -1,69 +1,41 @@
 struct Scenario
-    data::Dict{Int, Data}
+    data::Dictionary{Int,Data}
     duration::Int
-    links::Dict{Tuple{Int, Int}, Link}
-    nodes::Dict{Int, Node}
-    users::Dict{Int, User}
+    topology::Topology{Int,Int}
+    users::Dictionary{Int,User}
 end
 
-const DEFAULT_LINKS = [
-    (1, 2) => 1000,
-    (1, 3) => 1000,
-    (2, 3) => 1000,
-    (2, 4) => 1000,
-    (3, 5) => 1000,
-    (4, 5) => 1000,
-    (4, 6) => 1000,
-    (5, 6) => 1000,
-]
+function scenario(duration, links, nodes, users, job_distribution, request_rate)
+    _links = Dictionary{Tuple{Int,Int},Resource{Int}}()
+    foreach(l -> set!(_links, l[1], Resource(l[2])), links)
 
-const DEFAULT_NODES = [
-    1 => 30,
-    2 => 30,
-    3 => 30,
-    4 => 30,
-    5 => 30,
-    6 => 30,
-]
+    _nodes = Dictionary{Int,Resource{Int}}()
+    foreach(n -> set!(_nodes, n[1], Resource(n[2])), nodes)
 
-const DEFAULT_USERS = 100
-
-const DEFAULT_DURATION = 1000
-
-function scenario(;
-    duration = DEFAULT_DURATION,
-    links = DEFAULT_LINKS,
-    nodes = DEFAULT_NODES,
-    users = DEFAULT_USERS,
-    )
-    _links = Dict{Tuple{Int, Int}, Link}()
-    foreach(l -> push!(_links, l[1] => Link(l[2])), links)
-
-    _nodes = Dict{Int, Node}()
-    foreach(n -> push!(_nodes, n[1] => Node(n[2])), nodes)
-
-    _users = Dict{Int, User}()
-    _data = Dict{Int, Data}()
+    _users = Dictionary{Int,User}()
+    _data = Dictionary{Int,Data}()
 
     locations = 1:length(nodes)
 
     for i in 1:users
-        push!(_users, i => user(1/20, rand(locations)))
-        push!(_data, i => Data(rand(locations)))
+        set!(_users, i, user(request_rate, rand(locations), job_distribution))
+        set!(_data, i, Data(rand(locations)))
     end
 
-    return Scenario(_data, duration, _links, _nodes, _users)
+    topo = Topology(_nodes, _links)
+
+    return Scenario(_data, duration, topo, _users)
 end
 
 function make_df(s::Scenario)
     df = DataFrame(
-        backend = Int[],
-        containers = Int[],
-        data_location = Int[],
-        duration = Float64[],
-        frontend = Int[],
-        user_id = Int[],
-        user_location = Int[],
+        backend=Int[],
+        containers=Int[],
+        data_location=Int[],
+        duration=Float64[],
+        frontend=Int[],
+        user_id=Int[],
+        user_location=Int[],
     )
 
     for u in s.users
@@ -86,4 +58,13 @@ function make_df(s::Scenario)
     pretty_table(describe(df))
 
     return df
+end
+
+function predict_best_cost(s::Scenario, j::Job)
+    links = s.links
+    nodes = s.nodes
+    nodes_costs = sort!(map(n -> predict_cost(n, charge), nodes))
+    links_costs = map(l -> predict_cost(l, charge), links)
+    @info "predicted costs:" nodes_costs links_costs
+    return last(pairs(nodes_costs))
 end

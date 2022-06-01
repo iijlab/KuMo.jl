@@ -1,6 +1,6 @@
 abstract type AbstractRequests end
 
-struct PeriodicRequests{J} <: AbstractRequests
+struct PeriodicRequests{J<:AbstractJob} <: AbstractRequests
     job::J
     period::Float64
 end
@@ -10,9 +10,11 @@ function splat(pr::PeriodicRequests, scenario_duration)
     return fill(pr.job, length(sequence))
 end
 
-struct User{R <: AbstractRequests}
+struct User{R<:AbstractRequests}
     job_requests::R
     location::Int
 end
 
-user(period, location) = User(PeriodicRequests(rand_job(), period), location)
+function user(period, location, job_distribution)
+    return User(PeriodicRequests(rand_job(job_distribution), period), location)
+end
