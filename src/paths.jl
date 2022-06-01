@@ -14,8 +14,8 @@ function mincost_flow end
     edge_current_cap::AbstractMatrix,
     optimizer;
     edge_demand::Union{Nothing,AbstractMatrix}=nothing,
-    source_nodes=(), # Source nodes at which to allow a netflow greater than nodal demand
-    sink_nodes=()   # Sink nodes at which to allow a netflow less than nodal demand
+    source_nodes=(),
+    sink_nodes=(),
 ) where {AG<:Graphs.AbstractGraph}
 
     m = JuMP.Model(optimizer)

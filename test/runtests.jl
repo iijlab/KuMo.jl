@@ -6,7 +6,7 @@ using Ipopt
 @testset "KuMo.jl" begin
     @info "Starting simulation 1"
     println()
-    times, snaps = simulate(scenario_1(), ShortestPath(); speed=100)#, output="scenario1-shortestpath.csv")
+    times, snaps = simulate(scenario_1(), ShortestPath(); speed=10)#, output="scenario1-shortestpath.csv")
     @info "Running times" times
 
     # @info "Starting simulation 2"

@@ -11,6 +11,7 @@ using Graphs
 using JuMP
 using MathOptInterface
 using PrettyTables
+using ProgressMeter
 using Random
 using SimpleTraits
 using SparseArrays

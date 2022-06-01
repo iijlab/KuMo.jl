@@ -69,21 +69,14 @@ function inner_queue(g, u, j, nodes, capacities, _, state, ::ShortestPath)
     best_cost = Inf
 
     node_costs = map(v -> pseudo_cost(v.second, state.nodes[v.first]), pairs(nodes))
-    # @info "Debug costs" node_costs
 
     f(x) = pseudo_cost(x...)
 
     link_costs = map(f, zip(capacities, state.links))
 
-    # @info "Debug pseudo_cost" link_costs
-    # @info "Debug pseudo_cost" node_costs
-
     paths_user = dijkstra_shortest_paths(g, u, link_costs; trackvertices=true)
     paths_data = dijkstra_shortest_paths(g, j.data_location, link_costs; trackvertices=true)
     best_cost, best_node = findmin(paths_user.dists + paths_data.dists + [node_costs[i] for i in keys(node_costs)])
-    # @info "debug costs 2" best_cost best_node u j.data_location
-    # @info "debug costs 2.1" paths_user.dists
-    # @info "debug costs 2.2" paths_data.dists
 
     path_user = retrieve_path(u, best_node, paths_user)
     path_data = retrieve_path(j.data_location, best_node, paths_data)
@@ -162,11 +155,10 @@ function simulate(s::Scenario, algo; speed=1, output="")
 
     push!(times, "start_queue" => time() - start_simulation)
 
-
-    # @warn "Debug state 0: nodes" state.nodes
-    # @warn "Debug state 0: links" state.links
-
     ii = 0
+    p = Progress(
+        length(tasks);
+        desc = "Simulating with $algo at speed $speed",showspeed = true, color=:normal)
     while !all_queue || isready(c)
         start_iteration = time()
         ii += 1
@@ -187,31 +179,21 @@ function simulate(s::Scenario, algo; speed=1, output="")
                 capacity(s.topology.nodes[best_node])
             is_valid = valid_links && valid_nodes
 
-            is_valid || (@warn "is valid" is_valid valid_links valid_nodes)
-            # is_valid && (@info "is valid" is_valid valid_links valid_nodes)
-
-            is_valid || continue
+            is_valid || (sleep(0.001); continue)
 
             for i in 1:n, j in 1:n
                 state.links[i, j] += best_links[i, j]
             end
             state.nodes[best_node] += j.containers
-            # @warn "Debug state 1: nodes" state.nodes u j.data_location
-            # @warn "Debug state 1: links" state.links
 
             @async begin
-                # @info "starting sleep" (j.duration / speed) j time() state.nodes[best_node] best_node
                 sleep(j.duration / speed)
                 for i in 1:n, j in 1:n
                     state.links[i, j] -= best_links[i, j]
                 end
                 state.nodes[best_node] -= j.containers
 
-                # @info "end sleep" j time() state.nodes[best_node] best_node
             end
-
-            # @warn "Debug state 2: nodes" state.nodes
-            # @warn "Debug state 2: links" state.links
 
             links = deepcopy(state.links[1:n, 1:n])
             nodes = deepcopy(state.nodes[1:n])
@@ -221,15 +203,7 @@ function simulate(s::Scenario, algo; speed=1, output="")
 
             push!(snapshots, snap)
 
-
-            # @warn "Debug state 3: nodes" state.nodes
-            # @info "Debug state 3: snap nodes" nodes
-            # @warn "Debug state 3: links" state.links
-            # @info "Debug state 3: snap links" links
-
-            mod(ii, round(length(tasks) / 20)) == 0 && @info("Iteration $ii/$(length(tasks)): $(time() - start_simulation) seconds passed")
-            # ii < 2 || break
-
+            update!(p, ii)
         end
     end
 

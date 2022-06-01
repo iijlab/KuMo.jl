@@ -60,11 +60,11 @@ function make_df(s::Scenario)
     return df
 end
 
-function predict_best_cost(s::Scenario, j::Job)
-    links = s.links
-    nodes = s.nodes
-    nodes_costs = sort!(map(n -> predict_cost(n, charge), nodes))
-    links_costs = map(l -> predict_cost(l, charge), links)
-    @info "predicted costs:" nodes_costs links_costs
-    return last(pairs(nodes_costs))
-end
+# function predict_best_cost(s::Scenario, j::Job)
+#     links = s.links
+#     nodes = s.nodes
+#     nodes_costs = sort!(map(n -> predict_cost(n, charge), nodes))
+#     links_costs = map(l -> predict_cost(l, charge), links)
+#     @info "predicted costs:" nodes_costs links_costs
+#     return last(pairs(nodes_costs))
+# end
