@@ -75,6 +75,9 @@ function inner_queue(g, u, j, nodes, capacities, _, state, ::ShortestPath)
 
     link_costs = map(f, zip(capacities, state.links))
 
+    # @info "Debug pseudo_cost" link_costs
+    # @info "Debug pseudo_cost" node_costs
+
     paths_user = dijkstra_shortest_paths(g, u, link_costs; trackvertices=true)
     paths_data = dijkstra_shortest_paths(g, j.data_location, link_costs; trackvertices=true)
     best_cost, best_node = findmin(paths_user.dists + paths_data.dists + [node_costs[i] for i in keys(node_costs)])
@@ -92,10 +95,6 @@ function inner_queue(g, u, j, nodes, capacities, _, state, ::ShortestPath)
 end
 
 function make_df(snapshots::Vector{SnapShot}, topo)
-    snap = first(snapshots)
-
-    # @info "debug state" links nodes
-
     function shape_entry(s)
         entry = Vector{Pair{String,Float64}}()
         push!(entry, "selected" => s.selected)
@@ -112,12 +111,16 @@ function make_df(snapshots::Vector{SnapShot}, topo)
         return entry
     end
 
-    df = DataFrame(shape_entry(first(snapshots)))
-    foreach(e -> push!(df, Dict(shape_entry(e))), snapshots[2:end])
+    if !isempty(snapshots)
+        df = DataFrame(shape_entry(first(snapshots)))
+        foreach(e -> push!(df, Dict(shape_entry(e))), snapshots[2:end])
 
-    pretty_table(describe(df))
+        pretty_table(describe(df))
 
-    return df
+        return df
+    else
+        return DataFrame()
+    end
 end
 
 function simulate(s::Scenario, algo; speed=1, output="")
@@ -170,47 +173,64 @@ function simulate(s::Scenario, algo; speed=1, output="")
         u, j = take!(c)
 
         start_solving = time() - start_iteration
+        is_valid = false
 
-        best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, capacities, demands, state, algo)
+        while !is_valid
+            best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, capacities, demands, state, algo)
 
-        n = nv(g) - vtx(algo)
-        for i in 1:n, j in 1:n
-            state.links[i, j] += best_links[i, j]
-        end
-        state.nodes[best_node] += j.containers
-        # @warn "Debug state 1: nodes" state.nodes u j.data_location
-        # @warn "Debug state 1: links" state.links
+            n = nv(g) - vtx(algo)
 
-        @async begin
-            # @info "starting sleep" (j.duration / speed) j time() state.nodes[best_node] best_node
-            sleep(j.duration / speed)
+            compare_links(i,j) = state.links[i,j] + best_links[i,j] .< capacities[i,j]
+            valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
+            valid_nodes =
+                state.nodes[best_node] + j.containers <
+                capacity(s.topology.nodes[best_node])
+            is_valid = valid_links && valid_nodes
+
+            is_valid || (@warn "is valid" is_valid valid_links valid_nodes)
+            # is_valid && (@info "is valid" is_valid valid_links valid_nodes)
+
+            is_valid || continue
+
             for i in 1:n, j in 1:n
-                state.links[i, j] -= best_links[i, j]
+                state.links[i, j] += best_links[i, j]
             end
-            state.nodes[best_node] -= j.containers
+            state.nodes[best_node] += j.containers
+            # @warn "Debug state 1: nodes" state.nodes u j.data_location
+            # @warn "Debug state 1: links" state.links
 
-            # @info "end sleep" j time() state.nodes[best_node] best_node
+            @async begin
+                # @info "starting sleep" (j.duration / speed) j time() state.nodes[best_node] best_node
+                sleep(j.duration / speed)
+                for i in 1:n, j in 1:n
+                    state.links[i, j] -= best_links[i, j]
+                end
+                state.nodes[best_node] -= j.containers
+
+                # @info "end sleep" j time() state.nodes[best_node] best_node
+            end
+
+            # @warn "Debug state 2: nodes" state.nodes
+            # @warn "Debug state 2: links" state.links
+
+            links = deepcopy(state.links[1:n, 1:n])
+            nodes = deepcopy(state.nodes[1:n])
+            duration = time() - start_iteration
+
+            snap = SnapShot(State(links, nodes), best_cost, best_node, duration, duration - start_solving)
+
+            push!(snapshots, snap)
+
+
+            # @warn "Debug state 3: nodes" state.nodes
+            # @info "Debug state 3: snap nodes" nodes
+            # @warn "Debug state 3: links" state.links
+            # @info "Debug state 3: snap links" links
+
+            mod(ii, round(length(tasks) / 20)) == 0 && @info("Iteration $ii/$(length(tasks)): $(time() - start_simulation) seconds passed")
+            # ii < 2 || break
+
         end
-
-        # @warn "Debug state 2: nodes" state.nodes
-        # @warn "Debug state 2: links" state.links
-
-        links = deepcopy(state.links[1:n, 1:n])
-        nodes = deepcopy(state.nodes[1:n])
-        duration = time() - start_iteration
-
-        snap = SnapShot(State(links, nodes), best_cost, best_node, duration, duration - start_solving)
-
-        push!(snapshots, snap)
-
-
-        # @warn "Debug state 3: nodes" state.nodes
-        # @info "Debug state 3: snap nodes" nodes
-        # @warn "Debug state 3: links" state.links
-        # @info "Debug state 3: snap links" links
-
-        mod(ii, round(length(tasks) / 20)) == 0 && @info("Iteration $ii/$(length(tasks)): $(time() - start_simulation) seconds passed")
-        # ii < 2 || break
     end
 
     push!(times, "end_queue" => time() - start_simulation)
