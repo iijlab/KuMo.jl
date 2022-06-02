@@ -18,6 +18,7 @@ using SparseArrays
 
 # SECTION - exports
 export make_df
+export make_nodes
 export mincost_flow
 export predict_cost
 export predict_best_cost
