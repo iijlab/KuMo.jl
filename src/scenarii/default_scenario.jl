@@ -9,7 +9,7 @@ const DEFAULT_LINKS = [
     (5, 6, 1000),
 ]
 
-const DEFAULT_NODES = make_nodes(6, 30)
+const DEFAULT_NODES = (6, 30)
 
 const DEFAULT_USERS = 100
 

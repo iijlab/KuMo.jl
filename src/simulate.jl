@@ -15,7 +15,7 @@ struct SnapShot
     solving_time::Float64
 end
 
-function inner_queue(g, u, j, nodes, capacities, demands, state, algo::MinCostFlow)
+function inner_queue(g, u, j, nodes, capacities, demands, state, lck, algo::MinCostFlow)
     nvtx = nv(g)
 
     add_edge!(g, nvtx - 1, u)
@@ -62,17 +62,22 @@ function retrieve_path(u, v, paths)
     return path
 end
 
-function inner_queue(g, u, j, nodes, capacities, _, state, ::ShortestPath)
+function inner_queue(g, u, j, nodes, capacities, _, state, lck, ::ShortestPath)
     nvtx = nv(g)
     best_links = spzeros(nvtx, nvtx)
     best_node = 0
     best_cost = Inf
 
-    node_costs = map(v -> pseudo_cost(v.second, state.nodes[v.first]), pairs(nodes))
-
-    f(x) = pseudo_cost(x...)
-
-    link_costs = map(f, zip(capacities, state.links))
+    node_costs = nothing
+    link_costs = nothing
+    lock(lck)
+    try
+        node_costs = map(v -> pseudo_cost(v.second, state.nodes[v.first]), pairs(nodes))
+        f(x) = pseudo_cost(x...)
+        link_costs = map(f, zip(capacities, state.links))
+    finally
+        unlock(lck)
+    end
 
     paths_user = dijkstra_shortest_paths(g, u, link_costs; trackvertices=true)
     paths_data = dijkstra_shortest_paths(g, j.data_location, link_costs; trackvertices=true)
@@ -153,6 +158,8 @@ function simulate(s::Scenario, algo; speed=1, output="")
     state = State(nv(g))
     demands = spzeros(nv(g))
 
+    lck = ReentrantLock()
+
     push!(times, "start_queue" => time() - start_simulation)
 
     ii = 0
@@ -168,31 +175,48 @@ function simulate(s::Scenario, algo; speed=1, output="")
         is_valid = false
 
         while !is_valid
-            best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, capacities, demands, state, algo)
+            best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, capacities, demands, state, lck, algo)
 
             n = nv(g) - vtx(algo)
 
-            compare_links(i,j) = state.links[i,j] + best_links[i,j] .< capacities[i,j]
-            valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
-            valid_nodes =
-                state.nodes[best_node] + j.containers <
-                capacity(s.topology.nodes[best_node])
+            valid_links, valid_nodes = nothing, nothing
+            lock(lck)
+            try
+                compare_links(i,j) = state.links[i,j] + best_links[i,j] .< capacities[i,j]
+                valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
+                valid_nodes =
+                    state.nodes[best_node] + j.containers <
+                    capacity(s.topology.nodes[best_node])
+            finally
+                unlock(lck)
+            end
+
+
             is_valid = valid_links && valid_nodes
 
             is_valid || (sleep(0.001); continue)
 
-            for i in 1:n, j in 1:n
-                state.links[i, j] += best_links[i, j]
+            lock(lck)
+            try
+                for i in 1:n, j in 1:n
+                    state.links[i, j] += best_links[i, j]
+                end
+                state.nodes[best_node] += j.containers
+            finally
+                unlock(lck)
             end
-            state.nodes[best_node] += j.containers
 
             @async begin
                 sleep(j.duration / speed)
-                for i in 1:n, j in 1:n
-                    state.links[i, j] -= best_links[i, j]
+                lock(lck)
+                try
+                    for i in 1:n, j in 1:n
+                        state.links[i, j] -= best_links[i, j]
+                    end
+                    state.nodes[best_node] -= j.containers
+                finally
+                    unlock(lck)
                 end
-                state.nodes[best_node] -= j.containers
-
             end
 
             links = deepcopy(state.links[1:n, 1:n])

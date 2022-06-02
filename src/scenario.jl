@@ -1,7 +1,7 @@
-struct Scenario
+struct Scenario{N <: AbstractNode, L <: AbstractLink}
     data::Dictionary{Int,Data}
     duration::Int
-    topology::Topology{Int,Int}
+    topology::Topology{N,L}
     users::Dictionary{Int,User}
 end
 
@@ -67,7 +67,7 @@ end
 
 make_links(links, c) = make_links(Link{typeof(c)}, links, c)
 
-make_links(c) = make_links(Iterators.product(1:n,1:n), c)
+make_links(n, c) = make_links(Iterators.product(1:n,1:n), c)
 
 make_links(x::Tuple) = make_links(x...)
 
@@ -93,6 +93,8 @@ function scenario(;
     end
 
     topo = Topology(_nodes, _links)
+
+    @info "Topology" topo.nodes topo.links graph(topo, ShortestPath())
 
     return Scenario(_data, duration, topo, _users)
 end
