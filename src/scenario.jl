@@ -6,11 +6,11 @@ struct Scenario
 end
 
 function scenario(duration, links, nodes, users, job_distribution, request_rate)
-    _links = Dictionary{Tuple{Int,Int},Resource{Int}}()
-    foreach(l -> set!(_links, l[1], Resource(l[2])), links)
+    _links = Dictionary{Tuple{Int,Int},Link{Int}}()
+    foreach(l -> set!(_links, l[1], Link(l[2])), links)
 
-    _nodes = Dictionary{Int,Resource{Int}}()
-    foreach(n -> set!(_nodes, n[1], Resource(n[2])), nodes)
+    _nodes = Dictionary{Int,Node{Int}}()
+    foreach(n -> set!(_nodes, n[1], Node(n[2])), nodes)
 
     _users = Dictionary{Int,User}()
     _data = Dictionary{Int,Data}()
@@ -59,12 +59,3 @@ function make_df(s::Scenario)
 
     return df
 end
-
-# function predict_best_cost(s::Scenario, j::Job)
-#     links = s.links
-#     nodes = s.nodes
-#     nodes_costs = sort!(map(n -> predict_cost(n, charge), nodes))
-#     links_costs = map(l -> predict_cost(l, charge), links)
-#     @info "predicted costs:" nodes_costs links_costs
-#     return last(pairs(nodes_costs))
-# end

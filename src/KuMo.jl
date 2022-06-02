@@ -34,6 +34,7 @@ export scenario_2
 
 # SECTION - includes
 include("data.jl")
+include("pseudocosts.jl")
 include("resource.jl")
 include("paths.jl")
 include("topology.jl")

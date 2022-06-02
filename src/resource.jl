@@ -1,16 +1,23 @@
-abstract type AbstractResource end
+"""
+    AbstractResource
 
-struct Resource{T<:Number} <: AbstractResource
-    capacity::T
-end
+An abstract supertype for resources in a cloud morphing architecture. Any type `MyResource <: AbstractResource` needs to either:
+- have a field `capacity::T` where `T <: Number`,
+- implement a `capacity(r::MyResource)` method.
+Optionally, one can implement a specific `pseudo_cost(r::MyResource, charge)` method.
+"""
+abstract type AbstractResource end
 
 capacity(r::R) where {R<:AbstractResource} = r.capacity
 
-function pseudo_cost(cap, charge)
-    cap == 0 && return 0.0
-    ρ = charge / cap
-    isapprox(1.0, ρ) || ρ > 1.0 && (@warn("Error in pseudo_cost", charge, cap); return Inf)
-    return (2 * ρ - 1)^2 / (1 - ρ) + 1
+pseudo_cost(r::R, charge) where {R<:AbstractResource} = pseudo_cost(capacity(r), charge)
+
+struct Node{T<:Number} <: AbstractResource
+    capacity::T
 end
 
-pseudo_cost(r::R, charge) where {R<:AbstractResource} = pseudo_cost(capacity(r), charge)
+struct Link{T<:Number} <: AbstractResource
+    capacity::T
+end
+
+pseudo_cost(r::Link, charge) = pseudo_cost(r, charge, :optical_link)

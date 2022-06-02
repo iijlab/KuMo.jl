@@ -1,6 +1,6 @@
 struct Topology{N<:Number,L<:Number}
-    nodes::Dictionary{Int,Resource{N}}
-    links::Dictionary{Tuple{Int,Int},Resource{L}}
+    nodes::Dictionary{Int,Node{N}}
+    links::Dictionary{Tuple{Int,Int},Link{L}}
 end
 
 vtx(::MinCostFlow) = 2
