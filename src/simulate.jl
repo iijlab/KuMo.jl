@@ -13,6 +13,7 @@ struct SnapShot
     selected::Int
     duration::Float64
     solving_time::Float64
+    instant::Float64
 end
 
 function inner_queue(g, u, j, nodes, capacities, demands, state, lck, algo::MinCostFlow)
@@ -99,6 +100,7 @@ function make_df(snapshots::Vector{SnapShot}, topo)
         push!(entry, "total" => s.total)
         push!(entry, "duration" => s.duration)
         push!(entry, "solving_time" => s.solving_time)
+        push!(entry, "instant" => s.instant)
 
         foreach(p -> push!(entry, string(p.first) => p.second / capacity(topo.nodes[p.first])), pairs(s.state.nodes))
 
@@ -222,8 +224,9 @@ function simulate(s::Scenario, algo; speed=1, output="")
             links = deepcopy(state.links[1:n, 1:n])
             nodes = deepcopy(state.nodes[1:n])
             duration = time() - start_iteration
+            instant = time() - start_simulation
 
-            snap = SnapShot(State(links, nodes), best_cost, best_node, duration, duration - start_solving)
+            snap = SnapShot(State(links, nodes), best_cost, best_node, duration, duration - start_solving, instant)
 
             push!(snapshots, snap)
 
