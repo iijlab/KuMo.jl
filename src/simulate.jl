@@ -283,5 +283,5 @@ function simulate(s::Scenario, algo; speed=1, output="")
 
     pretty_table(df_snaps)
 
-    return times, snapshots
+    return times, df_snaps, snapshots
 end
