@@ -29,11 +29,6 @@ export simulate
 export MinCostFlow
 export ShortestPath
 
-export default_scenario
-export scenario_1
-export scenario_2
-export scenario_3
-
 # SECTION - includes
 include("data.jl")
 include("pseudocosts.jl")
@@ -44,10 +39,5 @@ include("job.jl")
 include("user.jl")
 include("scenario.jl")
 include("simulate.jl")
-
-include("scenarii/default_scenario.jl")
-include("scenarii/scenario1.jl")
-include("scenarii/scenario2.jl")
-include("scenarii/scenario3.jl")
 
 end

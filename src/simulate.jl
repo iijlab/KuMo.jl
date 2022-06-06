@@ -16,13 +16,19 @@ struct SnapShot
     instant::Float64
 end
 
-function inner_queue(g, u, j, nodes, capacities, demands, state, lck, algo::MinCostFlow)
+function inner_queue(g, u, j, nodes, links, capacities, demands, state, lck, algo::MinCostFlow)
     nvtx = nv(g)
 
     add_edge!(g, nvtx - 1, u)
     add_edge!(g, nvtx - 1, j.data_location)
-    state.links[nvtx-1, u] += j.frontend
-    state.links[nvtx-1, j.data_location] += j.backend
+
+    lock(lck)
+    try
+        state.links[nvtx-1, u] += j.frontend
+        state.links[nvtx-1, j.data_location] += j.backend
+    finally
+        unlock(lck)
+    end
 
     demands[nvtx-1] = -(j.backend + j.frontend)
     demands[nvtx] = j.backend + j.frontend
@@ -33,7 +39,15 @@ function inner_queue(g, u, j, nodes, capacities, demands, state, lck, algo::MinC
 
     for (i, v) in pairs(nodes)
         node_cost = pseudo_cost(v, j.containers)
-        aux_cap = deepcopy(state.links)
+        aux_cap = nothing
+
+        lock(lck)
+        try
+            aux_cap = deepcopy(state.links)
+        finally
+            unlock(lck)
+        end
+
         aux_cap[i, nvtx] = j.backend + j.frontend
         f, links_cost = mincost_flow(g, demands, capacities, aux_cap, algo.optimizer)
         cost = node_cost + links_cost
@@ -46,8 +60,15 @@ function inner_queue(g, u, j, nodes, capacities, demands, state, lck, algo::MinC
 
     rem_edge!(g, nvtx - 1, u)
     rem_edge!(g, nvtx - 1, j.data_location)
-    state.links[nvtx-1, u] = 0.0
-    state.links[nvtx-1, j.data_location] = 0.0
+
+
+    lock(lck)
+    try
+        state.links[nvtx-1, u] = 0.0
+        state.links[nvtx-1, j.data_location] = 0.0
+    finally
+        unlock(lck)
+    end
 
     return best_links, best_cost, best_node
 end
@@ -63,7 +84,7 @@ function retrieve_path(u, v, paths)
     return path
 end
 
-function inner_queue(g, u, j, nodes, capacities, _, state, lck, ::ShortestPath)
+function inner_queue(g, u, j, nodes, links, capacities, _, state, lck, ::ShortestPath)
     nvtx = nv(g)
     best_links = spzeros(nvtx, nvtx)
     best_node = 0
@@ -74,8 +95,12 @@ function inner_queue(g, u, j, nodes, capacities, _, state, lck, ::ShortestPath)
     lock(lck)
     try
         node_costs = map(v -> pseudo_cost(v.second, state.nodes[v.first]), pairs(nodes))
-        f(x) = pseudo_cost(x...)
-        link_costs = map(f, zip(capacities, state.links))
+        link_costs = zeros(size(capacities))
+        for i in 1:size(state.links, 1), j in 1:size(state.links, 1)
+            if (i, j) ∈ keys(links)
+                link_costs[i, j] = pseudo_cost(links[(i, j)], state.links[i, j])
+            end
+        end
     finally
         unlock(lck)
     end
@@ -131,6 +156,7 @@ function simulate(s::Scenario, algo; speed=1, output="")
     tasks = Vector{Pair{Float64,Tuple{Int,Job}}}()
 
     all_queue = false
+    all_unloaded = false
 
     for u in s.users
         jr = u.job_requests
@@ -167,7 +193,7 @@ function simulate(s::Scenario, algo; speed=1, output="")
     ii = 0
     p = Progress(
         length(tasks);
-        desc = "Simulating with $algo at speed $speed",showspeed = true, color=:normal)
+        desc="Simulating with $algo at speed $speed", showspeed=true, color=:normal)
     while !all_queue || isready(c)
         start_iteration = time()
         ii += 1
@@ -177,18 +203,16 @@ function simulate(s::Scenario, algo; speed=1, output="")
         is_valid = false
 
         while !is_valid
-            best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, capacities, demands, state, lck, algo)
+            best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, s.topology.links, capacities, demands, state, lck, algo)
 
             n = nv(g) - vtx(algo)
 
             valid_links, valid_nodes = nothing, nothing
             lock(lck)
             try
-                compare_links(i,j) = state.links[i,j] + best_links[i,j] .< capacities[i,j]
+                compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
                 valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
-                valid_nodes =
-                    state.nodes[best_node] + j.containers <
-                    capacity(s.topology.nodes[best_node])
+                valid_nodes = state.nodes[best_node] + j.containers ≤ capacity(s.topology.nodes[best_node])
             finally
                 unlock(lck)
             end
@@ -209,6 +233,7 @@ function simulate(s::Scenario, algo; speed=1, output="")
             end
 
             @async begin
+                last_unload = ii == length(tasks)
                 sleep(j.duration / speed)
                 lock(lck)
                 try
@@ -216,25 +241,39 @@ function simulate(s::Scenario, algo; speed=1, output="")
                         state.links[i, j] -= best_links[i, j]
                     end
                     state.nodes[best_node] -= j.containers
+                    links = deepcopy(state.links[1:n, 1:n])
+                    nodes = deepcopy(state.nodes[1:n])
+                    instant = time() - start_simulation
+                    snap = SnapShot(State(links, nodes), 0, 0, 0, 0, instant)
+                    push!(snapshots, snap)
                 finally
                     unlock(lck)
                 end
+                last_unload && (all_unloaded = true)
             end
 
-            links = deepcopy(state.links[1:n, 1:n])
-            nodes = deepcopy(state.nodes[1:n])
-            duration = time() - start_iteration
-            instant = time() - start_simulation
-
-            snap = SnapShot(State(links, nodes), best_cost, best_node, duration, duration - start_solving, instant)
-
-            push!(snapshots, snap)
+            lock(lck)
+            try
+                links = deepcopy(state.links[1:n, 1:n])
+                nodes = deepcopy(state.nodes[1:n])
+                duration = time() - start_iteration
+                instant = time() - start_simulation
+                snap = SnapShot(State(links, nodes), best_cost, best_node, duration, duration - start_solving, instant)
+                push!(snapshots, snap)
+            finally
+                unlock(lck)
+            end
 
             update!(p, ii)
         end
     end
 
     push!(times, "end_queue" => time() - start_simulation)
+
+    while !all_unloaded
+        # @warn "debug" all_unloaded ii
+        sleep(0.001)
+    end
 
     df_snaps = make_df(snapshots, s.topology)
     if !isempty(output)

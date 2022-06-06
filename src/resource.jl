@@ -30,4 +30,4 @@ struct FreeLink <: AbstractLink end
 
 capacity(::FreeLink) = Inf
 
-pseudo_cost(::FreeLink, x...) = 0.
+pseudo_cost(::FreeLink, x...) = 0.0

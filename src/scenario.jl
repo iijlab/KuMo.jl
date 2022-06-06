@@ -1,4 +1,4 @@
-struct Scenario{N <: AbstractNode, L <: AbstractLink}
+struct Scenario{N<:AbstractNode,L<:AbstractLink}
     data::Dictionary{Int,Data}
     duration::Int
     topology::Topology{N,L}
@@ -28,7 +28,7 @@ end
 
 make_nodes(n, c) = make_nodes(Node{typeof(c)}, n, c)
 
-function make_nodes(capacities::Vector{T}) where {T <: Number}
+function make_nodes(capacities::Vector{T}) where {T<:Number}
     return make_nodes(Node{T}, capacities)
 end
 
@@ -36,48 +36,48 @@ make_nodes(x::Tuple) = make_nodes(x...)
 
 function make_links(links)
     _links = Dictionary{Tuple{Int,Int},FreeLink}()
-    foreach(l -> set!(_links, (l[1],l[2]), FreeLink()), links)
+    foreach(l -> set!(_links, (l[1], l[2]), FreeLink()), links)
     return _links
 end
 
-make_links(::Nothing, n::Int) = make_links(Iterators.product(1:n,1:n))
+make_links(::Nothing, n::Int) = make_links(Iterators.product(1:n, 1:n))
 
-function make_links(links::Vector{Tuple{DataType, Int, Int, T}}) where {T <: Number}
+function make_links(links::Vector{Tuple{DataType,Int,Int,T}}) where {T<:Number}
     types = Set{Type}()
     foreach(l -> push!(types, l[1]), links)
     UT = Union{collect(s)...}
     _links = Dictionary{Tuple{Int,Int},UT}()
-    foreach(l -> set!(_links, (l[2],l[3]), l[1](l[4])), links)
+    foreach(l -> set!(_links, (l[2], l[3]), l[1](l[4])), links)
     return _links
 end
 
-function make_links(lt::DataType, links) where {T <: Number}
+function make_links(lt::DataType, links) where {T<:Number}
     _links = Dictionary{Tuple{Int,Int},lt}()
-    foreach(l -> set!(_links, (l[1],l[2]), lt(l[3])), links)
+    foreach(l -> set!(_links, (l[1], l[2]), lt(l[3])), links)
     return _links
 end
 
-make_links(links::Vector{Tuple{Int, Int, T}}) where {T<:Number} = make_links(Link{T}, links)
+make_links(links::Vector{Tuple{Int,Int,T}}) where {T<:Number} = make_links(Link{T}, links)
 
 function make_links(lt::DataType, links, c)
     _links = Dictionary{Tuple{Int,Int},lt}()
-    foreach(l -> set!(_links, (l[1],l[2]), lt(c)), links)
+    foreach(l -> set!(_links, (l[1], l[2]), lt(c)), links)
     return _links
 end
 
 make_links(links, c) = make_links(Link{typeof(c)}, links, c)
 
-make_links(n, c) = make_links(Iterators.product(1:n,1:n), c)
+make_links(n::Int, c) = make_links(Iterators.product(1:n, 1:n), c)
 
 make_links(x::Tuple) = make_links(x...)
 
 function scenario(;
     duration,
-    links = nothing,
+    links=nothing,
     nodes,
     users,
     job_distribution,
-    request_rate,
+    request_rate
 )
     _nodes = make_nodes(nodes)
     _links = isnothing(links) ? make_links(links, length(_nodes)) : make_links(links)
@@ -94,7 +94,7 @@ function scenario(;
 
     topo = Topology(_nodes, _links)
 
-    @info "Topology" topo.nodes topo.links graph(topo, ShortestPath())
+    # @info "Topology" topo.nodes topo.links graph(topo, ShortestPath())
 
     return Scenario(_data, duration, topo, _users)
 end
