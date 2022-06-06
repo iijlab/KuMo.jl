@@ -33,10 +33,10 @@ const USERS_2 = 100
 # const REQUEST_RATE_1 = 1.
 
 scenario_2() = scenario(
-    DURATION_1,
-    LINKS_1,
-    NODES_1,
-    USERS_2,
-    JOB_DISTRIBUTIONS_1,
-    REQUEST_RATE_1,
+    duration = DURATION_1,
+    links = LINKS_1,
+    nodes = NODES_1,
+    users = USERS_2,
+    job_distribution = JOB_DISTRIBUTIONS_1,
+    request_rate = REQUEST_RATE_1,
 )

@@ -1,21 +1,91 @@
-struct Scenario
+struct Scenario{N<:AbstractNode,L<:AbstractLink}
     data::Dictionary{Int,Data}
     duration::Int
-    topology::Topology{Int,Int}
+    topology::Topology{N,L}
     users::Dictionary{Int,User}
 end
 
-function scenario(duration, links, nodes, users, job_distribution, request_rate)
-    _links = Dictionary{Tuple{Int,Int},Resource{Int}}()
-    foreach(l -> set!(_links, l[1], Resource(l[2])), links)
+function make_nodes(nodes)
+    types = Set{Type}()
+    foreach((nt, _) -> push!(types, nt), nodes)
+    UT = Union{collect(types)...}
+    _nodes = Dictionary{Int,UT}()
+    foreach((i, (nt, c)) -> set!(_nodes, i, nt(c)), enumerate(nodes))
+    return _nodes
+end
 
-    _nodes = Dictionary{Int,Resource{Int}}()
-    foreach(n -> set!(_nodes, n[1], Resource(n[2])), nodes)
+function make_nodes(nt::DataType, capacities)
+    _nodes = Dictionary{Int,nt}()
+    foreach((i, c) -> set!(_nodes, i, nt(c)), enumerate(capacities))
+    return _nodes
+end
+
+function make_nodes(nt::DataType, n, capacity)
+    _nodes = Dictionary{Int,nt}()
+    foreach(i -> set!(_nodes, i, nt(capacity)), 1:n)
+    return _nodes
+end
+
+make_nodes(n, c) = make_nodes(Node{typeof(c)}, n, c)
+
+function make_nodes(capacities::Vector{T}) where {T<:Number}
+    return make_nodes(Node{T}, capacities)
+end
+
+make_nodes(x::Tuple) = make_nodes(x...)
+
+function make_links(links)
+    _links = Dictionary{Tuple{Int,Int},FreeLink}()
+    foreach(l -> set!(_links, (l[1], l[2]), FreeLink()), links)
+    return _links
+end
+
+make_links(::Nothing, n::Int) = make_links(Iterators.product(1:n, 1:n))
+
+function make_links(links::Vector{Tuple{DataType,Int,Int,T}}) where {T<:Number}
+    types = Set{Type}()
+    foreach(l -> push!(types, l[1]), links)
+    UT = Union{collect(s)...}
+    _links = Dictionary{Tuple{Int,Int},UT}()
+    foreach(l -> set!(_links, (l[2], l[3]), l[1](l[4])), links)
+    return _links
+end
+
+function make_links(lt::DataType, links) where {T<:Number}
+    _links = Dictionary{Tuple{Int,Int},lt}()
+    foreach(l -> set!(_links, (l[1], l[2]), lt(l[3])), links)
+    return _links
+end
+
+make_links(links::Vector{Tuple{Int,Int,T}}) where {T<:Number} = make_links(Link{T}, links)
+
+function make_links(lt::DataType, links, c)
+    _links = Dictionary{Tuple{Int,Int},lt}()
+    foreach(l -> set!(_links, (l[1], l[2]), lt(c)), links)
+    return _links
+end
+
+make_links(links, c) = make_links(Link{typeof(c)}, links, c)
+
+make_links(n::Int, c) = make_links(Iterators.product(1:n, 1:n), c)
+
+make_links(x::Tuple) = make_links(x...)
+
+function scenario(;
+    duration,
+    links=nothing,
+    nodes,
+    users,
+    job_distribution,
+    request_rate
+)
+    _nodes = make_nodes(nodes)
+    _links = isnothing(links) ? make_links(links, length(_nodes)) : make_links(links)
 
     _users = Dictionary{Int,User}()
     _data = Dictionary{Int,Data}()
 
-    locations = 1:length(nodes)
+    locations = 1:length(_nodes)
 
     for i in 1:users
         set!(_users, i, user(request_rate, rand(locations), job_distribution))
@@ -23,6 +93,8 @@ function scenario(duration, links, nodes, users, job_distribution, request_rate)
     end
 
     topo = Topology(_nodes, _links)
+
+    # @info "Topology" topo.nodes topo.links graph(topo, ShortestPath())
 
     return Scenario(_data, duration, topo, _users)
 end
@@ -60,11 +132,35 @@ function make_df(s::Scenario)
     return df
 end
 
-function predict_best_cost(s::Scenario, j::Job)
-    links = s.links
-    nodes = s.nodes
-    nodes_costs = sort!(map(n -> predict_cost(n, charge), nodes))
-    links_costs = map(l -> predict_cost(l, charge), links)
-    @info "predicted costs:" nodes_costs links_costs
-    return last(pairs(nodes_costs))
-end
+const SCENARII = Dict(
+    :four_nodes => scenario(;
+        duration=399,
+        nodes=(4, 100),
+        users=1,
+        job_distribution=Dict(
+            :backend => 0:0,
+            :container => 1:1,
+            :data_location => 1:4,
+            :duration => 400:400,
+            :frontend => 0:0,
+        ),
+        request_rate=1.0
+    ),
+    :square => scenario(;
+        duration = 399,
+        nodes = (4, 100),
+        links = [
+            (1, 2, 400.), (2, 3, 400.), (3, 4, 400.), (4, 1, 400.),
+            (2, 1, 400.), (3, 2, 400.), (4, 3, 400.), (1, 4, 400.),
+        ],
+        users = 1,
+        job_distribution = Dict(
+            :backend => 2:2,
+            :container => 1:2,
+            :data_location => 1:4,
+            :duration => 100:100,
+            :frontend => 1:1,
+        ),
+        request_rate = 1.,
+    )
+)
