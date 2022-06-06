@@ -24,7 +24,7 @@ struct Link{T<:Number} <: AbstractLink
     capacity::T
 end
 
-pseudo_cost(r::Link, charge) = pseudo_cost(r, charge, :optical_link)
+pseudo_cost(r::Link, charge) = pseudo_cost(capacity(r), charge, :optical_link)
 
 struct FreeLink <: AbstractLink end
 

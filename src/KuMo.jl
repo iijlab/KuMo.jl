@@ -29,6 +29,9 @@ export simulate
 export MinCostFlow
 export ShortestPath
 
+export NODES_ONLY_SCENARIO
+export SQUARE_SCENARIO
+
 # SECTION - includes
 include("data.jl")
 include("pseudocosts.jl")
