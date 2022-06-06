@@ -1,5 +1,5 @@
 four_nodes() = scenario(;
-    duration=399,
+    duration=349,
     nodes=(4, 100),
     users=1,
     job_distribution=Dict(
@@ -11,4 +11,3 @@ four_nodes() = scenario(;
     ),
     request_rate=1.0
 )
-

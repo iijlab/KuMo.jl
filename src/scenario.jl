@@ -132,34 +132,35 @@ function make_df(s::Scenario)
     return df
 end
 
-const NODES_ONLY_SCENARIO = scenario(;
-    duration=399,
-    nodes=(4, 100),
-    users=1,
-    job_distribution=Dict(
-        :backend => 0:0,
-        :container => 1:1,
-        :data_location => 1:4,
-        :duration => 400:400,
-        :frontend => 0:0,
+const SCENARII = Dict(
+    :four_nodes => scenario(;
+        duration=399,
+        nodes=(4, 100),
+        users=1,
+        job_distribution=Dict(
+            :backend => 0:0,
+            :container => 1:1,
+            :data_location => 1:4,
+            :duration => 400:400,
+            :frontend => 0:0,
+        ),
+        request_rate=1.0
     ),
-    request_rate=1.0
-)
-
-const SQUARE_SCENARIO = scenario(;
-    duration = 399,
-    nodes = (4, 100),
-    links = [
-        (1, 2, 400.), (2, 3, 400.), (3, 4, 400.), (4, 1, 400.),
-        (2, 1, 400.), (3, 2, 400.), (4, 3, 400.), (1, 4, 400.),
-    ],
-    users = 1,
-    job_distribution = Dict(
-        :backend => 2:2,
-        :container => 1:2,
-        :data_location => 1:4,
-        :duration => 100:100,
-        :frontend => 1:1,
-    ),
-    request_rate = 1.,
+    :square => scenario(;
+        duration = 399,
+        nodes = (4, 100),
+        links = [
+            (1, 2, 400.), (2, 3, 400.), (3, 4, 400.), (4, 1, 400.),
+            (2, 1, 400.), (3, 2, 400.), (4, 3, 400.), (1, 4, 400.),
+        ],
+        users = 1,
+        job_distribution = Dict(
+            :backend => 2:2,
+            :container => 1:2,
+            :data_location => 1:4,
+            :duration => 100:100,
+            :frontend => 1:1,
+        ),
+        request_rate = 1.,
+    )
 )
