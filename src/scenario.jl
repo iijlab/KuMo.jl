@@ -99,7 +99,7 @@ function scenario(;
     return Scenario(_data, duration, topo, _users)
 end
 
-function make_df(s::Scenario)
+function make_df(s::Scenario; verbose=true)
     df = DataFrame(
         backend=Int[],
         containers=Int[],
@@ -127,7 +127,7 @@ function make_df(s::Scenario)
         end
     end
 
-    pretty_table(describe(df))
+    verbose && pretty_table(describe(df))
 
     return df
 end
@@ -147,20 +147,20 @@ const SCENARII = Dict(
         request_rate=1.0
     ),
     :square => scenario(;
-        duration = 399,
-        nodes = (4, 100),
-        links = [
-            (1, 2, 400.), (2, 3, 400.), (3, 4, 400.), (4, 1, 400.),
-            (2, 1, 400.), (3, 2, 400.), (4, 3, 400.), (1, 4, 400.),
+        duration=399,
+        nodes=(4, 100),
+        links=[
+            (1, 2, 400.0), (2, 3, 400.0), (3, 4, 400.0), (4, 1, 400.0),
+            (2, 1, 400.0), (3, 2, 400.0), (4, 3, 400.0), (1, 4, 400.0),
         ],
-        users = 1,
-        job_distribution = Dict(
+        users=1,
+        job_distribution=Dict(
             :backend => 2:2,
             :container => 1:2,
             :data_location => 1:4,
-            :duration => 100:100,
+            :duration => 400:400,
             :frontend => 1:1,
         ),
-        request_rate = 1.,
+        request_rate=1.0
     )
 )

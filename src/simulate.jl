@@ -118,7 +118,7 @@ function inner_queue(g, u, j, nodes, links, capacities, _, state, lck, ::Shortes
     return best_links, best_cost, best_node
 end
 
-function make_df(snapshots::Vector{SnapShot}, topo)
+function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     function shape_entry(s)
         entry = Vector{Pair{String,Float64}}()
         push!(entry, "selected" => s.selected)
@@ -148,7 +148,7 @@ function make_df(snapshots::Vector{SnapShot}, topo)
     end
 end
 
-function simulate(s::Scenario, algo; speed=1, output="")
+function simulate(s::Scenario, algo; speed=1, output="", verbose=true)
     times = Dict{String,Float64}()
     snapshots = Vector{SnapShot}()
     start_simulation = time()
@@ -275,13 +275,13 @@ function simulate(s::Scenario, algo; speed=1, output="")
         sleep(0.001)
     end
 
-    df_snaps = make_df(snapshots, s.topology)
+    df_snaps = make_df(snapshots, s.topology; verbose)
     if !isempty(output)
         CSV.write(joinpath(datadir(), output), df_snaps)
-        @info "Output written in $(datadir())"
+        verbose && (@info "Output written in $(datadir())")
     end
 
-    pretty_table(df_snaps)
+    verbose && pretty_table(df_snaps)
 
     return times, df_snaps, snapshots
 end
