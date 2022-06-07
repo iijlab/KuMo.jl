@@ -17,6 +17,7 @@ using SimpleTraits
 using SparseArrays
 
 # SECTION - exports
+export job_distributions
 export make_df
 export make_nodes
 export mincost_flow

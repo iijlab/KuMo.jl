@@ -5,16 +5,160 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 61189540-e578-11ec-3030-c3ebb611c28b
+# Packages requirement (only KuMo.jl is private and restricted to IIJ lab members)
 using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX
 
+# ╔═╡ d3221f99-adcc-457c-82f5-95aaa2a9e197
+md"""# Series of plots to illustrate the use of pseudo-cost functions
+
+The package `KuMo.jl` is used both as an interface and a simulator of scenarii. Several algorithms can be used to evaluate the cost of allocating a task in a network.
+"""
+
 # ╔═╡ bc72d307-12f7-47c6-b90a-062814186978
+# (Optional) Set the plotting and TeX engines
 begin
 	pgfplotsx()
 	latexengine!(PGFPlotsX.PDFLATEX)
+end;
+
+# ╔═╡ 6eff9ab6-620a-4a31-833d-8b8ec2b399a6
+md"""
+## Nodes-only scenarii
+
+To illustrate the intended behaviour of pseudo-cost functions without the impact of a network infrastructure, we consider complete networks with free links (no cost).
+This is done automatically in `KuMo.jl` by not providing any link.
+
+A basic four-nodes scenario reaching full load is provided as `SCENARII[:four_nodes]`. We define another four-nodes scenario with total load of 3.5 (87.5%) in the next section.
+
+The first scenario is plotted with the number of the resources load snapshot to illustrate how such a network would behave if loaded exactly to the max. Such a situation is unlikely to happen in practice.
+Plots after that takes the time of allocation/deallocation as parameter.
+"""
+
+# ╔═╡ b4576a3c-823f-479b-b940-6fb60c824e35
+# ╠═╡ show_logs = false
+begin
+	times, df, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); speed=100);
+    @df df plot(cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="snaps", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+    vline!([76, 152, 228, 304], w=0.75, color=:pink, style=:dash, legend=:none);
 end
 
-# ╔═╡ 56a801de-ca9a-473d-80be-365852fbcd45
-times, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); speed=100, output="4nodes-shortestpath.csv")
+# ╔═╡ 12169dd2-6ea2-43a3-b6fd-94d55e23a568
+# Load of 87.5%
+four_nodes_87_5() = scenario(;
+    duration=349,
+    nodes=(4, 100),
+    users=1,
+    job_distribution=Dict(
+        :backend => 0:0,
+        :container => 1:1,
+        :data_location => 1:4,
+        :duration => 400:400,
+        :frontend => 0:0,
+    ),
+    request_rate=1.0
+)
+
+# ╔═╡ ded04baf-49d3-4a85-aa70-3c331a7a6160
+# ╠═╡ show_logs = false
+begin
+	_, df2, _ = simulate(four_nodes_87_5(), ShortestPath(); speed=100);
+    @df df2 plot(:instant, cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+end
+
+# ╔═╡ 101246ef-1753-4174-ab16-109b425adbec
+md"""
+## Square networks scenarii
+We consider an infrastructure connected as a square `(a <-> b <-> c <-> d <-> a)`.
+"""
+
+# ╔═╡ 1c7238b6-6a2c-4123-8f9b-061820e74c98
+square_full_load() = scenario(;
+    duration=349,
+    nodes=(4, 100),
+    links=[
+    	(1, 2, 400.0), (2, 3, 400.0), (3, 4, 400.0), (4, 1, 400.0),
+        # (2, 1, 400.0), (3, 2, 400.0), (4, 3, 400.0), (1, 4, 400.0),
+    ],
+    users=1,
+    job_distribution=Dict(
+    	:backend => 2:2,
+        :container => 1:1,
+        :data_location => 1:4,
+        :duration => 400:400,
+        :frontend => 1:1,
+    ),
+    request_rate=1.0
+)
+
+# ╔═╡ 23e7e6df-1a7a-4f59-8654-7dd73aa73939
+# ╠═╡ show_logs = false
+begin
+	_, df3, _ = simulate(square_full_load(), ShortestPath(); speed=100);
+    p1 = @df df3 plot(:instant,
+        cols(6:9), tex_output_standalone=true, xlabel="time",
+        ylabel="load", title="Resources allocations using basic pseudo-cost functions",
+        w=1.25,
+    );
+	p2 = @df df3 plot(:instant,
+        cols(10:13), tex_output_standalone=true, xlabel="time",
+        ylabel="load",
+        w=1.25,
+	);
+	plot(p1, p2, layout = grid(2,1))
+end
+
+# ╔═╡ 8233eb08-88ed-4add-913c-beec05619f2b
+md"""
+## A basic scenario
+This is a 6 nodes scenario. 
+"""
+
+# ╔═╡ da7e3b03-7124-43e9-8f4c-b1c8ec2b4db6
+basic_scenario() = scenario(;
+    duration=1000,
+    nodes=(6, 30),
+    links=[
+    	(1, 2, 1000.0),# (2, 1, 1000.0),
+		(1, 3, 1000.0),# (3, 1, 1000.0),
+		(2, 3, 1000.0),# (3, 2, 1000.0),
+		(2, 4, 1000.0),# (4, 2, 1000.0),
+		(3, 5, 1000.0),# (5, 3, 1000.0),
+		(4, 5, 1000.0),# (5, 4, 1000.0),
+		(4, 6, 1000.0),# (6, 4, 1000.0),
+		(5, 6, 1000.0),# (6, 5, 1000.0),
+    ],
+    users=100,
+    job_distribution = job_distributions(
+	    backend=60 => 20,
+	    container=3 => 1,
+	    data_locations=1:6,
+	    duration=10 => 5,
+	    frontend=30 => 10,
+	),
+    request_rate=1/20
+)
+
+# ╔═╡ 05c04beb-454b-4f8d-b666-af2be214cc70
+begin
+	_, df4, _ = simulate(basic_scenario(), ShortestPath(); speed=100);
+    p3 = @df df4 plot(:instant,
+        cols(6:9), tex_output_standalone=true, xlabel="time",
+        ylabel="load", title="Resources allocations using basic pseudo-cost functions",
+        w=1.25,
+    );
+	p4 = @df df4 plot(:instant,
+        cols(10:13), tex_output_standalone=true, xlabel="time",
+        ylabel="load",
+        w=1.25,
+	);
+	plot(p3, p4, layout = grid(2,1))
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -28,7 +172,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-KuMo = "~0.1.2"
+KuMo = "~0.1.3"
 PGFPlotsX = "~1.5.0"
 StatsPlots = "~0.14.34"
 """
@@ -39,7 +183,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "392a031626fdb5e7e5ed952a915aaf838faebfa8"
+project_hash = "fba5ed10fa1d734f8cafc8fdd305277a2ebf4089"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -516,9 +660,9 @@ version = "0.13.6"
 
 [[deps.InverseFunctions]]
 deps = ["Test"]
-git-tree-sha1 = "791e670cea61472d457d7a11e2af3bb2b3290c05"
+git-tree-sha1 = "c6cf981474e7094ce044168d329274d797843467"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
-version = "0.1.5"
+version = "0.1.6"
 
 [[deps.InvertedIndices]]
 git-tree-sha1 = "bee5f1ef5bf65df56bdd2e40447590b272a5471f"
@@ -578,9 +722,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "7d04f1a6a715ec999342f67e352a969251d7ebfb"
+git-tree-sha1 = "caa493ae02e8b3f29f1045ac4d4c12d0aabe7de8"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.2"
+version = "0.1.3"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -757,14 +901,14 @@ version = "0.9.1"
 
 [[deps.MutableArithmetics]]
 deps = ["LinearAlgebra", "SparseArrays", "Test"]
-git-tree-sha1 = "4050cd02756970414dab13b55d55ae1826b19008"
+git-tree-sha1 = "3f419c608647de2afb8c05a1b1911f45b35418e2"
 uuid = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
-version = "1.0.2"
+version = "1.0.3"
 
 [[deps.NaNMath]]
-git-tree-sha1 = "737a5957f387b17e74d4ad2f440eb330b39a62c5"
+git-tree-sha1 = "b086b7ea07f8e38cf122f5016af580881ac914fe"
 uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
-version = "1.0.0"
+version = "0.3.7"
 
 [[deps.NearestNeighbors]]
 deps = ["Distances", "StaticArrays"]
@@ -783,9 +927,9 @@ version = "0.5.1"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
-git-tree-sha1 = "d623bd9462972ca53c95bd3e6d94a002968faaa7"
+git-tree-sha1 = "8694b777fe710111c65879fcc1184f8422b6d910"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.12.2"
+version = "1.12.3"
 
 [[deps.Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1039,9 +1183,9 @@ version = "2.1.6"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "8e981101b5c246b8325dbb3b294b0c67b9c69a0a"
+git-tree-sha1 = "383a578bdf6e6721f480e749d503ebc8405a0b22"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.4.5"
+version = "1.4.6"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -1391,8 +1535,18 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
+# ╟─d3221f99-adcc-457c-82f5-95aaa2a9e197
 # ╠═61189540-e578-11ec-3030-c3ebb611c28b
 # ╠═bc72d307-12f7-47c6-b90a-062814186978
-# ╠═56a801de-ca9a-473d-80be-365852fbcd45
+# ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
+# ╠═b4576a3c-823f-479b-b940-6fb60c824e35
+# ╠═12169dd2-6ea2-43a3-b6fd-94d55e23a568
+# ╠═ded04baf-49d3-4a85-aa70-3c331a7a6160
+# ╟─101246ef-1753-4174-ab16-109b425adbec
+# ╠═1c7238b6-6a2c-4123-8f9b-061820e74c98
+# ╠═23e7e6df-1a7a-4f59-8654-7dd73aa73939
+# ╠═8233eb08-88ed-4add-913c-beec05619f2b
+# ╠═da7e3b03-7124-43e9-8f4c-b1c8ec2b4db6
+# ╠═05c04beb-454b-4f8d-b666-af2be214cc70
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
