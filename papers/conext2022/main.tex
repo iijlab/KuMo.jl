@@ -1,0 +1,48 @@
+\documentclass[10pt,sigconf,letterpaper,anonymous,nonacm]{acmart}
+
+\title{Virtualizing Clouds by Cloud Morphing}
+
+\begin{document}
+
+\begin{abstract}
+
+In this paper, we propose a dynamic pricing model for distributed
+resource management in a future distributed cloud.
+In this model, the resource cost is a function of the load of the
+resource, and the required resources for a job are allocated by a
+simple cost minimization algorithm.  This simple mechanism realizes
+automatic load balancing within the cloud, and operators can loosely
+control the utilization of each resource by manupulating the cost function.
+We examine differnt cost tuning methods for adjusting utilization, and
+prove the system to be robust against changing conditions.
+
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+\input{intro.tex}
+
+\section{Model}
+
+\input{model}
+
+\section{Extensions}
+
+\input{extensions}
+
+\section{Related Work}
+
+\input{related}
+
+\section{Simulation}
+
+\input{simulation}
+
+\section{Summary}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{cloudmorphing}
+
+\end{document}
