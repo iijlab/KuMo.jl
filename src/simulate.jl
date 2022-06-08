@@ -408,66 +408,13 @@ function simulate(s::Scenario, algo, _, output, verbose, ::Val{false})
             end
         end
 
-        if (next_queued, next_unload) === (nothing, nothing)
-            # Queue task to last_unload
-
+        (task, _) = next_task
+        task_occ = task.first
+        while next_task
 
         end
 
     end
-
-    for task in tasks
-        start_iteration = time()
-        ii += 1
-
-        # Unload executed tasks
-        isnothing(next) && !isempty(unload) && next = iterate(unload)
-        while next !== nothing
-            (u_task, u_state) = next
-            if u_task.first ≤ task.first
-                ii += 1
-                v, c, ls = u_task.second
-                for i in 1:n, j in 1:n
-                    state.links[i, j] += ls[i, j]
-                end
-                state.nodes[v] += c
-
-                links = deepcopy(state.links[1:n, 1:n])
-                nodes = deepcopy(state.nodes[1:n])
-                instant = u_task.first
-                snap = SnapShot(State(links, nodes), 0, 0, 0, 0, instant)
-                push!(snapshots, snap)
-            end
-
-            # Load due & valid tasks
-            for q in queued
-                best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, s.topology.links, capacities, demands, state, lck, algo)
-
-                valid_links, valid_nodes = nothing, nothing
-
-                compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
-                valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
-                valid_nodes = state.nodes[best_node] + j.containers ≤ capacity(s.topology.nodes[best_node])
-            end
-
-            # Advance to next unload state
-            aux = iterate(unload, u_state)
-            aux[1].first ≤ task.first ? (next = aux) : break
-        end
-
-        # Load due tasks
-
-    end
-
-    unload_iter = iterate()
-    for (occ, task) in tasks
-        start_iteration = time()
-        ii += 1
-
-
-
-    end
-
     return nothing
 end
 
