@@ -4,6 +4,7 @@ module KuMo
 
 using CSV
 using DataFrames
+using DataStructures
 using Dictionaries
 using Distributions
 using DrWatson

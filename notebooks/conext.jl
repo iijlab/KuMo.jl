@@ -101,17 +101,17 @@ end
 # ╔═╡ c1a3e0fe-c63d-41eb-9ef4-6a9c68246dc0
 # Load of 87.5% (small duration, high request rate)
 four_nodes_87_5_2() = scenario(;
-    duration=20,
-    nodes=(4, 100),
+    duration=10,
+    nodes=(4, 32),
     users=1,
     job_distribution=Dict(
         :backend => 0:0,
         :container => 1:1,
         :data_location => 1:4,
-        :duration => 4:4,
+        :duration => 1:1,
         :frontend => 0:0,
     ),
-    request_rate=1.0/75
+    request_rate=1.0/50
 )
 
 # ╔═╡ 015b87d8-c652-41ea-8bd8-0634383afea9
@@ -128,6 +128,15 @@ begin
     );
 end
 
+# ╔═╡ c38705c0-077b-4676-be4e-2ecae6cec26c
+# Line plot
+begin
+    p2_2_1_1 = @df df2_2 plot(cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="snaps", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+end
+
 # ╔═╡ 7c195f46-ce3e-4b28-9ef5-b32bb94e3714
 # Area plot
 begin
@@ -138,6 +147,8 @@ begin
 end
 
 # ╔═╡ 73ab86d3-7ab6-4288-a1d0-ca30432da9fc
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	# Save figures
 	savefig(p1_1, "nodes-only-saturated-load_lines.pdf")
@@ -147,6 +158,7 @@ begin
 	savefig(p2_2_1, "4nodes-low-duration_lines.pdf")
 	savefig(p2_2_2, "4nodes-low-duration_area.pdf")
 end
+  ╠═╡ =#
 
 # ╔═╡ 101246ef-1753-4174-ab16-109b425adbec
 md"""
@@ -265,6 +277,8 @@ end
 
 # ╔═╡ 05c04beb-454b-4f8d-b666-af2be214cc70
 # ╠═╡ show_logs = false
+# ╠═╡ disabled = true
+#=╠═╡
 # Area plot
 begin
     p4_3 = @df df4 areaplot(:instant,
@@ -278,6 +292,7 @@ begin
 	);
 	plot(p4_3, p4_4, layout = grid(2,1))
 end
+  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1668,6 +1683,7 @@ version = "0.9.1+5"
 # ╠═c1a3e0fe-c63d-41eb-9ef4-6a9c68246dc0
 # ╠═015b87d8-c652-41ea-8bd8-0634383afea9
 # ╠═c493a411-3073-4e1d-81f1-02a6168221d0
+# ╠═c38705c0-077b-4676-be4e-2ecae6cec26c
 # ╠═7c195f46-ce3e-4b28-9ef5-b32bb94e3714
 # ╠═73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 # ╟─101246ef-1753-4174-ab16-109b425adbec

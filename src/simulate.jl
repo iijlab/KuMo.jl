@@ -148,7 +148,7 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     end
 end
 
-function simulate(s::Scenario, algo; speed=1, output="", verbose=true)
+function simulate(s::Scenario, algo, speed, output, verbose, ::Val{true})
     times = Dict{String,Float64}()
     snapshots = Vector{SnapShot}()
     start_simulation = time()
@@ -284,4 +284,193 @@ function simulate(s::Scenario, algo; speed=1, output="", verbose=true)
     verbose && pretty_table(df_snaps)
 
     return times, df_snaps, snapshots
+end
+
+function simulate(s::Scenario, algo, _, output, verbose, ::Val{false})
+    times = Dict{String,Float64}()
+    snapshots = Vector{SnapShot}()
+    start_simulation = time()
+
+    tasks = SortedMultiDict{Float64, Tuple{Int, Job}}()
+    queued = Vector{Pair{Float64, Tuple{Int, Job}}}()
+    unloads =
+        SortedMultiDict{Float64, Tuple{Int, Float64, SparseMatrixCSC{Float64,Int64}}}()
+
+    for u in s.users
+        jr = u.job_requests
+        j = jr.job
+        p = jr.period
+
+        foreach(occ -> insert!(tasks, occ, (u.location, j)), 0:p:s.duration)
+    end
+
+    push!(times, "start_tasks" => time() - start_simulation)
+
+    g, capacities = graph(s.topology, algo)
+    n = nv(g) - vtx(algo)
+
+    state = State(nv(g))
+    demands = spzeros(nv(g))
+
+    push!(times, "start_queue" => time() - start_simulation)
+
+    ii = 0
+    p = Progress(
+        2 * length(tasks);
+        desc="Simulating with $algo at speed $speed", showspeed=true, color=:normal
+    )
+
+    lck = ReentrantLock()
+    next_queued = nothing
+    previous_unload = nothing
+    next_unload = nothing
+    next_task = iterate(tasks)
+
+    last_unload = zero(Float64)
+    unchecked_unload = true
+
+    while (next_queued, next_unload, next_task) !== (nothing, nothing, nothing)
+        start_iteration = time()
+
+        if next_queued !== nothing && unchecked_unload
+            (task, ts) = next_queued
+            occ = task.first
+            u, j = task.second
+
+            nodes = s.topology.nodes
+            links = s.topology.links
+            bs = inner_queue(g, u, j, nodes, links, capacities, demands, state, lck, algo)
+            best_links, best_cost, best_node = bs
+
+            compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
+            valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
+            valid_nodes = state.nodes[best_node] + j.containers ≤ capacity(s.topology.nodes[best_node])
+
+            if valid_links && valid_nodes
+                ii += 1
+
+                # Add load
+                for i in 1:n, j in 1:n
+                    state.links[i, j] += best_links[i, j]
+                end
+                state.nodes[best_node] += j.containers
+
+                # Snap new state
+                _links = deepcopy(state.links[1:n, 1:n])
+                _nodes = deepcopy(state.nodes[1:n])
+                instant = last_unload
+                snap = SnapShot(State(_links, _nodes), 0, 0, 0, 0, instant)
+                push!(snapshots, snap)
+
+                # Assign unload
+                unload_time = occ + j.duration
+                push!(unloads, unload_time => (best_node, j.containers, best_links))
+                isempty(unloads) && previous_unload = iterate(unloads)
+
+                # Advance iterator
+                next_queued = iterate(queued, ts)
+                continue
+            else
+                unchecked_unload = false
+            end
+        end
+
+        if next_unload === nothing && previous_unload !== nothing
+            next_unload = iterate(unloads, previous_unload)
+        end
+
+        if next_unload !== nothing
+            (unload, us) = next_unload
+            (task, _) = next_task
+
+            unload_time = unload.first
+            task_occ = task.first
+
+            if unload_time ≤ task_occ
+                ii += 1
+
+                v, c, ls = unload.second
+                for i in 1:n, j in 1:n
+                    state.links[i, j] -= ls[i, j]
+                end
+                state.nodes[v] -= c
+
+                links = deepcopy(state.links[1:n, 1:n])
+                nodes = deepcopy(state.nodes[1:n])
+                snap = SnapShot(State(links, nodes), 0, 0, 0, 0, unload_time)
+                push!(snapshots, snap)
+
+                previous_unload = next_unload
+                next_unload = iterate(unloads, us)
+
+                unchecked_unload = true
+                continue
+            end
+        end
+
+        if (next_queued, next_unload) === (nothing, nothing)
+            # Queue task to last_unload
+
+
+        end
+
+    end
+
+    for task in tasks
+        start_iteration = time()
+        ii += 1
+
+        # Unload executed tasks
+        isnothing(next) && !isempty(unload) && next = iterate(unload)
+        while next !== nothing
+            (u_task, u_state) = next
+            if u_task.first ≤ task.first
+                ii += 1
+                v, c, ls = u_task.second
+                for i in 1:n, j in 1:n
+                    state.links[i, j] += ls[i, j]
+                end
+                state.nodes[v] += c
+
+                links = deepcopy(state.links[1:n, 1:n])
+                nodes = deepcopy(state.nodes[1:n])
+                instant = u_task.first
+                snap = SnapShot(State(links, nodes), 0, 0, 0, 0, instant)
+                push!(snapshots, snap)
+            end
+
+            # Load due & valid tasks
+            for q in queued
+                best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, s.topology.links, capacities, demands, state, lck, algo)
+
+                valid_links, valid_nodes = nothing, nothing
+
+                compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
+                valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
+                valid_nodes = state.nodes[best_node] + j.containers ≤ capacity(s.topology.nodes[best_node])
+            end
+
+            # Advance to next unload state
+            aux = iterate(unload, u_state)
+            aux[1].first ≤ task.first ? (next = aux) : break
+        end
+
+        # Load due tasks
+
+    end
+
+    unload_iter = iterate()
+    for (occ, task) in tasks
+        start_iteration = time()
+        ii += 1
+
+
+
+    end
+
+    return nothing
+end
+
+function simulate(s::Scenario, algo; speed=1, output="", verbose=true, async=true)
+    return simulate(s, algo, speed, output, verbose, Val(async))
 end
