@@ -7,6 +7,20 @@ struct State
     State(links, nodes) = new(links, nodes)
 end
 
+function add_load!(state, links, containers, v, n)
+    for i in 1:n, j in 1:n
+        state.links[i, j] += links[i, j]
+    end
+    state.nodes[v] += containers
+end
+
+function rem_load!(state, links, containers, v, n)
+    for i in 1:n, j in 1:n
+        state.links[i, j] -= links[i, j]
+    end
+    state.nodes[v] -= containers
+end
+
 struct SnapShot
     state::State
     total::Float64
@@ -14,6 +28,13 @@ struct SnapShot
     duration::Float64
     solving_time::Float64
     instant::Float64
+end
+
+function push_snap!(snapshots, state, total, selected, duration, solving_time, instant, n)
+    links = deepcopy(state.links[1:n, 1:n])
+    nodes = deepcopy(state.nodes[1:n])
+    snap = SnapShot(State(links, nodes), total, selected, duration, solving_time, instant)
+    push!(snapshots, snap)
 end
 
 function inner_queue(g, u, j, nodes, links, capacities, demands, state, lck, algo::MinCostFlow)
@@ -224,10 +245,7 @@ function simulate(s::Scenario, algo, speed, output, verbose, ::Val{true})
 
             lock(lck)
             try
-                for i in 1:n, j in 1:n
-                    state.links[i, j] += best_links[i, j]
-                end
-                state.nodes[best_node] += j.containers
+                add_load!(state, best_links, j.containers, best_node, n)
             finally
                 unlock(lck)
             end
@@ -237,15 +255,8 @@ function simulate(s::Scenario, algo, speed, output, verbose, ::Val{true})
                 sleep(j.duration / speed)
                 lock(lck)
                 try
-                    for i in 1:n, j in 1:n
-                        state.links[i, j] -= best_links[i, j]
-                    end
-                    state.nodes[best_node] -= j.containers
-                    links = deepcopy(state.links[1:n, 1:n])
-                    nodes = deepcopy(state.nodes[1:n])
-                    instant = time() - start_simulation
-                    snap = SnapShot(State(links, nodes), 0, 0, 0, 0, instant)
-                    push!(snapshots, snap)
+                    rem_load!(state, best_links, j.containers, best_node, n)
+                    push_snap!(snapshots, state, 0, 0, 0, 0, time() - start_simulation, n)
                 finally
                     unlock(lck)
                 end
@@ -254,17 +265,14 @@ function simulate(s::Scenario, algo, speed, output, verbose, ::Val{true})
 
             lock(lck)
             try
-                links = deepcopy(state.links[1:n, 1:n])
-                nodes = deepcopy(state.nodes[1:n])
                 duration = time() - start_iteration
                 instant = time() - start_simulation
-                snap = SnapShot(State(links, nodes), best_cost, best_node, duration, duration - start_solving, instant)
-                push!(snapshots, snap)
+                push_snap!(snapshots, state, best_cost, best_node, duration, duration - start_solving, instant, n)
             finally
                 unlock(lck)
             end
 
-            update!(p, ii)
+            ProgressMeter.update!(p, ii)
         end
     end
 
@@ -291,10 +299,10 @@ function simulate(s::Scenario, algo, _, output, verbose, ::Val{false})
     snapshots = Vector{SnapShot}()
     start_simulation = time()
 
-    tasks = SortedMultiDict{Float64, Tuple{Int, Job}}()
-    queued = Vector{Pair{Float64, Tuple{Int, Job}}}()
+    tasks = SortedMultiDict{Float64,Tuple{Int,Job}}()
+    queued = Vector{Pair{Float64,Tuple{Int,Job}}}()
     unloads =
-        SortedMultiDict{Float64, Tuple{Int, Float64, SparseMatrixCSC{Float64,Int64}}}()
+        SortedMultiDict{Float64,Tuple{Int,Float64,SparseMatrixCSC{Float64,Int64}}}()
 
     for u in s.users
         jr = u.job_requests
@@ -350,22 +358,15 @@ function simulate(s::Scenario, algo, _, output, verbose, ::Val{false})
                 ii += 1
 
                 # Add load
-                for i in 1:n, j in 1:n
-                    state.links[i, j] += best_links[i, j]
-                end
-                state.nodes[best_node] += j.containers
+                add_load!(state, best_links, j.containers, best_node, n)
 
                 # Snap new state
-                _links = deepcopy(state.links[1:n, 1:n])
-                _nodes = deepcopy(state.nodes[1:n])
-                instant = last_unload
-                snap = SnapShot(State(_links, _nodes), 0, 0, 0, 0, instant)
-                push!(snapshots, snap)
+                push_snap!(snapshots, state, 0, 0, 0, 0, last_unload, n)
 
                 # Assign unload
                 unload_time = occ + j.duration
                 push!(unloads, unload_time => (best_node, j.containers, best_links))
-                isempty(unloads) && previous_unload = iterate(unloads)
+                isempty(unloads) && (previous_unload = iterate(unloads))
 
                 # Advance iterator
                 next_queued = iterate(queued, ts)
@@ -390,15 +391,8 @@ function simulate(s::Scenario, algo, _, output, verbose, ::Val{false})
                 ii += 1
 
                 v, c, ls = unload.second
-                for i in 1:n, j in 1:n
-                    state.links[i, j] -= ls[i, j]
-                end
-                state.nodes[v] -= c
-
-                links = deepcopy(state.links[1:n, 1:n])
-                nodes = deepcopy(state.nodes[1:n])
-                snap = SnapShot(State(links, nodes), 0, 0, 0, 0, unload_time)
-                push!(snapshots, snap)
+                rem_load!(state, ls, c, v, n)
+                push_snap!(snapshots, state, 0, 0, 0, 0, unload_time, n)
 
                 previous_unload = next_unload
                 next_unload = iterate(unloads, us)
