@@ -1,9 +1,17 @@
 
+%% idea: mechanics model instead of optimization
+
+
+
+%% model: cost function: congestion pricing combined with idle resource pooling
 Our model is based on congestion pricing in which the cost of a
 resource dynamically changes according to the load of the resource.
 
 Another key idea is idle resource pooling that tries to put resources
 into idle states as much as possible for energy saving.
+
+The model employs convex pseudo cost functions that combines congestion
+pricing with idle resource pooling.
 
 \subsection{Pseudo Cost Functions}
 
@@ -108,7 +116,13 @@ function of the resource.
 
 \begin{description}
 \item[lowering/raising utilization] by raising/lowering the pseudo cost. \\
-  $f'(\rho) = f(\rho) + \Delta$
+  $f'(\rho) = f(\rho) + \Delta$ \\
+or \\
+  $f'(\rho) = (1 \pm \Delta)f(\rho)$ \\
+The difference from the original is milder for the former additive
+form; the difference of the latter multiplicative form rapidly grows
+as the load moves away from the center.
+
 \item[increaing idle-state] by raising the the cost for light load.
 \item[premium service] can be realized by lowering the target load so
   that the job runs on lightly loaded resources. \\
@@ -160,3 +174,12 @@ To assign Job $j$, we simply find: \\
 and then, assign $j$ to $i$. \\
 
   
+\subsection{Misc}
+
+The load of a resource can be measured in a number of ways.  Most
+resources have some form of load report functions built-in.
+A load value does not need to be precise, and a rough approximation is
+enough for resource management.
+
+
+

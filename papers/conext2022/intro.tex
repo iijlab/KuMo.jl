@@ -22,13 +22,14 @@ One trend is edge computing and micro datacenters.
 diverse computing resources, geographically scattered around.
 it will require a new management mechanism to efficiently utilize such
 resources.
-Computing resources will be abandunt in the environment so that it
+Computing resources will be abundant in the environment so that it
 will be no longer necessary to micro-manage computing resources.
 
 %% serverless, micro services
 Another trend is micro services, or serverless computing.
 lightweight services are short lived, which would make resource
-allocation much simpler.
+allocation much simpler. It would be also possible to migrate service
+instances. 
 
 %% energy saving??
 
@@ -41,9 +42,11 @@ heterogeneous resources, a cloud service instance emerges at the best
 location and, as the usage pattern changes, the service instance also
 transforms the locations of the resources and their connections.
 
-add a few examples: interactive task will follow the user.  data
-intensive task stays close to the data. services are fault-tolerant as
-jobs on faulty resources are automatically relocated.
+For examples, an interactive task will follow the user when the user 
+moves to a new location, while a data intensive task will stay close
+to the data regardless of the user location. As a result, services are
+inherently fault-tolerant and resilient against outages or disasters
+since jobs on faulty resources are automatically relocated.
 
 It would require technical advances in many fields to realize such
 systems.
@@ -63,9 +66,11 @@ Among other things, new resource management model is needed.
 
 \subsection{Resource Management Model}
 
+%% resource allocation problems are NP-hard
 resource allocation in distributed clouds: non-trivial optimization
 problem.
 
+%% even harder for distributed heterogeneous resources
 distributed resource management: diverse resources are owned and
 managed by different parties.
 It requires loose management of resources, as small parties cannot
@@ -73,11 +78,19 @@ afford dedicated skilled operators.
 The utilization of each resource needs to be easily manipulated,
 without affecting the stability of the system.
 
+%% our idea: use congestion pricing mechanism for automatic load management
 To this end, we employ dynamic pricing for decentralized resource
-trading.
+allocation whcih works as backpressure against congestion.
+By design, serious congestion never happens in the system.
 
 pseudo pricing for manipullating resource allocation.
 and a pseudo price is not an actual manetary charge.
 
-resilient against outages and desasters.
+There exist a large body of literature formulating resource allocation
+as optimization problems.
+In this paper, we use terms and tools borrowed from optimization
+theory. However, our goal is not to pursue theoretical optimum
+allocations, but to present a practical feedback control model for
+distributed resource management.
+
 
