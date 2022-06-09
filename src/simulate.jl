@@ -455,7 +455,7 @@ function post_simulate(s, snapshots, verbose, output)
 
     verbose && pretty_table(df_snaps)
 
-    return df_snaps, snapshots
+    return df_snaps
 end
 
 function simulate(s::Scenario, algo; speed=1, output="", verbose=true, async=true)
