@@ -6,7 +6,7 @@ using InteractiveUtils
 
 # ╔═╡ 61189540-e578-11ec-3030-c3ebb611c28b
 # Packages requirement (only KuMo.jl is private and restricted to IIJ lab members)
-using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX, Plots
+using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX
 
 # ╔═╡ d3221f99-adcc-457c-82f5-95aaa2a9e197
 md"""# Series of plots to illustrate the use of pseudo-cost functions
@@ -14,24 +14,12 @@ md"""# Series of plots to illustrate the use of pseudo-cost functions
 The package `KuMo.jl` is used both as an interface and a simulator of scenarii. Several algorithms can be used to evaluate the cost of allocating a task in a network.
 """
 
-# ╔═╡ 21639215-1463-46ff-80a0-f1f2028c7558
-begin
-	pc1 = ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1
-	pc2 = ρ ->　(ρ - 0.0375)^2 / (1 - ρ)
-    plot_pc1 = plot([pc1, pc2], 0:0.01:0.9, label = ["nodes" "links"])
-	savefig(plot_pc1, "pseudo_costs.pdf")
-	plot_pc1
-end
-
 # ╔═╡ bc72d307-12f7-47c6-b90a-062814186978
-# ╠═╡ disabled = true
-#=╠═╡
 # (Optional) Set the plotting and TeX engines
 begin
 	pgfplotsx()
 	latexengine!(PGFPlotsX.LUALATEX)
 end;
-  ╠═╡ =#
 
 # ╔═╡ 6eff9ab6-620a-4a31-833d-8b8ec2b399a6
 md"""
@@ -49,13 +37,14 @@ Plots after that takes the time of allocation/deallocation as parameter.
 # ╔═╡ 698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═╡ show_logs = false
 # Simulation
-times, df1, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); speed=0);
+# times, df1, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); speed=100);
+times, df1, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); async=false);
 
 # ╔═╡ b4576a3c-823f-479b-b940-6fb60c824e35
 # ╠═╡ show_logs = false
 begin	
-    p1_1 = @df df1 plot(:instant, cols(6:9),
-		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
+    p1_1 = @df df1 plot(cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="snaps", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
     vline!([76, 152, 228, 304], w=0.75, color=:pink, style=:dash, legend=:none);
@@ -64,8 +53,8 @@ end
 # ╔═╡ 0f54d3d2-3908-4b6f-9499-fa1d47531a1f
 # Area plot
 begin
-	p1_2 = @df df1 areaplot(:instant, cols(6:9),
-		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
+	p1_2 = @df df1 areaplot(cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="snaps", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
 end
@@ -73,7 +62,7 @@ end
 # ╔═╡ 12169dd2-6ea2-43a3-b6fd-94d55e23a568
 # Load of 87.5% (long duration, low request rate)
 four_nodes_87_5() = scenario(;
-    duration=349,
+    duration=351,
     nodes=(4, 100),
     users=1,
     job_distribution=Dict(
@@ -89,12 +78,13 @@ four_nodes_87_5() = scenario(;
 # ╔═╡ d3da1adc-91a8-4a97-bb23-586582a31ad7
 # ╠═╡ show_logs = false
 # Simulation
-_, df2, _ = simulate(four_nodes_87_5(), ShortestPath(); speed=0);
+# _, df2, _ = simulate(four_nodes_87_5(), ShortestPath(); speed=100);
+_, df2, _ = simulate(four_nodes_87_5(), ShortestPath(); async=false);
 
 # ╔═╡ e293bd76-4a2d-4b12-a311-858fc4cf52b7
 # Line plot
 begin
-    p2_1 = @df df2 plot(:instant, cols(6:9),
+    p2_1 = @df df2 plot(cols(6:9),
 		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
@@ -129,13 +119,13 @@ four_nodes_87_5_2() = scenario(;
 # ╔═╡ 015b87d8-c652-41ea-8bd8-0634383afea9
 # ╠═╡ show_logs = false
 # Simulation
-_, df2_2, _ = simulate(four_nodes_87_5_2(), ShortestPath(); speed=0);
+_, df2_2, _ = simulate(four_nodes_87_5_2(), ShortestPath(); speed=100);
 
 # ╔═╡ c493a411-3073-4e1d-81f1-02a6168221d0
 # Line plot
 begin
     p2_2_1 = @df df2_2 plot(:instant, cols(6:9),
-		legend=:none, tex_output_standalone=true, xlabel="time", ylabel="load",
+		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
 end
@@ -144,7 +134,7 @@ end
 # Line plot
 begin
     p2_2_1_1 = @df df2_2 plot(cols(6:9),
-		legend=:none, tex_output_standalone=true, xlabel="snaps", ylabel="load",
+		legend=:topright, tex_output_standalone=true, xlabel="snaps", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
 end
@@ -159,15 +149,18 @@ begin
 end
 
 # ╔═╡ 73ab86d3-7ab6-4288-a1d0-ca30432da9fc
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	# Save figures
 	savefig(p1_1, "nodes-only-saturated-load_lines.pdf")
 	savefig(p1_2, "nodes-only-saturated-load_area.pdf")
 	savefig(p2_1, "4nodes-high-duration_lines.pdf")
 	savefig(p2_2, "4nodes-high-duration_area.pdf")
-	savefig(p2_2_1_1, "4nodes-low-duration_lines.pdf")
+	savefig(p2_2_1, "4nodes-low-duration_lines.pdf")
 	savefig(p2_2_2, "4nodes-low-duration_area.pdf")
 end
+  ╠═╡ =#
 
 # ╔═╡ 101246ef-1753-4174-ab16-109b425adbec
 md"""
@@ -197,7 +190,7 @@ square_full_load() = scenario(;
 # ╔═╡ 9ba5c4d2-6197-46ab-a2b6-ff81dd5175d5
 # ╠═╡ show_logs = false
 # Simulation
-_, df3, _ = simulate(square_full_load(), ShortestPath(); speed=0);
+_, df3, _ = simulate(square_full_load(), ShortestPath(); speed=100);
 
 # ╔═╡ 23e7e6df-1a7a-4f59-8654-7dd73aa73939
 # ╠═╡ show_logs = false
@@ -266,39 +259,42 @@ basic_scenario() = scenario(;
 # ╔═╡ 47696319-495c-45f0-ac02-77bc04560547
 # ╠═╡ show_logs = false
 # Simulation
-_, df4, _ = simulate(basic_scenario(), ShortestPath(); speed=0);
+_, df4, _ = simulate(basic_scenario(), ShortestPath(); speed=100);
 
 # ╔═╡ c9ba01cd-4868-411e-9f67-4adcf3d3341d
-# # Line plot
-# begin
-#     p4_1 = @df df4 plot(:instant,
-#         cols(6:11), tex_output_standalone=true, xlabel="time",
-#         ylabel="load", title="Resources allocations using basic pseudo-cost functions",
-#         w=1.25,
-#     );
-# 	p4_2 = @df df4 plot(:instant,
-#         cols(12:27), tex_output_standalone=true, xlabel="time",
-#         ylabel="load",
-#         w=1.25,
-# 	);
-# 	plot(p4_1, p4_2, layout = grid(2,1))
-# end
+# Line plot
+begin
+    p4_1 = @df df4 plot(:instant,
+        cols(6:11), tex_output_standalone=true, xlabel="time",
+        ylabel="load", title="Resources allocations using basic pseudo-cost functions",
+        w=1.25,
+    );
+	p4_2 = @df df4 plot(:instant,
+        cols(12:27), tex_output_standalone=true, xlabel="time",
+        ylabel="load",
+        w=1.25,
+	);
+	plot(p4_1, p4_2, layout = grid(2,1))
+end
 
 # ╔═╡ 05c04beb-454b-4f8d-b666-af2be214cc70
 # ╠═╡ show_logs = false
-# # Area plot
-# begin
-#     p4_3 = @df df4 areaplot(:instant,
-#         cols(6:11), tex_output_standalone=true, xlabel="time",
-#         ylabel="load", title="Resources allocations using basic pseudo-cost functions",
-#         w=1.25,
-#     );
-# 	p4_4 = @df df4 areaplot(:instant,
-#         cols(12:27), tex_output_standalone=true, xlabel="time",
-#         ylabel="load",
-# 	);
-# 	plot(p4_3, p4_4, layout = grid(2,1))
-# end
+# ╠═╡ disabled = true
+#=╠═╡
+# Area plot
+begin
+    p4_3 = @df df4 areaplot(:instant,
+        cols(6:11), tex_output_standalone=true, xlabel="time",
+        ylabel="load", title="Resources allocations using basic pseudo-cost functions",
+        w=1.25,
+    );
+	p4_4 = @df df4 areaplot(:instant,
+        cols(12:27), tex_output_standalone=true, xlabel="time",
+        ylabel="load",
+	);
+	plot(p4_3, p4_4, layout = grid(2,1))
+end
+  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -307,15 +303,13 @@ CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 KuMo = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
 PGFPlotsX = "8314cec4-20b6-5062-9cdb-752b83310925"
-Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-KuMo = "~0.1.9"
+KuMo = "~0.1.7"
 PGFPlotsX = "~1.5.0"
-Plots = "~1.29.1"
 StatsPlots = "~0.14.34"
 """
 
@@ -325,7 +319,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "fec570e370694c1ca04e763b95e01f138dd63dc3"
+project_hash = "392a031626fdb5e7e5ed952a915aaf838faebfa8"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -864,9 +858,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "0eabf3647bb780524456c9b3923150c745e3d1ce"
+git-tree-sha1 = "20e8dce81bae94062a58c89c8c22f7ab7abb4803"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.9"
+version = "0.1.7"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1679,7 +1673,6 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╟─d3221f99-adcc-457c-82f5-95aaa2a9e197
 # ╠═61189540-e578-11ec-3030-c3ebb611c28b
-# ╠═21639215-1463-46ff-80a0-f1f2028c7558
 # ╠═bc72d307-12f7-47c6-b90a-062814186978
 # ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
 # ╠═698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
