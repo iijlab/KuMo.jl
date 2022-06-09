@@ -1,14 +1,18 @@
 
 %% idea: mechanics model instead of optimization
 
-
+Our model employs a parametric representation of pseudo cost, as a
+function of load, and uses it for load control and also as
+backpressure against congestion.
+Micro jobs are naturally gravitated to the most cost-efficient
+location.
 
 %% model: cost function: congestion pricing combined with idle resource pooling
-Our model is based on congestion pricing in which the cost of a
-resource dynamically changes according to the load of the resource.
+The proposed model is based on congestion pricing in which the cost of
+a resource dynamically changes according to the load of the resource.
 
 Another key idea is idle resource pooling that tries to put resources
-into idle states as much as possible for energy saving.
+into idle state as much as possible for energy saving.
 
 The model employs convex pseudo cost functions that combines congestion
 pricing with idle resource pooling.
@@ -41,7 +45,7 @@ In this model, constraints in optimization problems (e.g.,
 capacity limit) are enforced by the rapid increase of the cost function when
 the load approaches $1$. 
 
-\subsubsection{Pseudo Cost Function in Action}
+\subsection{Pseudo Cost Function in Action}
 
 The behavior of the pseudo cost function is illustrated by the
 following examples.
@@ -109,7 +113,7 @@ a resource with the minimum cost).
 However, our goal is not to achieve the theoretical optimum but to
 enable loose automatic distributed load balancing.
 
-\subsubsection{Variations}
+\subsection{Variations}
 
 The operator can control the resource utilization by modifying the cost
 function of the resource.

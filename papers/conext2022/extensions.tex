@@ -9,9 +9,20 @@ necessary solutions for building a working prototype system.
   interactions among jobs, etc.
   
 \item[Hierarchical Configurations]
-
+  rack-level.  datacenter level.
+  
+\item[Inter-cloud]
+  hierarchical model natually extends to inter-cloud model.
+  The mechanism of the idle resource pooling allows to utilize external
+  clouds when only needed.
+  
 \item[Data Migration]
-
+  The location of data is critical.
+  A possible approach is to migrate data at coarser time scale, based
+  on usage history.
+  Another possibility is design a new distributed file system in which
+  (cached) data can be easily moved.
+  
 \item[L2 Paths] It is possible to use idle resource pooling for dynamically
   creating L2 paths.
 

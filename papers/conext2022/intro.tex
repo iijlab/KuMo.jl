@@ -6,51 +6,68 @@ enabling to build large pools of virtualized computing resources (e.g.,
 servers, storage, network) and dynamically allocate necessary resources
 for providing services.
 However, cloud computing system itself is still on physical cloud
-infrastructure, that is, cloud system operators manage phisical
-servers and network switches to meet the overall demands without
-overloading certain resources.
+infrastructure, that is, cloud system operators manually manage
+phisical servers and network switches to meet the overall demands
+so as not to overload certain resources.
 
 Next challenge would be to virtualize cloud infrastructure!
 By decoupling infrastructure management from service management,
 cloud operators can be liberated from hardware resource management.
 This is similar to what happend to system administrators by cloud
 computing.
+Moreover, it is not enough to shift responsibility to operators of the
+new lower infrastructure layer. We need a new self-managing
+infrastructure layer which does not require human operators.
 
 %% Edge computing and micro datacenters
 We also consider two recent trends in cloud computing.
 One trend is edge computing and micro datacenters.
-diverse computing resources, geographically scattered around.
-it will require a new management mechanism to efficiently utilize such
+Small-scale datacenters with a few racks or even a couple of servers
+can be placed at locations closer to the users, to reduce latencies
+or to store sensitive data on premise, and make them act as part of
+the cloud.
+One direction towards the future is distributed cloud computing that
+utilizes diverse and geographically scattered computing resources.
+It will require a new management mechanism to efficiently utilize such
 resources.
-Computing resources will be abundant in the environment so that it
-will be no longer necessary to micro-manage computing resources.
+On the other hand, computing resources will be abundant in the
+environment so that it will be no longer necessary to micro-manage
+computing resources.
 
 %% serverless, micro services
-Another trend is micro services, or serverless computing.
-lightweight services are short lived, which would make resource
-allocation much simpler. It would be also possible to migrate service
-instances. 
+Another trend is micro services and serverless computing in which
+a cloud service is composed of a collection of loosely-coupled
+lightweight services.
+Each micro service is ephemeral and short lived, and can be executed
+in a stateless container, 
+which enables flexible and efficient use of underlying cloud
+resources.
+The concept has something in common with packet switching so that
+it might open up new possibilities to apply packet switching
+techniques to handling micro service jobs.
 
-%% energy saving??
+%% energy saving?
+Lastly, we need to take energy saving into consideration as it is
+essential for future clouds, or even for future computing as a whole.
 
 \subsection{Cloud Morphing Vision}
 
-Cloud Morphing is our vision for cloud virtualization in the future:
+{\em Cloud Morphing} is our vision for cloud virtualization in the future:
 dynamically morphing clouds.
 By dynamicaly allocatating micro services over distributed
 heterogeneous resources, a cloud service instance emerges at the best
 location and, as the usage pattern changes, the service instance also
 transforms the locations of the resources and their connections.
 
-For examples, an interactive task will follow the user when the user 
-moves to a new location, while a data intensive task will stay close
+For examples, an interactive task will follow the user when the user
+moves, while a data intensive task will stay close
 to the data regardless of the user location. As a result, services are
 inherently fault-tolerant and resilient against outages or disasters
 since jobs on faulty resources are automatically relocated.
 
-It would require technical advances in many fields to realize such
-systems.
-Among other things, new resource management model is needed.
+To realize such systems, it requires various technical advances across
+many fields.  Among other things, new resource management model is
+needed.
 
 %%It is a vision for dynamic distributed resource management in 10 years.
 %%research vision to set long-term directions, find/prioritize research
@@ -67,12 +84,11 @@ Among other things, new resource management model is needed.
 \subsection{Resource Management Model}
 
 %% resource allocation problems are NP-hard
-resource allocation in distributed clouds: non-trivial optimization
-problem.
-
 %% even harder for distributed heterogeneous resources
-distributed resource management: diverse resources are owned and
-managed by different parties.
+Resource allocation in distributed clouds is a non-trivial
+optimization problem, and it is even harder when distributed
+management is assumed.
+Diverse resources would be owned and managed by different parties.
 It requires loose management of resources, as small parties cannot
 afford dedicated skilled operators.
 The utilization of each resource needs to be easily manipulated,
@@ -83,13 +99,14 @@ To this end, we employ dynamic pricing for decentralized resource
 allocation whcih works as backpressure against congestion.
 By design, serious congestion never happens in the system.
 
-pseudo pricing for manipullating resource allocation.
-and a pseudo price is not an actual manetary charge.
+We use pseudo pricing for manipullating resource allocation.
+Here, pseudo price is not an actual manetary charge but used to
+control resource utilization.
 
 There exist a large body of literature formulating resource allocation
 as optimization problems.
 In this paper, we use terms and tools borrowed from optimization
-theory. However, our goal is not to pursue theoretical optimum
+theory. Our goal is, however, not to pursue theoretical optimum
 allocations, but to present a practical feedback control model for
 distributed resource management.
 
