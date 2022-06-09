@@ -20,16 +20,16 @@ pricing with idle resource pooling.
 \subsection{Pseudo Cost Functions}
 
 \begin{figure}[thb]
-\begin{center}
-\includegraphics[width=7.5cm,clip]{costfunc.pdf}
-\vspace{-2.0ex}
-\caption{standard pseudo cost function}
-\label{fig:std_costfunc}
-\end{center}
+  \begin{center}
+    \includegraphics[width=7.5cm,clip]{costfunc.pdf}
+    \vspace{-2.0ex}
+    \caption{Standard pseudo cost function}
+    \label{fig:std_costfunc}
+  \end{center}
 \end{figure}
 
 The standard pseudo cost function from the load of a resource
-$\rho \in [0, 1]$ to the curresponding cost is in Figure
+$\rho \in [0, 1]$ to the corresponding cost is in Figure
 \ref{fig:std_costfunc}: \\
 
 \( f(\rho) = \frac{(2\rho - 1)^{2}}{1 - \rho} + 1  \) \\
@@ -43,7 +43,7 @@ working range, $[0 \le \rho \le .75]$, aiming at $\rho = .5$. \\
 
 In this model, constraints in optimization problems (e.g.,
 capacity limit) are enforced by the rapid increase of the cost function when
-the load approaches $1$. 
+the load approaches $1$.
 
 \subsection{Pseudo Cost Function in Action}
 
@@ -52,7 +52,7 @@ following examples.
 
 Assume a pool of equivalent resources with the standard pseudo cost
 function (Figure \ref{fig:std_costfunc}).
-Also, assume that micro jobs are continuousy assigned to the
+Also, assume that micro jobs are continuously assigned to the
 system; each micro job is much smaller than the capacity of a
 resource.
 
@@ -60,7 +60,7 @@ The initial system load $\sum \rho$ is $0$, and gradually increased
 up to $2.0$, here, load $1.0$ is the capacity of a single resource.
 Initially, all resources in the pool are idle, and their costs are
 all $f(0)= 2$.
-First, one resource $r_{0}$ is randomly selected for allocation, and it's
+First, one resource $r_{0}$ is randomly selected for allocation, and its
 cost becomes lower: $f(0+) < 2$. As a result, subsequent jobs are
 assigned to $r_{0}$, with lowering cost towards $\rho = .5$ and then
 rising again until $\rho = .75$ where $f(.75) = 2 = f(0)$.
@@ -82,10 +82,10 @@ loses the load until it becomes idle again, while the other 2 keep
 $\rho = .5$. It repeats for the remaining ones.
 
 Looking at how the number of active resources changes in a coarser
-time scale,
+timescale,
 when the number of active resources is increasing, the load of each
 active resource stay at $\rho = .75$.
-On the other hand, when the number of actice resources is decreasing,
+On the other hand, when the number of active resources is decreasing,
 the load of each active resource stay at $\rho = .5$.
 In short, when all resources are equal, the system tries to maintain
 the load of active resources in the range $(.5, .75)$, while keeping
@@ -95,7 +95,7 @@ When resources are not equal, the behavior becomes more complex, but
 the underlying mechanisms are the same.
 Let's take a look at a case of two resources with the cost ratio $1:2$,
 that is $f_{r_1{}}(\rho) = 2 f_{r_{0}}(\rho)$.
-To activate $r_{1}$, the load of $r_{0}$ goes up to $.84$ to satisfay:
+To activate $r_{1}$, the load of $r_{0}$ goes up to $.84$ to satisfy:
 $f_{r_{1}}(0) = 4 = f_{r_{0}}(.84)$.
 When $r_{1}$ is moving towards idle, the load of $r_{0}$ is $.75$ to
 satisfy: $f_{r_{1}}(.5) = 2 = f_{r_{0}}(.75)$
@@ -106,7 +106,7 @@ active ones to match the cost $f(0)$ for the new one, but the load
 will not go much further as the slope of the function is steep.
 Similarly, when the most expensive one among active resources becomes
 idle, the load of the remaining ones stay at the matching cost at
-$f(.5)$ for the deactivating one. 
+$f(.5)$ for the deactivating one.
 
 The system could be stabilized at local minimum (e.g., cannot activate
 a resource with the minimum cost).
@@ -119,22 +119,22 @@ The operator can control the resource utilization by modifying the cost
 function of the resource.
 
 \begin{description}
-\item[lowering/raising utilization] by raising/lowering the pseudo cost. \\
-  $f'(\rho) = f(\rho) + \Delta$ \\
-or \\
-  $f'(\rho) = (1 \pm \Delta)f(\rho)$ \\
-The difference from the original is milder for the former additive
-form; the difference of the latter multiplicative form rapidly grows
-as the load moves away from the center.
+  \item[lowering/raising utilization] by raising/lowering the pseudo cost. \\
+        $f'(\rho) = f(\rho) + \Delta$ \\
+        or \\
+        $f'(\rho) = (1 \pm \Delta)f(\rho)$ \\
+        The difference from the original is milder for the former additive
+        form; the difference of the latter multiplicative form rapidly grows
+        as the load moves away from the center.
 
-\item[increaing idle-state] by raising the the cost for light load.
-\item[premium service] can be realized by lowering the target load so
-  that the job runs on lightly loaded resources. \\
-  $f'(\rho) = f(\rho - \Delta)$
-\item[equal load-balancing] without idle resource pooling can be
-  achieved by simple monotonic functions, e.g.,
-  $f(\rho) = \frac{\rho^{2}}{1 - \rho} + 1$.
-\item[hierarchical model] will be discussed later in Section XX.
+  \item[increasing idle-state] by raising the cost for light load.
+  \item[premium service] can be realized by lowering the target load so
+        that the job runs on lightly loaded resources. \\
+        $f'(\rho) = f(\rho - \Delta)$
+  \item[equal load-balancing] without idle resource pooling can be
+        achieved by simple monotonic functions, e.g.,
+        $f(\rho) = \frac{\rho^{2}}{1 - \rho} + 1$.
+  \item[hierarchical model] will be discussed later in Section XX.
 \end{description}
 
 \subsection{Jobs}
@@ -177,13 +177,10 @@ To assign Job $j$, we simply find: \\
 \(  argmin_{i} \: E(j, i)   \)  \\
 and then, assign $j$ to $i$. \\
 
-  
+
 \subsection{Misc}
 
 The load of a resource can be measured in a number of ways.  Most
 resources have some form of load report functions built-in.
 A load value does not need to be precise, and a rough approximation is
 enough for resource management.
-
-
-
