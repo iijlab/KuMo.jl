@@ -180,7 +180,7 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
         df = DataFrame(shape_entry(first(snapshots)))
         foreach(e -> push!(df, Dict(shape_entry(e))), snapshots[2:end])
 
-        pretty_table(describe(df))
+        verbose && pretty_table(describe(df))
 
         return df
     else
@@ -188,14 +188,14 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     end
 end
 
-function init_simulate(::Val{false})
+function init_simulate(::Val{0})
     tasks = Vector{Load}()
     queued = Vector{Load}()
     unloads = Vector{Unload}()
     return tasks, queued, unloads
 end
 
-function init_simulate(::Val{true})
+function init_simulate(::Val)
     tasks = Vector{Load}()
     c = Channel{Tuple{Int,Job}}(10^7)
     return tasks, c
@@ -224,7 +224,7 @@ function init_simulate(s, algo, tasks, start)
     return times, snapshots, g, capacities, n, state, demands
 end
 
-function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{true})
+function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)
     tasks, c = containers
     times, snapshots, g, capacities, n, state, demands = args_loop
 
@@ -314,6 +314,8 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{true}
     while !all_unloaded
         sleep(0.001)
     end
+
+    return nothing
 end
 
 function execute_valid_load(s, task, g, capacities, state, algo, demands)
@@ -346,15 +348,17 @@ function insert_sorted!(w, val, it = iterate(w))
     push!(w, val)
 end
 
-function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{false})
+function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{0})
     tasks, queued, unloads = containers
     times, snapshots, g, capacities, n, state, demands = args_loop
 
     ii = 0
     p = Progress(
         2 * length(tasks);
-        desc="Simulating with $algo at speed $speed", showspeed=true, color=:normal
+        desc="Simulating with $algo synchronously", showspeed=true, color=:normal
     )
+
+    push!(times, "start_tasks" => time() - start)
 
     next_queued = iterate(queued)
     previous_queued = 1
@@ -429,7 +433,7 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{false
             add_load!(state, best_links, j.containers, best_node, n)
 
             # Snap new state
-            push_snap!(snapshots, state, 0, 0, 0, 0, last_unload, n)
+            push_snap!(snapshots, state, 0, 0, 0, 0, task.occ, n)
 
             # Assign unload
             unload = Unload(task.occ + j.duration, best_node, j.containers, best_links)
@@ -443,6 +447,7 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{false
         next_task = iterate(tasks, ts)
         ProgressMeter.update!(p, ii)
     end
+    push!(times, "end_queue" => time() - start)
     return nothing
 end
 
@@ -458,17 +463,17 @@ function post_simulate(s, snapshots, verbose, output)
     return df_snaps
 end
 
-function simulate(s::Scenario, algo; speed=1, output="", verbose=true, async=true)
+function simulate(s::Scenario, algo; speed=0, output="", verbose=true)
     start = time()
 
     # dispatched containers
-    containers = init_simulate(Val(async))
+    containers = init_simulate(Val(speed))
 
     # shared init
     args_loop = init_simulate(s, algo, containers[1], start)
 
     # simulate loop
-    simulate_loop(s, algo, speed, start, containers, args_loop, Val(async))
+    simulate_loop(s, algo, speed, start, containers, args_loop, Val(speed))
 
     # post-process
     return args_loop[1], post_simulate(s, args_loop[2], verbose, output), args_loop[2]

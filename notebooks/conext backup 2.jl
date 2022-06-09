@@ -37,8 +37,10 @@ Plots after that takes the time of allocation/deallocation as parameter.
 # ╔═╡ 698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═╡ show_logs = false
 # Simulation
-# times, df1, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); speed=100);
-times, df1, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); async=false);
+times, df1, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); speed=100);
+
+# ╔═╡ 9e975f40-a1b9-4b0f-a2ac-65fc8b59aa50
+snaps
 
 # ╔═╡ b4576a3c-823f-479b-b940-6fb60c824e35
 # ╠═╡ show_logs = false
@@ -62,7 +64,7 @@ end
 # ╔═╡ 12169dd2-6ea2-43a3-b6fd-94d55e23a568
 # Load of 87.5% (long duration, low request rate)
 four_nodes_87_5() = scenario(;
-    duration=351,
+    duration=349,
     nodes=(4, 100),
     users=1,
     job_distribution=Dict(
@@ -78,13 +80,12 @@ four_nodes_87_5() = scenario(;
 # ╔═╡ d3da1adc-91a8-4a97-bb23-586582a31ad7
 # ╠═╡ show_logs = false
 # Simulation
-# _, df2, _ = simulate(four_nodes_87_5(), ShortestPath(); speed=100);
-_, df2, _ = simulate(four_nodes_87_5(), ShortestPath(); async=false);
+_, df2, _ = simulate(four_nodes_87_5(), ShortestPath(); speed=100);
 
 # ╔═╡ e293bd76-4a2d-4b12-a311-858fc4cf52b7
 # Line plot
 begin
-    p2_1 = @df df2 plot(cols(6:9),
+    p2_1 = @df df2 plot(:instant, cols(6:9),
 		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
@@ -94,7 +95,7 @@ end
 # ╠═╡ show_logs = false
 # Area plot
 begin
-    p2_2 = @df df2 areaplot(cols(6:9),
+    p2_2 = @df df2 areaplot(:instant, cols(6:9),
 		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
@@ -308,7 +309,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-KuMo = "~0.1.7"
+KuMo = "~0.1.6"
 PGFPlotsX = "~1.5.0"
 StatsPlots = "~0.14.34"
 """
@@ -858,9 +859,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "20e8dce81bae94062a58c89c8c22f7ab7abb4803"
+git-tree-sha1 = "30f62881f0936eb9c92f5ca68f6d7f3be9867465"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.7"
+version = "0.1.6"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1676,6 +1677,7 @@ version = "0.9.1+5"
 # ╠═bc72d307-12f7-47c6-b90a-062814186978
 # ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
 # ╠═698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
+# ╠═9e975f40-a1b9-4b0f-a2ac-65fc8b59aa50
 # ╠═b4576a3c-823f-479b-b940-6fb60c824e35
 # ╠═0f54d3d2-3908-4b6f-9499-fa1d47531a1f
 # ╠═12169dd2-6ea2-43a3-b6fd-94d55e23a568
