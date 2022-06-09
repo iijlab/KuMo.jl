@@ -37,7 +37,23 @@ function push_snap!(snapshots, state, total, selected, duration, solving_time, i
     push!(snapshots, snap)
 end
 
-function inner_queue(g, u, j, nodes, links, capacities, demands, state, lck, algo::MinCostFlow)
+struct Load
+    occ::Float64
+    node::Int
+    job::Job
+end
+
+struct Unload
+    occ::Float64
+    node::Int
+    vload::Int
+    lloads::SparseMatrixCSC{Float64,Int64}
+end
+
+function inner_queue(
+    g, u, j, nodes, capacities, state, algo::MinCostFlow;
+    lck = ReentrantLock(), demands, links = nothing,
+)
     nvtx = nv(g)
 
     add_edge!(g, nvtx - 1, u)
@@ -105,7 +121,10 @@ function retrieve_path(u, v, paths)
     return path
 end
 
-function inner_queue(g, u, j, nodes, links, capacities, _, state, lck, ::ShortestPath)
+function inner_queue(
+    g, u, j, nodes, capacities, state, ::ShortestPath;
+    lck = ReentrantLock(), demands = nothing, links,
+)
     nvtx = nv(g)
     best_links = spzeros(nvtx, nvtx)
     best_node = 0
@@ -169,52 +188,66 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     end
 end
 
-function simulate(s::Scenario, algo, speed, output, verbose, ::Val{true})
+function init_simulate(::Val{false})
+    tasks = MutableLinkedList{Load}()
+    queued = Vector{Load}()
+    unloads = MutableLinkedList{Unload}()
+    return tasks, queued, unloads
+end
+
+function init_simulate(::Val{true})
+    tasks = Vector{Load}()
+    c = Channel{Tuple{Int,Job}}(10^7)
+    return tasks, c
+end
+
+function init_simulate(s, algo, tasks, start)
     times = Dict{String,Float64}()
     snapshots = Vector{SnapShot}()
-    start_simulation = time()
-
-    tasks = Vector{Pair{Float64,Tuple{Int,Job}}}()
-
-    all_queue = false
-    all_unloaded = false
 
     for u in s.users
         jr = u.job_requests
         j = jr.job
         p = jr.period
 
-        foreach(occ -> push!(tasks, occ => (u.location, j)), 0:p:s.duration)
+        foreach(occ -> push!(tasks, Load(occ, u.location, j)), 0:p:s.duration)
     end
 
-    c = Channel{Tuple{Int,Job}}(10^7)
-    c = Channel{Tuple{Int,Job}}(10^7)
-
-    push!(times, "start_tasks" => time() - start_simulation)
-
-    for (i, t) in enumerate(tasks)
-        @async begin
-            sleep(t[1] / speed)
-            put!(c, t[2])
-            i == length(tasks) && (all_queue = true)
-        end
-    end
-
-    push!(times, "init_queue" => time() - start_simulation)
-
+    push!(times, "start_tasks" => time() - start)
     g, capacities = graph(s.topology, algo)
+    n = nv(g) - vtx(algo)
 
     state = State(nv(g))
     demands = spzeros(nv(g))
 
-    lck = ReentrantLock()
+    push!(times, "start_queue" => time() - start)
+    return times, snapshots, g, capacities, n, state, demands
+end
 
-    push!(times, "start_queue" => time() - start_simulation)
+function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{true})
+    tasks, c = containers
+    times, snapshots, g, capacities, n, state, demands = args_loop
 
+    all_queue = false
+    all_unloaded = false
     ii = 0
     p = Progress(
         length(tasks);
-        desc="Simulating with $algo at speed $speed", showspeed=true, color=:normal)
+        desc="Simulating with $algo at speed $speed", showspeed=true, color=:normal
+    )
+
+    push!(times, "start_tasks" => time() - start)
+
+    for (i, t) in enumerate(tasks)
+        @async begin
+            sleep(t.occ / speed)
+            put!(c, (t.node, t.job))
+            i == length(tasks) && (all_queue = true)
+        end
+    end
+
+    lck = ReentrantLock()
+
     while !all_queue || isready(c)
         start_iteration = time()
         ii += 1
@@ -224,7 +257,7 @@ function simulate(s::Scenario, algo, speed, output, verbose, ::Val{true})
         is_valid = false
 
         while !is_valid
-            best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, s.topology.links, capacities, demands, state, lck, algo)
+            best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, capacities, state,algo; links = s.topology.links, lck, demands)
 
             n = nv(g) - vtx(algo)
 
@@ -256,7 +289,7 @@ function simulate(s::Scenario, algo, speed, output, verbose, ::Val{true})
                 lock(lck)
                 try
                     rem_load!(state, best_links, j.containers, best_node, n)
-                    push_snap!(snapshots, state, 0, 0, 0, 0, time() - start_simulation, n)
+                    push_snap!(snapshots, state, 0, 0, 0, 0, time() - start, n)
                 finally
                     unlock(lck)
                 end
@@ -266,7 +299,7 @@ function simulate(s::Scenario, algo, speed, output, verbose, ::Val{true})
             lock(lck)
             try
                 duration = time() - start_iteration
-                instant = time() - start_simulation
+                instant = time() - start
                 push_snap!(snapshots, state, best_cost, best_node, duration, duration - start_solving, instant, n)
             finally
                 unlock(lck)
@@ -276,51 +309,17 @@ function simulate(s::Scenario, algo, speed, output, verbose, ::Val{true})
         end
     end
 
-    push!(times, "end_queue" => time() - start_simulation)
+    push!(times, "end_queue" => time() - start)
 
     while !all_unloaded
         # @warn "debug" all_unloaded ii
         sleep(0.001)
     end
-
-    df_snaps = make_df(snapshots, s.topology; verbose)
-    if !isempty(output)
-        CSV.write(joinpath(datadir(), output), df_snaps)
-        verbose && (@info "Output written in $(datadir())")
-    end
-
-    verbose && pretty_table(df_snaps)
-
-    return times, df_snaps, snapshots
 end
 
-function simulate(s::Scenario, algo, _, output, verbose, ::Val{false})
-    times = Dict{String,Float64}()
-    snapshots = Vector{SnapShot}()
-    start_simulation = time()
-
-    tasks = SortedMultiDict{Float64,Tuple{Int,Job}}()
-    queued = Vector{Pair{Float64,Tuple{Int,Job}}}()
-    unloads =
-        SortedMultiDict{Float64,Tuple{Int,Float64,SparseMatrixCSC{Float64,Int64}}}()
-
-    for u in s.users
-        jr = u.job_requests
-        j = jr.job
-        p = jr.period
-
-        foreach(occ -> insert!(tasks, occ, (u.location, j)), 0:p:s.duration)
-    end
-
-    push!(times, "start_tasks" => time() - start_simulation)
-
-    g, capacities = graph(s.topology, algo)
-    n = nv(g) - vtx(algo)
-
-    state = State(nv(g))
-    demands = spzeros(nv(g))
-
-    push!(times, "start_queue" => time() - start_simulation)
+function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{false})
+    tasks, queued, unloads = containers
+    times, snapshots, g, capacities, n, state, demands = args_loop
 
     ii = 0
     p = Progress(
@@ -328,7 +327,6 @@ function simulate(s::Scenario, algo, _, output, verbose, ::Val{false})
         desc="Simulating with $algo at speed $speed", showspeed=true, color=:normal
     )
 
-    lck = ReentrantLock()
     next_queued = nothing
     previous_unload = nothing
     next_unload = nothing
@@ -347,7 +345,7 @@ function simulate(s::Scenario, algo, _, output, verbose, ::Val{false})
 
             nodes = s.topology.nodes
             links = s.topology.links
-            bs = inner_queue(g, u, j, nodes, links, capacities, demands, state, lck, algo)
+            bs = inner_queue(g, u, j, nodes, capacities, state, algo; links, demands)
             best_links, best_cost, best_node = bs
 
             compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
@@ -408,10 +406,35 @@ function simulate(s::Scenario, algo, _, output, verbose, ::Val{false})
 
         end
 
+        ProgressMeter.update!(p, ii)
     end
     return nothing
 end
 
+function post_simulate(s, snapshots, verbose, output)
+    df_snaps = make_df(snapshots, s.topology; verbose)
+    if !isempty(output)
+        CSV.write(joinpath(datadir(), output), df_snaps)
+        verbose && (@info "Output written in $(datadir())")
+    end
+
+    verbose && pretty_table(df_snaps)
+
+    return df_snaps, snapshots
+end
+
 function simulate(s::Scenario, algo; speed=1, output="", verbose=true, async=true)
-    return simulate(s, algo, speed, output, verbose, Val(async))
+    start = time()
+
+    # dispatched containers
+    containers = init_simulate(Val(async))
+
+    # shared init
+    args_loop = init_simulate(s, algo, containers[1], start)
+
+    # simulate loop
+    simulate_loop(s, algo, speed, start, containers, args_loop, Val(async))
+
+    # post-process
+    return args_loop[1], post_simulate(s, args_loop[2], verbose, output), args_loop[2]
 end
