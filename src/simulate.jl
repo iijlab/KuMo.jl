@@ -189,9 +189,9 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
 end
 
 function init_simulate(::Val{false})
-    tasks = MutableLinkedList{Load}()
+    tasks = Vector{Load}()
     queued = Vector{Load}()
-    unloads = MutableLinkedList{Unload}()
+    unloads = Vector{Unload}()
     return tasks, queued, unloads
 end
 
@@ -312,9 +312,38 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{true}
     push!(times, "end_queue" => time() - start)
 
     while !all_unloaded
-        # @warn "debug" all_unloaded ii
         sleep(0.001)
     end
+end
+
+function execute_valid_load(s, task, g, capacities, state, algo, demands)
+    occ, u, j = task.occ, task.node, task.job
+
+    nodes = s.topology.nodes
+    links = s.topology.links
+    best_links, best_cost, best_node = inner_queue(
+        g, u, j, nodes, capacities, state, algo;
+        links, demands,
+    )
+
+    compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
+    valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
+    valid_nodes =
+        state.nodes[best_node] + j.containers ≤ capacity(s.topology.nodes[best_node])
+
+    return (best_links, best_cost, best_node, valid_links && valid_nodes)
+end
+
+function insert_sorted!(w, val, it = iterate(w))
+    while it !== nothing
+        (elt, state) = it
+        if elt.occ ≥ val.occ
+            insert!(w, state - 1, val)
+            return w
+        end
+        it = iterate(w, state)
+    end
+    push!(w, val)
 end
 
 function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{false})
@@ -327,34 +356,28 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{false
         desc="Simulating with $algo at speed $speed", showspeed=true, color=:normal
     )
 
-    next_queued = nothing
-    previous_unload = nothing
-    next_unload = nothing
+    next_queued = iterate(queued)
+    previous_queued = 1
+
+    next_unload = iterate(unloads)
+    previous_unload = 1
+
     next_task = iterate(tasks)
 
     last_unload = zero(Float64)
     unchecked_unload = true
 
-    while (next_queued, next_unload, next_task) !== (nothing, nothing, nothing)
+    while ii < 2 * length(tasks)
         start_iteration = time()
 
+        next_queued = iterate(queued, previous_queued)
         if next_queued !== nothing && unchecked_unload
-            (task, ts) = next_queued
-            occ = task.first
-            u, j = task.second
+            (task, _) = next_queued
+            best_links, best_cost, best_node, is_valid =
+                execute_valid_load(s, task, g, capacities, state, algo, demands)
 
-            nodes = s.topology.nodes
-            links = s.topology.links
-            bs = inner_queue(g, u, j, nodes, capacities, state, algo; links, demands)
-            best_links, best_cost, best_node = bs
-
-            compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
-            valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
-            valid_nodes = state.nodes[best_node] + j.containers ≤ capacity(s.topology.nodes[best_node])
-
-            if valid_links && valid_nodes
-                ii += 1
-
+            if is_valid
+                j = task.job
                 # Add load
                 add_load!(state, best_links, j.containers, best_node, n)
 
@@ -362,50 +385,62 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{false
                 push_snap!(snapshots, state, 0, 0, 0, 0, last_unload, n)
 
                 # Assign unload
-                unload_time = occ + j.duration
-                push!(unloads, unload_time => (best_node, j.containers, best_links))
-                isempty(unloads) && (previous_unload = iterate(unloads))
+                unload = Unload(task.occ + j.duration, best_node, j.containers, best_links)
+                insert_sorted!(unloads, unload, next_unload)
 
                 # Advance iterator
-                next_queued = iterate(queued, ts)
+                previous_queued += 1
+                ii += 1
+                ProgressMeter.update!(p, ii)
                 continue
             else
                 unchecked_unload = false
             end
         end
 
-        if next_unload === nothing && previous_unload !== nothing
-            next_unload = iterate(unloads, previous_unload)
-        end
-
+        next_unload = iterate(unloads, previous_unload)
         if next_unload !== nothing
-            (unload, us) = next_unload
-            (task, _) = next_task
+            (unload, _) = next_unload
 
-            unload_time = unload.first
-            task_occ = task.first
-
-            if unload_time ≤ task_occ
-                ii += 1
-
-                v, c, ls = unload.second
+            if next_task === nothing || unload.occ ≤ next_task[1].occ
+                v, c, ls = unload.node, unload.vload, unload.lloads
                 rem_load!(state, ls, c, v, n)
-                push_snap!(snapshots, state, 0, 0, 0, 0, unload_time, n)
+                push_snap!(snapshots, state, 0, 0, 0, 0, unload.occ, n)
 
-                previous_unload = next_unload
-                next_unload = iterate(unloads, us)
-
+                previous_unload += 1
                 unchecked_unload = true
+                last_unload = unload.occ
+
+                ii += 1
+                ProgressMeter.update!(p, ii)
                 continue
             end
         end
 
-        (task, _) = next_task
-        task_occ = task.first
-        while next_task
+        # Nothing can be unload or exexecuted from the queue => load new task
+        (task, ts) = next_task
+        best_links, best_cost, best_node, is_valid =
+            execute_valid_load(s, task, g, capacities, state, algo, demands)
+        if is_valid
+            ii += 1
+            j= task.job
 
+            # Add load
+            add_load!(state, best_links, j.containers, best_node, n)
+
+            # Snap new state
+            push_snap!(snapshots, state, 0, 0, 0, 0, last_unload, n)
+
+            # Assign unload
+            unload = Unload(task.occ + j.duration, best_node, j.containers, best_links)
+            insert_sorted!(unloads, unload, next_unload)
+        else
+            unchecked_unload = false
+            push!(queued, task)
         end
 
+        # Advance iterator
+        next_task = iterate(tasks, ts)
         ProgressMeter.update!(p, ii)
     end
     return nothing
