@@ -80,23 +80,28 @@ function make_users(n::Int, rate, locations, jd, data)
     return users
 end
 
-function make_users(users::Vector{User{R}}, ::Float64, locations, ::Any, data) where {R}
-    _users = Dictionary{Int,User{R}}()
-    for (i, u) in enumerate(users)
-        set!(_users, i, u)
+function make_users(users, locations, data)
+    _users = Dictionary(users)
+    for i in 1:length(users)
         set!(data, i, Data(rand(locations)))
     end
     return _users
 end
 
-function scenario(;
-    duration,
-    links=nothing,
-    nodes,
-    users,
-    job_distribution,
-    request_rate
-)
+function scenario(duration, links, nodes, users)
+    _nodes = make_nodes(nodes)
+    _links = isnothing(links) ? make_links(links, length(_nodes)) : make_links(links)
+    _data = Dictionary{Int,Data}()
+    locations = 1:length(_nodes)
+
+    _users = make_users(users, locations, _data)
+
+    topo = Topology(_nodes, _links)
+
+    return Scenario(_data, duration, topo, _users)
+end
+
+function scenario(duration, links, nodes, users, job_distribution, request_rate)
     _nodes = make_nodes(nodes)
     _links = isnothing(links) ? make_links(links, length(_nodes)) : make_links(links)
     _data = Dictionary{Int,Data}()
@@ -106,9 +111,22 @@ function scenario(;
 
     topo = Topology(_nodes, _links)
 
-    # @info "Topology" topo.nodes topo.links graph(topo, ShortestPath())
-
     return Scenario(_data, duration, topo, _users)
+end
+
+function scenario(;
+    duration,
+    links=nothing,
+    nodes,
+    users,
+    job_distribution = nothing,
+    request_rate=nothing,
+)
+    if job_distribution === nothing || request_rate === nothing
+        scenario(duration, links, nodes, users)
+    else
+        scenario(duration, links, nodes, users, job_distribution, request_rate)
+    end
 end
 
 function make_df(s::Scenario; verbose=true)
@@ -148,18 +166,10 @@ const SCENARII = Dict(
     :four_nodes => scenario(;
         duration=399,
         nodes=(4, 100),
-        job_distribution=Dict(
-            :backend => 0:0,
-            :container => 1:1,
-            :data_location => 1:4,
-            :duration => 400:400,
-            :frontend => 0:0,
-        ),
         users=[
             user(Job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4); start=200.0, stop=299.0)
             user(Job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4);)
         ],
-        request_rate=1.0
     ),
     :square => scenario(;
         duration=399,
