@@ -1,8 +1,8 @@
-struct Scenario{N<:AbstractNode,L<:AbstractLink}
+struct Scenario{N<:AbstractNode,L<:AbstractLink,R<:AbstractRequests}
     data::Dictionary{Int,Data}
     duration::Int
     topology::Topology{N,L}
-    users::Dictionary{Int,User}
+    users::Dictionary{Int,User{R}}
 end
 
 function make_nodes(nodes)
@@ -72,16 +72,16 @@ make_links(n::Int, c) = make_links(Iterators.product(1:n, 1:n), c)
 make_links(x::Tuple) = make_links(x...)
 
 function make_users(n::Int, rate, locations, jd, data)
-    users = Dictionary{Int,User}()
+    users = Dictionary{Int,User{PeriodicRequests{Job}}}()
     for i in 1:n
-        set!(users, i, user(rate, rand(locations), jd))
+        set!(users, i, periodic_user(rate, locations, jd))
         set!(data, i, Data(rand(locations)))
     end
     return users
 end
 
 function make_users(users::Vector{User{R}}, ::Float64, locations, ::Any, data) where {R}
-    _users = Dictionary{Int,U}()
+    _users = Dictionary{Int,User{R}}()
     for (i, u) in enumerate(users)
         set!(_users, i, u)
         set!(data, i, Data(rand(locations)))
