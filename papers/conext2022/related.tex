@@ -1,3 +1,17 @@
+Congestion pricing and smart data pricing for networking have been
+exteneively studied~\cite{Sen-2013}.
+Early work in 1994 includes
+congestion pricing by Murphy {\em et al.}~\cite{Murphy94distributedpricing},
+and auction-based resource allocation by
+MacKie-Mason {\em et al.}~\cite{pricing-internet-1994}.
+Kelly {\em et al.}~\cite{Kelly-1998} framed congestion pricing in an
+optimization framework for fair allocation, which inspired a large
+number of the following
+work~\cite{gibbens1999resource,Henderson2001,Briscoe2003-M3I}.
+
+Congestion pricing are also applied to cloud computing:
+For cloud computing services~\cite{Wang-hotcloud2010,Kilcioglu-SIGMETRICS2015},
+For cloud computing spot instances~\cite{Song-INFOCOM2017}.
 
 Resource allocation for Edge Computing or Micro Data Centers:
 Most approaches use some form of optimization and many employ auction
@@ -5,40 +19,38 @@ models.
 Zhang {\em et al.}~\cite{Xu2017-zenith,Zhang2017-VMauction}
 proposed an online primal-dual optimization for VM auction in IaaS
 clouds for welfare and profit maximization.
+Distributed resource management for microservices~\cite{Suresh-SOA-SOCC2017}.
+load balancing within a data center\cite{Rikhtegar2021BiTEAD}.
+pricing used for load-balancing in clouds\cite{Song-2014,Ren-2017}.
+
 The work by Xu {\em et al.}~\cite{Xu2017-zenith} is similar to ours in
 separating the cloud infrastructure service from the cloud service for
 micro datacenters, but an auction model is proposed for resource
 allocation.
-Distributed resource management for microservices~\cite{Suresh-SOA-SOCC2017}.
-
-Congestion pricing for networking:
-congestion pricing and smart data pricing have been
-studied~\cite{pricing-internet-1994,Kelly-1998,gibbens1999resource,Henderson2001,Sen-2013}.
-a dynamic pricing model for QoS was implemented by the
-Market Managed Multiservice Internet (M3I) project~\cite{Briscoe2003-M3I}.
-for cloud computing services\cite{Wang-hotcloud2010,Kilcioglu-SIGMETRICS2015},
-for cloud computing spot instances\cite{Song-INFOCOM2017}.
-a genetic algorithm is used in\cite{Macias-SAC2011}.
-
-Wagner {\em et al.}~\cite{Wagner-2012} developed a Nash
-Bargaining–based congestion pricing mechanism in a military network
-setting to distribute jobs across multiple computing clusters for fair
-load balancing while using redundancy in job replication to provide
-reliability. The goals of manageability, complexity, and
-implementability can also conflict; measures to make network traffic
-manageable usually introduce some system complexity and implementation
-challenges.
-
-load balancing within a data center\cite{Rikhtegar2021BiTEAD}.
-
-pricing used for load-balancing in clouds\cite{Song-2014,Ren-2017}.
 
 Exponential cost growth as a function of load is well known in packet
 switching networks (e.g., M/M/1 queue and CSMA/CD Ethernet).
 We have modified it to make it convex for idle resource pooling, and
-exploit it as the pseudo cost function.
+exploit it in the pseudo cost function.
+A similar idea was found in \cite{Murphy94distributedpricing} where
+Murphy {\em et al.} used the cost function for distributed bandwidth
+allocation in ATM networks in 1994.
+Their cost function is similar to our monotonic cost function, and
+their simple cost minimizing allocation algorithm is also somewhat
+similar to our allocation model.
 
-data migration\cite{Pu2015-geodistdata}.
-distributed data store\cite{Shima2012,Tahoe-2008}.
+A system model similar to ours is found in~\cite{Wagner-2012} where
+Wagner {\em et al.} used congestion pricing for resilient job
+allocation in a distributed millitary cloud.  They used a
+game-theoretic resource allocation method based on Nash Bargaining,
+and developed a Hadoop-based prototype system.
+
+We were inspired by the concet of micro cloud services to apply packet
+switching techniques to distributed heterogeneous clouds.
+To the best of our knowledge, our work is unique in using a convex
+cost function for idle resource pooling.
+
+%%data migration\cite{Pu2015-geodistdata}.
+%%distributed data store\cite{Shima2012,Tahoe-2008}.
 
 
