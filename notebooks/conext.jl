@@ -57,7 +57,7 @@ df1
 # ╔═╡ b4576a3c-823f-479b-b940-6fb60c824e35
 # ╠═╡ show_logs = false
 begin	
-    p1_1 = @df df1 plot(:instant, cols(6:9),
+    p1_1 = @df df1 plot(cols(6:9),
 		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
@@ -118,15 +118,10 @@ end
 four_nodes_87_5_2() = scenario(;
     duration=10,
     nodes=(4, 32),
-    users=1,
-    job_distribution=Dict(
-        :backend => 0:0,
-        :container => 1:1,
-        :data_location => 1:4,
-        :duration => 1:1,
-        :frontend => 0:0,
-    ),
-    request_rate=1.0/50
+    users=[
+		KuMo.user(KuMo.Job(0, 1, rand(1:4), 1, 0), 1.0/50, rand(1:4); start=4.01, stop=6.)
+        KuMo.user(KuMo.Job(0, 1, rand(1:4), 1, 0), 1.0/50, rand(1:4);)
+	]
 )
 
 # ╔═╡ 015b87d8-c652-41ea-8bd8-0634383afea9
@@ -168,7 +163,7 @@ begin
 	savefig(p1_2, "nodes-only-saturated-load_area.pdf")
 	savefig(p2_1, "4nodes-high-duration_lines.pdf")
 	savefig(p2_2, "4nodes-high-duration_area.pdf")
-	savefig(p2_2_1_1, "4nodes-low-duration_lines.pdf")
+	savefig(p2_2_1, "4nodes-low-duration_lines.pdf")
 	savefig(p2_2_2, "4nodes-low-duration_area.pdf")
 end
 
@@ -316,7 +311,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-KuMo = "~0.1.11"
+KuMo = "~0.1.12"
 PGFPlotsX = "~1.5.0"
 Plots = "~1.29.1"
 StatsPlots = "~0.14.34"
@@ -328,7 +323,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "fd74a2874c00c6bca21f1f9ebe0391c78cb69084"
+project_hash = "fec570e370694c1ca04e763b95e01f138dd63dc3"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -867,9 +862,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "bbd234df8e9c5362291bda5e6eae71447146ae37"
+git-tree-sha1 = "498883064f4be0560281da44cb05aefb61c4841f"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.11"
+version = "0.1.12"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]

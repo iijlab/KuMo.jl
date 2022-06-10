@@ -18,6 +18,8 @@ function job_distributions(;backend, container, data_locations, duration, fronte
     )
 end
 
+job(x...) = Job(x...)
+
 function rand_job(jd)
     return Job(
         round(rand(jd[:backend])),

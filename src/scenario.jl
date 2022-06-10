@@ -165,9 +165,9 @@ end
 const SCENARII = Dict(
     :four_nodes => scenario(;
         duration=399,
-        nodes=(4, 100),
+        nodes=(4, 125),
         users=[
-            user(Job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4); start=200.0, stop=299.0)
+            user(Job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4); start=200.5, stop=299.5)
             user(Job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4);)
         ],
     ),

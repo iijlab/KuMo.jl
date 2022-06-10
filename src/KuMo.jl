@@ -18,6 +18,7 @@ using SimpleTraits
 using SparseArrays
 
 # SECTION - exports
+export job
 export job_distributions
 export make_df
 export make_nodes
@@ -27,6 +28,7 @@ export predict_best_cost
 export pseudo_cost
 export scenario
 export simulate
+export user
 
 export MinCostFlow
 export ShortestPath
