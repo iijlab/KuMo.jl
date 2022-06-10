@@ -51,9 +51,6 @@ Plots after that takes the time of allocation/deallocation as parameter.
 # Simulation
 times, df1, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); speed=0);
 
-# ╔═╡ d05b4c49-7c68-445a-ad8e-018058f5e69b
-df1
-
 # ╔═╡ b4576a3c-823f-479b-b940-6fb60c824e35
 # ╠═╡ show_logs = false
 begin	
@@ -316,7 +313,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-KuMo = "~0.1.11"
+KuMo = "~0.1.10"
 PGFPlotsX = "~1.5.0"
 Plots = "~1.29.1"
 StatsPlots = "~0.14.34"
@@ -328,7 +325,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "fd74a2874c00c6bca21f1f9ebe0391c78cb69084"
+project_hash = "fec570e370694c1ca04e763b95e01f138dd63dc3"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -867,9 +864,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "bbd234df8e9c5362291bda5e6eae71447146ae37"
+git-tree-sha1 = "dc74580ea02d780d4c2453f9e836998ef718890e"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.11"
+version = "0.1.10"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1686,7 +1683,6 @@ version = "0.9.1+5"
 # ╠═bc72d307-12f7-47c6-b90a-062814186978
 # ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
 # ╠═698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
-# ╠═d05b4c49-7c68-445a-ad8e-018058f5e69b
 # ╠═b4576a3c-823f-479b-b940-6fb60c824e35
 # ╠═0f54d3d2-3908-4b6f-9499-fa1d47531a1f
 # ╠═12169dd2-6ea2-43a3-b6fd-94d55e23a568

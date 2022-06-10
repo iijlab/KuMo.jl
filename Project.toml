@@ -1,7 +1,7 @@
 name = "KuMo"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
 authors = ["azzaare <jf@baffier.fr> and contributors"]
-version = "0.1.11"
+version = "0.1.12"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

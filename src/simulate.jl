@@ -212,7 +212,7 @@ function init_simulate(s, algo, tasks, start)
         t0 = max(jr.start, 0.0)
         t1 = min(jr.stop, s.duration)
 
-        foreach(occ -> push!(tasks, Load(occ, u.location, j)), t0:p:t1)
+        foreach(occ -> insert_sorted!(tasks, Load(occ, u.location, j)), t0:p:t1)
     end
 
     push!(times, "start_tasks" => time() - start)
