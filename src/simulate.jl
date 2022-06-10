@@ -52,7 +52,7 @@ end
 
 function inner_queue(
     g, u, j, nodes, capacities, state, algo::MinCostFlow;
-    lck = ReentrantLock(), demands, links = nothing,
+    lck=ReentrantLock(), demands, links=nothing
 )
     nvtx = nv(g)
 
@@ -123,7 +123,7 @@ end
 
 function inner_queue(
     g, u, j, nodes, capacities, state, ::ShortestPath;
-    lck = ReentrantLock(), demands = nothing, links,
+    lck=ReentrantLock(), demands=nothing, links
 )
     nvtx = nv(g)
     best_links = spzeros(nvtx, nvtx)
@@ -209,8 +209,10 @@ function init_simulate(s, algo, tasks, start)
         jr = u.job_requests
         j = jr.job
         p = jr.period
+        t0 = max(jr.start, 0.0)
+        t1 = min(jr.stop, s.duration)
 
-        foreach(occ -> push!(tasks, Load(occ, u.location, j)), 0:p:s.duration)
+        foreach(occ -> push!(tasks, Load(occ, u.location, j)), t0:p:t1)
     end
 
     push!(times, "start_tasks" => time() - start)
@@ -257,7 +259,7 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)
         is_valid = false
 
         while !is_valid
-            best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, capacities, state,algo; links = s.topology.links, lck, demands)
+            best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, capacities, state, algo; links=s.topology.links, lck, demands)
 
             n = nv(g) - vtx(algo)
 
@@ -325,7 +327,7 @@ function execute_valid_load(s, task, g, capacities, state, algo, demands)
     links = s.topology.links
     best_links, best_cost, best_node = inner_queue(
         g, u, j, nodes, capacities, state, algo;
-        links, demands,
+        links, demands
     )
 
     compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
@@ -336,7 +338,7 @@ function execute_valid_load(s, task, g, capacities, state, algo, demands)
     return (best_links, best_cost, best_node, valid_links && valid_nodes)
 end
 
-function insert_sorted!(w, val, it = iterate(w))
+function insert_sorted!(w, val, it=iterate(w))
     while it !== nothing
         (elt, state) = it
         if elt.occ ≥ val.occ
@@ -427,7 +429,7 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{0})
             execute_valid_load(s, task, g, capacities, state, algo, demands)
         if is_valid
             ii += 1
-            j= task.job
+            j = task.job
 
             # Add load
             add_load!(state, best_links, j.containers, best_node, n)
