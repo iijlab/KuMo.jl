@@ -71,6 +71,24 @@ make_links(n::Int, c) = make_links(Iterators.product(1:n, 1:n), c)
 
 make_links(x::Tuple) = make_links(x...)
 
+function make_users(n::Int, rate, locations, jd, data)
+    users = Dictionary{Int,User}()
+    for i in 1:n
+        set!(users, i, user(rate, rand(locations), jd))
+        set!(data, i, Data(rand(locations)))
+    end
+    return users
+end
+
+function make_users(users::Vector{User{R}}, ::Float64, locations, ::Any, data) where {R}
+    _users = Dictionary{Int,U}()
+    for (i, u) in enumerate(users)
+        set!(_users, i, u)
+        set!(data, i, Data(rand(locations)))
+    end
+    return _users
+end
+
 function scenario(;
     duration,
     links=nothing,
@@ -81,16 +99,10 @@ function scenario(;
 )
     _nodes = make_nodes(nodes)
     _links = isnothing(links) ? make_links(links, length(_nodes)) : make_links(links)
-
-    _users = Dictionary{Int,User}()
     _data = Dictionary{Int,Data}()
-
     locations = 1:length(_nodes)
 
-    for i in 1:users
-        set!(_users, i, user(request_rate, rand(locations), job_distribution))
-        set!(_data, i, Data(rand(locations)))
-    end
+    _users = make_users(users, request_rate, locations, job_distribution, _data)
 
     topo = Topology(_nodes, _links)
 
@@ -136,7 +148,6 @@ const SCENARII = Dict(
     :four_nodes => scenario(;
         duration=399,
         nodes=(4, 100),
-        users=1,
         job_distribution=Dict(
             :backend => 0:0,
             :container => 1:1,
@@ -144,6 +155,10 @@ const SCENARII = Dict(
             :duration => 400:400,
             :frontend => 0:0,
         ),
+        users=[
+            user(Job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4); start=200.0, stop=299.0)
+            user(Job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4);)
+        ],
         request_rate=1.0
     ),
     :square => scenario(;
