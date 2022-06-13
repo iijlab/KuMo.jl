@@ -74,7 +74,7 @@ make_links(x::Tuple) = make_links(x...)
 function make_users(n::Int, rate, locations, jd, data)
     users = Dictionary{Int,User{PeriodicRequests{Job}}}()
     for i in 1:n
-        set!(users, i, periodic_user(rate, locations, jd))
+        set!(users, i, user(jd, rate, locations))
         set!(data, i, Data(rand(locations)))
     end
     return users
@@ -119,8 +119,8 @@ function scenario(;
     links=nothing,
     nodes,
     users,
-    job_distribution = nothing,
-    request_rate=nothing,
+    job_distribution=nothing,
+    request_rate=nothing
 )
     if job_distribution === nothing || request_rate === nothing
         scenario(duration, links, nodes, users)
@@ -163,13 +163,20 @@ function make_df(s::Scenario; verbose=true)
 end
 
 const SCENARII = Dict(
+    :four_nodes_four_users => scenario(;
+        duration=399,
+        nodes=(4, 125),
+        users=[
+            user(requests(job(0, 1, rand(1:4), 1, 0), 10, Normal(5, 1), 0, 10), rand(1:4);)
+        ]
+    ),
     :four_nodes => scenario(;
         duration=399,
         nodes=(4, 125),
         users=[
-            user(Job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4); start=200.5, stop=299.5)
-            user(Job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4);)
-        ],
+            user(job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4); start=200.5, stop=299.5)
+            user(job(0, 1, rand(1:4), 400, 0), 1.0, rand(1:4);)
+        ]
     ),
     :square => scenario(;
         duration=399,
