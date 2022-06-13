@@ -184,6 +184,34 @@ begin
     );
 end
 
+# ╔═╡ e2144b8b-6b09-4f99-8bf3-819d0a7704f1
+scenario5() = scenario(;
+    duration=1,
+    nodes=(4, 32),
+    users=[
+		# user 1
+        user(job(0, 1, rand(1:4), 1, 0), 1/5, rand(1:4);)
+	]
+	
+)
+
+# ╔═╡ 2cbf7ae8-e160-48dc-b48d-8482480504d0
+# ╠═╡ show_logs = false
+# Simulation
+_, df5, _ = simulate(scenario5(), ShortestPath(); speed=0);
+
+# ╔═╡ 19c37de2-e11f-4602-9d97-4c7d33c7cb1d
+df5
+
+# ╔═╡ c9c4a2e5-0559-4dd1-b887-d02456809af5
+# Line plot
+begin
+    p5_line = @df df5 plot(cols(6:9),
+		legend=:none, tex_output_standalone=true, xlabel="time", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+end
+
 # ╔═╡ 73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 begin
 	# Save figures
@@ -225,18 +253,18 @@ square_full_load() = scenario(;
 # ╔═╡ 9ba5c4d2-6197-46ab-a2b6-ff81dd5175d5
 # ╠═╡ show_logs = false
 # Simulation
-_, df5, _ = simulate(square_full_load(), ShortestPath(); speed=0);
+_, df6, _ = simulate(square_full_load(), ShortestPath(); speed=0);
 
 # ╔═╡ 23e7e6df-1a7a-4f59-8654-7dd73aa73939
 # ╠═╡ show_logs = false
 # Line plot
 begin
-    p3_1 = @df df5 plot(:instant,
+    p3_1 = @df df6 plot(:instant,
         cols(6:9), tex_output_standalone=true, xlabel="time",
         ylabel="load", title="Resources allocations using basic pseudo-cost functions",
         w=1.25,
     );
-	p3_2 = @df df5 plot(:instant,
+	p3_2 = @df df6 plot(:instant,
         cols(10:17), tex_output_standalone=true, xlabel="time",
         ylabel="load",
         w=1.25,
@@ -247,12 +275,12 @@ end
 # ╔═╡ 52e4d1d9-e4fb-4fab-8425-252f17d11f2d
 # Area plot
 begin
-    p3_3 = @df df5 areaplot(:instant,
+    p3_3 = @df df6 areaplot(:instant,
         cols(6:9), tex_output_standalone=true, xlabel="time",
         ylabel="load", title="Resources allocations using basic pseudo-cost functions",
         w=1.25,
     );
-	p3_4 = @df df5 areaplot(:instant,
+	p3_4 = @df df6 areaplot(:instant,
         cols(10:17), tex_output_standalone=true, xlabel="time",
         ylabel="load",
         w=1.25,
@@ -341,7 +369,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-KuMo = "~0.1.13"
+KuMo = "~0.1.15"
 PGFPlotsX = "~1.5.0"
 Plots = "~1.29.1"
 StatsPlots = "~0.14.34"
@@ -892,9 +920,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "3db50760392ba3eac95428ac3d7e7eb9782a0ef3"
+git-tree-sha1 = "f3c75dd806122b1f9663ff870d0ac6c9bb382612"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.13"
+version = "0.1.15"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1725,6 +1753,10 @@ version = "0.9.1+5"
 # ╠═63f15cd5-fb1b-4f74-a287-8e2265ad5d9e
 # ╠═9f7add45-1e75-48ee-8a64-eaad266ddf94
 # ╠═187a9ba4-3cba-44ff-98e1-f4a3369e672a
+# ╠═e2144b8b-6b09-4f99-8bf3-819d0a7704f1
+# ╠═2cbf7ae8-e160-48dc-b48d-8482480504d0
+# ╠═19c37de2-e11f-4602-9d97-4c7d33c7cb1d
+# ╠═c9c4a2e5-0559-4dd1-b887-d02456809af5
 # ╠═73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 # ╟─101246ef-1753-4174-ab16-109b425adbec
 # ╠═1c7238b6-6a2c-4123-8f9b-061820e74c98
