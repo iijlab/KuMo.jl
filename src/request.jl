@@ -14,19 +14,24 @@ struct Request{J<:AbstractJob}
     start::Float64
 end
 
-struct Resquests{J<:AbstractJob} <: AbstractRequests
-    requests::Vector{Requests}
+struct Requests{J<:AbstractJob} <: AbstractRequests
+    requests::Vector{Request{J}}
 end
 
-function make_requests(pr::PeriodicRequests)
+function requests(pr::PeriodicRequests)
     return map(t -> Request(pr.job, t), pr.start:pr.period:pr.stop)
 end
 
-make_requests(r::Request) = Requests([r])
+requests(r::Request) = Requests([r])
 
-make_requests(r::Requests) = r
+requests(r::Requests) = r
 
-function make_requests(requests_lst...)
+function requests(j::Job, n::Int, d::UnivariateDistribution, lower::Real, upper::Real)
+    dtrunc = truncated(d; lower, upper)
+    return Requests(map(_ -> Request(j, rand(dtrunc)), 1:n))
+end
+
+function requests(requests_lst...)
     UT = Union{map(r -> first(typeof(r).parameters), requests_lst)...}
     reqs = Requests(Vector{UT}())
     foreach(r -> push!(reqs.requests, r), Iterators.flatten(requests_lst))

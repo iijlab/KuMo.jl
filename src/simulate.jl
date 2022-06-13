@@ -201,19 +201,25 @@ function init_simulate(::Val)
     return tasks, c
 end
 
+function init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
+    jr = u.job_requests
+    j = jr.job
+    p = jr.period
+    t0 = max(jr.start, 0.0)
+    t1 = min(jr.stop, s.duration)
+
+    foreach(occ -> insert_sorted!(tasks, Load(occ, u.location, j)), t0:p:t1)
+end
+
+function init_user(::Scenario, u::User, tasks, ::Requests)
+    foreach(r -> insert_sorted!(tasks, Load(r.start, u.location, r.job)), u.job_requests.requests)
+end
+
 function init_simulate(s, algo, tasks, start)
     times = Dict{String,Float64}()
     snapshots = Vector{SnapShot}()
 
-    for u in s.users
-        jr = u.job_requests
-        j = jr.job
-        p = jr.period
-        t0 = max(jr.start, 0.0)
-        t1 = min(jr.stop, s.duration)
-
-        foreach(occ -> insert_sorted!(tasks, Load(occ, u.location, j)), t0:p:t1)
-    end
+    foreach(u -> init_user(s, u, tasks, u.job_requests), s.users)
 
     push!(times, "start_tasks" => time() - start)
     g, capacities = graph(s.topology, algo)

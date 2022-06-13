@@ -11,7 +11,7 @@ function user(job, period, loc; start=-Inf, stop=Inf)
     return user(PeriodicRequests(job, period; start, stop), loc)
 end
 
-function periodic_user(period, loc, job_distributions; start=-Inf, stop=Inf)
+function user(job_distributions::Dict, period, loc; start=-Inf, stop=Inf)
     jr = PeriodicRequests(rand_job(job_distributions), period; start, stop)
     return user(jr, loc)
 end
