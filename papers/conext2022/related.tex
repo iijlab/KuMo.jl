@@ -1,9 +1,9 @@
 Congestion pricing and smart data pricing for networking have been
 exteneively studied~\cite{Sen-2013}.
-Early work in 1994 includes
-congestion pricing by Murphy {\em et al.}~\cite{Murphy94distributedpricing},
+Early work includes congestion pricing by
+Murphy {\em et al.}~\cite{Murphy94distributedpricing},
 and auction-based resource allocation by
-MacKie-Mason {\em et al.}~\cite{pricing-internet-1994}.
+MacKie-Mason {\em et al.}~\cite{pricing-internet-1994}, both in 1994.
 Kelly {\em et al.}~\cite{Kelly-1998} framed congestion pricing in an
 optimization framework for fair allocation, which inspired a large
 number of the following
@@ -23,20 +23,20 @@ Distributed resource management for microservices~\cite{Suresh-SOA-SOCC2017}.
 load balancing within a data center\cite{Rikhtegar2021BiTEAD}.
 pricing used for load-balancing in clouds\cite{Song-2014,Ren-2017}.
 
-The work by Xu {\em et al.}~\cite{Xu2017-zenith} is similar to ours in
-separating the cloud infrastructure service from the cloud service for
-micro datacenters, but an auction model is proposed for resource
-allocation.
+Xu {\em et al.}~\cite{Xu2017-zenith} proposed the edge computing
+infrastructure layer similar to ours, separating the cloud
+infrastructure service from the cloud service for micro datacenters,
+but an auction model is proposed for resource allocation.
 
 Exponential cost growth as a function of load is well known in packet
 switching networks (e.g., M/M/1 queue and CSMA/CD Ethernet).
 We have modified it to make it convex for idle resource pooling, and
 exploit it in the pseudo cost function.
 A similar idea was found in \cite{Murphy94distributedpricing} where
-Murphy {\em et al.} used the cost function for distributed bandwidth
+Murphy {\em et al.} used a cost function for distributed bandwidth
 allocation in ATM networks in 1994.
-Their cost function is similar to our monotonic cost function, and
-their simple cost minimizing allocation algorithm is also somewhat
+Their cost function is a barrier function for utility optimization
+and their simple cost minimizing allocation algorithm is also somewhat
 similar to our allocation model.
 
 A system model similar to ours is found in~\cite{Wagner-2012} where
@@ -45,8 +45,9 @@ allocation in a distributed millitary cloud.  They used a
 game-theoretic resource allocation method based on Nash Bargaining,
 and developed a Hadoop-based prototype system.
 
-We were inspired by the concet of micro cloud services to apply packet
-switching techniques to distributed heterogeneous clouds.
+We were inspired by the concept of micro cloud services to apply packet
+switching techniques to distributed heterogeneous clouds, and have
+revisited congestion pricing.
 To the best of our knowledge, our work is unique in using a convex
 cost function for idle resource pooling.
 

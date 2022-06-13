@@ -60,10 +60,24 @@ location and, as the usage pattern changes, the service instance also
 transforms the locations of the resources and their connections.
 
 For examples, an interactive task will follow the user when the user
-moves, while a data intensive task will stay close
-to the data regardless of the user location. As a result, services are
-inherently fault-tolerant and resilient against outages or disasters
-since jobs on faulty resources are automatically relocated.
+moves, while a data intensive task will stay close to the data
+regardless of the user location.
+Edge computing is automatically formed using resources close to
+the users.
+As a result, services are inherently fault-tolerant and resilient
+against outages or disasters since faulty resources are
+automatically evicted from the resource pool.
+
+The physical resource management becomes simpler, as a physical node
+can be easily added to or deleted from the resource pool.
+When there is a consistent hotspot, it can be alleviated or solved by
+placing new resources close to the location.
+
+Diverse resources would be owned and managed by different parties.
+It requires loose management of resources, as small parties cannot
+afford dedicated skilled operators.
+The utilization of each resource needs to be easily manipulated,
+without affecting the stability of the system.
 
 To realize such systems, it requires various technical advances across
 many fields.  Among other things, new resource management model is
@@ -88,24 +102,19 @@ needed.
 Resource allocation in distributed clouds is a non-trivial
 optimization problem, and it is even harder when distributed
 management is assumed.
-Diverse resources would be owned and managed by different parties.
-It requires loose management of resources, as small parties cannot
-afford dedicated skilled operators.
-The utilization of each resource needs to be easily manipulated,
-without affecting the stability of the system.
 
 %% our idea: use congestion pricing mechanism for automatic load management
 To this end, we employ dynamic pricing for decentralized resource
 allocation which works as backpressure against congestion.
 By design, serious congestion never happens in the system.
 
-We use pseudo pricing for manipulating resource allocation.
-Here, pseudo price is not an actual monetary charge but used to
+We use pseudo cost for manipulating resource allocation.
+Here, pseudo cost is not an actual monetary charge but it is used to
 control resource utilization.
 
 There exist a large body of literature formulating resource allocation
 as optimization problems.
-In this paper, we use terms and tools borrowed from optimization
+In this paper, we use terms and expressions borrowed from optimization
 theory. Our goal is, however, not to pursue theoretical optimum
 allocations, but to present a practical feedback control model for
 distributed resource management.

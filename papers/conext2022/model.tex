@@ -10,8 +10,11 @@ location.
 %% model: cost function: congestion pricing combined with idle resource pooling
 The proposed model is based on congestion pricing in which the cost of
 a resource dynamically changes according to the load of the resource.
+It works as a barrier function for optimization; the capacity
+constraint is enforced by a penelizing cost when approaching the full
+capacity.
 
-Another key idea is idle resource pooling that tries to put resources
+Another key idea is {\em idle resource pooling} that tries to put resources
 into idle state as much as possible for energy saving.
 
 The model employs convex pseudo cost functions that combines congestion
@@ -50,14 +53,14 @@ the load approaches $1$.
 The behavior of the pseudo cost function is illustrated by the
 following examples.
 
-Assume a pool of equivalent resources with the standard pseudo cost
+Assume a pool of four equivalent resources with the standard pseudo cost
 function (Figure \ref{fig:std_costfunc}).
 Also, assume that micro jobs are continuously assigned to the
 system; each micro job is much smaller than the capacity of a
 resource.
 
 The initial system load $\sum \rho$ is $0$, and gradually increased
-up to $2.0$, here, load $1.0$ is the capacity of a single resource.
+up to $3.5$, here, load $1.0$ is the capacity of a single resource.
 Initially, all resources in the pool are idle, and their costs are
 all $f(0)= 2$.
 First, one resource $r_{0}$ is randomly selected for allocation, and its
@@ -70,15 +73,17 @@ allocation so that both loads move towards $\rho_{0} = \rho_{1} = .5$,
 where both are balanced.
 Both loads rise again until $\rho_{r_{0}} = \rho_{r_{1}} = .75$,
 where the third resource $r_{2}$ kicks in.
-When $\sum \rho$ reaches $2.0$, $\rho_{r_{0}} = \rho_{r_{1}} = \rho_{r_{2}} = .67$.
+It repeats for $r_{3}$, but no more idle resouce is available
+when $\sum \rho$ reaches $3.0$ so that the loads grow beyond $.75$
+up to $\sum \rho = 3.5$ with $\rho = .875$ for each.
 
 When the system load decreases, the process is reversed.
-Assume the system load is gradually decreased from $2.0$.
-After reaching $\rho_{r_{0}} = \rho_{r_{1}} = \rho_{r_{2}} = .5$,
+The system load is gradually decreased from $3.5$.
+After reaching $\rho = .5$ for all the resource,
 one resource with the lowest load $\rho < .5$ becomes more expensive
 than the others.
 This one is less preferred for subsequent assignments, and quickly
-loses the load until it becomes idle again, while the other 2 keep
+loses the load until it becomes idle again, while the other 3 keep
 $\rho = .5$. It repeats for the remaining ones.
 
 Looking at how the number of active resources changes in a coarser
@@ -93,8 +98,8 @@ idle resources as much as possible.
 
 When resources are not equal, the behavior becomes more complex, but
 the underlying mechanisms are the same.
-Let's take a look at a case of two resources with the cost ratio $1:2$,
-that is $f_{r_1{}}(\rho) = 2 f_{r_{0}}(\rho)$.
+Let's take a look at a case of four resources with the cost ratio $1:2:4:8$,
+that is $f_{r_{1}}(\rho) = 2 f_{r_{0}}(\rho)$ and $f_{r_{3}}(\rho) = 8 f_{r_{0}}(\rho)$.
 To activate $r_{1}$, the load of $r_{0}$ goes up to $.84$ to satisfy:
 $f_{r_{1}}(0) = 4 = f_{r_{0}}(.84)$.
 When $r_{1}$ is moving towards idle, the load of $r_{0}$ is $.75$ to
