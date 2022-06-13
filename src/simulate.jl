@@ -176,16 +176,13 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
         return entry
     end
 
-    if !isempty(snapshots)
-        df = DataFrame(shape_entry(first(snapshots)))
-        foreach(e -> push!(df, Dict(shape_entry(e))), snapshots[2:end])
 
-        verbose && pretty_table(describe(df))
+    df = DataFrame(shape_entry(first(snapshots)))
+    foreach(e -> push!(df, Dict(shape_entry(e))), snapshots[2:end])
 
-        return df
-    else
-        return DataFrame()
-    end
+    verbose && pretty_table(describe(df))
+
+    return df
 end
 
 function init_simulate(::Val{0})
@@ -227,6 +224,8 @@ function init_simulate(s, algo, tasks, start)
 
     state = State(nv(g))
     demands = spzeros(nv(g))
+
+    push_snap!(snapshots, state, 0, 0, 0, 0, 0, n)
 
     push!(times, "start_queue" => time() - start)
     return times, snapshots, g, capacities, n, state, demands
@@ -459,8 +458,23 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{0})
     return nothing
 end
 
+function clean(snaps)
+    snapshots = Vector{SnapShot}()
+    push!(snapshots, first(snaps))
+    instant = first(snaps).instant
+    for s in snaps[2:end]
+        if s.instant == instant
+            snapshots[end] = s
+        else
+            push!(snapshots, s)
+            instant = s.instant
+        end
+    end
+    return snapshots
+end
+
 function post_simulate(s, snapshots, verbose, output)
-    df_snaps = make_df(snapshots, s.topology; verbose)
+    df_snaps = make_df(clean(snapshots), s.topology; verbose)
     if !isempty(output)
         CSV.write(joinpath(datadir(), output), df_snaps)
         verbose && (@info "Output written in $(datadir())")
