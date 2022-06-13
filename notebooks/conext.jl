@@ -200,6 +200,9 @@ scenario5() = scenario(;
 # Simulation
 _, df5, _ = simulate(scenario5(), ShortestPath(); speed=0);
 
+# ╔═╡ 19c37de2-e11f-4602-9d97-4c7d33c7cb1d
+df5
+
 # ╔═╡ c9c4a2e5-0559-4dd1-b887-d02456809af5
 # Line plot
 begin
@@ -366,7 +369,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-KuMo = "~0.1.14"
+KuMo = "~0.1.15"
 PGFPlotsX = "~1.5.0"
 Plots = "~1.29.1"
 StatsPlots = "~0.14.34"
@@ -917,9 +920,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "343039a1d6aff5095a16eaec32c524e18c59fa58"
+git-tree-sha1 = "f3c75dd806122b1f9663ff870d0ac6c9bb382612"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.14"
+version = "0.1.15"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1752,6 +1755,7 @@ version = "0.9.1+5"
 # ╠═187a9ba4-3cba-44ff-98e1-f4a3369e672a
 # ╠═e2144b8b-6b09-4f99-8bf3-819d0a7704f1
 # ╠═2cbf7ae8-e160-48dc-b48d-8482480504d0
+# ╠═19c37de2-e11f-4602-9d97-4c7d33c7cb1d
 # ╠═c9c4a2e5-0559-4dd1-b887-d02456809af5
 # ╠═73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 # ╟─101246ef-1753-4174-ab16-109b425adbec

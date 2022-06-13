@@ -21,7 +21,7 @@ function rem_load!(state, links, containers, v, n)
     state.nodes[v] -= containers
 end
 
-struct SnapShot
+mutable struct SnapShot
     state::State
     total::Float64
     selected::Int
@@ -460,16 +460,28 @@ end
 
 function clean(snaps)
     snapshots = Vector{SnapShot}()
-    push!(snapshots, first(snaps))
-    instant = first(snaps).instant
-    for s in snaps[2:end]
-        if s.instant == instant
-            snapshots[end] = s
-        else
+    fsnap = first(snaps)
+    instant = fsnap.instant
+
+    replaced = false
+
+    for (i, s) in enumerate(snaps)
+        if s.instant != instant || isempty(snapshots)
             push!(snapshots, s)
             instant = s.instant
+        else
+            if i == 2
+                replaced = true
+            end
+            snapshots[end] = s
         end
     end
+
+    if replaced
+        fsnap.instant = fsnap.instant - snapshots[2].instant
+        pushfirst!(snapshots, fsnap)
+    end
+
     return snapshots
 end
 
