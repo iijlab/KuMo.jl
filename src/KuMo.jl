@@ -35,6 +35,16 @@ export user
 export MinCostFlow
 export ShortestPath
 
+export Link
+export FreeLink
+
+export Node
+export PremiumNode
+export EqualLoadBalancingNode
+export MultiplicativeNode
+export AdditiveNode
+export IdleStateNode
+
 export SCENARII
 
 ## SECTION - includes

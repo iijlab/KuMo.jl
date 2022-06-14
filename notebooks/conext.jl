@@ -26,19 +26,15 @@ begin
 	plot_pc
 end
 
-# ╔═╡ fed2e759-8515-4461-8f61-fa20cc43c0dd
-pc1(0.01), pc1(0.74)
-
-# ╔═╡ 714f8714-f105-4f59-b8d1-0588cf9a92ca
-pc1(0.57), pc1(0.43)
-
-# ╔═╡ d472be5d-2f5d-47f1-9d0d-3fab8d79eccb
-pseudo_cost(100, 62)
-
 # ╔═╡ 16a05a2e-3c2d-441d-8ee7-1fd0345465ec
+# ╠═╡ disabled = true
+#=╠═╡
 plot(x -> pc1(1/2 + x) - pc1(1/2 - x), 0:0.01:0.5)
+  ╠═╡ =#
 
 # ╔═╡ f4b905e6-b5a9-4326-b705-96de41251de7
+# ╠═╡ disabled = true
+#=╠═╡
 begin
 	X = 0:351
 	Y = 352:398
@@ -65,6 +61,7 @@ begin
 	savefig(plot_handmade, "pseudo_costs_handmade.pdf")
 	plot_handmade
 end
+  ╠═╡ =#
 
 # ╔═╡ bc72d307-12f7-47c6-b90a-062814186978
 # ╠═╡ disabled = true
@@ -92,7 +89,7 @@ Plots after that takes the time of allocation/deallocation as parameter.
 # ╔═╡ 698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═╡ show_logs = false
 # Simulation
-times, df1, snaps = simulate(SCENARII[:four_nodes], MinCostFlow(Ipopt.Optimizer); speed=0);
+times, df1, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); speed=0);
 
 # ╔═╡ b4576a3c-823f-479b-b940-6fb60c824e35
 # ╠═╡ show_logs = false
@@ -245,13 +242,14 @@ scenario5() = scenario(;
 )
 
 # ╔═╡ 83f8c3e1-9a29-4e86-9125-ace58b0ad794
+# ╠═╡ show_logs = false
 # Simulation
 _, df5, _ = simulate(scenario5(), ShortestPath(); speed=0);
 
 # ╔═╡ c9c4a2e5-0559-4dd1-b887-d02456809af5
 # Line plot
 begin
-    p5_line = @df df5 plot(:instant, cols(6:7),
+    p5_line = @df df5 plot(:instant, cols(6:9),
 		legend=:none, tex_output_standalone=true, xlabel="time", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
@@ -260,11 +258,32 @@ end
 # ╔═╡ 87c8322e-1a0f-4998-be7d-23eaf18820f8
 # Area plot
 begin
-    p5_area = @df df5 areaplot(:instant, cols(6:7),
+    p5_area = @df df5 areaplot(:instant, cols(6:9),
 		legend=:none, tex_output_standalone=true, xlabel="time", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
 end
+
+# ╔═╡ 971d2a6e-72bb-4875-aee7-aeab10878dec
+scenario6() = scenario(;
+    duration=100,
+    nodes=[
+        MultiplicativeNode(100, 1),
+        MultiplicativeNode(100, 2),
+        MultiplicativeNode(100, 4),
+        MultiplicativeNode(100, 8),
+    ],
+    users=[
+        # user 1
+        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); stop=34.5),
+        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=6.015, stop=39.0),
+        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=12.03, stop=43.5),
+        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=18.045, stop=48.0),
+        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=22.56, stop=52.5),
+		user(job(0, 1, rand(1:2), 2.25, 0), 0.06, rand(1:2); start=43.5, stop=61.5),
+        user(job(0, 1, rand(1:2), 2.25, 0), 0.06, rand(1:2); start=50.25, stop=59.25),
+    ]
+)
 
 # ╔═╡ 73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 begin
@@ -277,6 +296,8 @@ begin
 	savefig(p3_area, "4nodes-low-duration_area.pdf")
 	savefig(p4_line, "4nodes-low-duration_4users_lines.pdf")
 	savefig(p4_area, "4nodes-low-duration_4users_area.pdf")
+	savefig(p5_line, "4nodes-low-duration_steadyload_lines.pdf")
+	savefig(p5_area, "4nodes-low-duration_steadyload_area.pdf")
 end
 
 # ╔═╡ 101246ef-1753-4174-ab16-109b425adbec
@@ -425,7 +446,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
 Ipopt = "~1.0.2"
-KuMo = "~0.1.16"
+KuMo = "~0.1.17"
 PGFPlotsX = "~1.5.0"
 Plots = "~1.29.1"
 StatsPlots = "~0.14.34"
@@ -564,9 +585,9 @@ version = "3.18.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "0f4e115f6f34bbe43c19751c90a38b2f380637b9"
+git-tree-sha1 = "eb7f0f8307f71fac7c606984ea5fb2817275d6e4"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.11.3"
+version = "0.11.4"
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "SpecialFunctions", "Statistics", "TensorCore"]
@@ -982,9 +1003,9 @@ version = "2.1.2+0"
 
 [[deps.JuMP]]
 deps = ["Calculus", "DataStructures", "ForwardDiff", "LinearAlgebra", "MathOptInterface", "MutableArithmetics", "NaNMath", "OrderedCollections", "Printf", "SparseArrays", "SpecialFunctions"]
-git-tree-sha1 = "67740bc79baa2104aa839f24181ea8110bb4f0f8"
+git-tree-sha1 = "534adddf607222b34a0a9bba812248a487ab22b7"
 uuid = "4076af6c-e467-56ae-b986-b466b2749572"
-version = "1.1.0"
+version = "1.1.1"
 
 [[deps.KernelDensity]]
 deps = ["Distributions", "DocStringExtensions", "FFTW", "Interpolations", "StatsBase"]
@@ -994,9 +1015,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "09242d4eb917b43b7db6f096b3cc9cc594d8f8e1"
+git-tree-sha1 = "56227623db7b736c1d430a7af14bcd8fc616213d"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.16"
+version = "0.1.17"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1211,9 +1232,9 @@ version = "0.5.1"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
-git-tree-sha1 = "b4975062de00106132d0b01b5962c09f7db7d880"
+git-tree-sha1 = "ec2e30596282d722f018ae784b7f44f3b88065e4"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.12.5"
+version = "1.12.6"
 
 [[deps.Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1286,9 +1307,9 @@ version = "0.12.3"
 
 [[deps.Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "1285416549ccfcdf0c50d4997a94331e88d68413"
+git-tree-sha1 = "0044b23da09b5608b4ecacb4e5e6c6332f833a7e"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.3.1"
+version = "2.3.2"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1828,9 +1849,6 @@ version = "0.9.1+5"
 # ╟─d3221f99-adcc-457c-82f5-95aaa2a9e197
 # ╠═61189540-e578-11ec-3030-c3ebb611c28b
 # ╠═21639215-1463-46ff-80a0-f1f2028c7558
-# ╠═fed2e759-8515-4461-8f61-fa20cc43c0dd
-# ╠═714f8714-f105-4f59-b8d1-0588cf9a92ca
-# ╠═d472be5d-2f5d-47f1-9d0d-3fab8d79eccb
 # ╠═16a05a2e-3c2d-441d-8ee7-1fd0345465ec
 # ╠═f4b905e6-b5a9-4326-b705-96de41251de7
 # ╠═bc72d307-12f7-47c6-b90a-062814186978
@@ -1855,6 +1873,7 @@ version = "0.9.1+5"
 # ╠═83f8c3e1-9a29-4e86-9125-ace58b0ad794
 # ╠═c9c4a2e5-0559-4dd1-b887-d02456809af5
 # ╠═87c8322e-1a0f-4998-be7d-23eaf18820f8
+# ╠═971d2a6e-72bb-4875-aee7-aeab10878dec
 # ╠═73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 # ╟─101246ef-1753-4174-ab16-109b425adbec
 # ╠═1c7238b6-6a2c-4123-8f9b-061820e74c98

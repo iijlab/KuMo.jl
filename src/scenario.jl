@@ -7,10 +7,10 @@ end
 
 function make_nodes(nodes)
     types = Set{Type}()
-    foreach((nt, _) -> push!(types, nt), nodes)
+    foreach(v -> push!(types, v), Iterators.map(typeof, nodes))
     UT = Union{collect(types)...}
     _nodes = Dictionary{Int,UT}()
-    foreach((i, (nt, c)) -> set!(_nodes, i, nt(c)), enumerate(nodes))
+    foreach(v -> set!(_nodes, v[1], v[2]), enumerate(nodes))
     return _nodes
 end
 
