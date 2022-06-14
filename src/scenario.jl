@@ -1,6 +1,6 @@
 struct Scenario{N<:AbstractNode,L<:AbstractLink,R<:AbstractRequests}
     data::Dictionary{Int,Data}
-    duration::Int
+    duration::Real
     topology::Topology{N,L}
     users::Dictionary{Int,User{R}}
 end

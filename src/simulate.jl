@@ -87,7 +87,7 @@ function inner_queue(
 
         aux_cap[i, nvtx] = j.backend + j.frontend
         f, links_cost = mincost_flow(g, demands, capacities, aux_cap, algo.optimizer)
-        cost = node_cost + links_cost
+        cost = round(node_cost + links_cost, sigdigits=5)
         if cost < best_cost
             best_cost = cost
             best_links = f
@@ -148,6 +148,10 @@ function inner_queue(
     paths_user = dijkstra_shortest_paths(g, u, link_costs; trackvertices=true)
     paths_data = dijkstra_shortest_paths(g, j.data_location, link_costs; trackvertices=true)
     best_cost, best_node = findmin(paths_user.dists + paths_data.dists + [node_costs[i] for i in keys(node_costs)])
+
+    best_nodes = findall(x -> x == best_cost, paths_user.dists + paths_data.dists + [node_costs[i] for i in keys(node_costs)])
+
+    best_node = minimum(best_nodes)
 
     path_user = retrieve_path(u, best_node, paths_user)
     path_data = retrieve_path(j.data_location, best_node, paths_data)
@@ -466,7 +470,7 @@ function clean(snaps)
     replaced = false
 
     for (i, s) in enumerate(snaps)
-        if s.instant != instant || isempty(snapshots)
+        if s.instant ≉ instant || isempty(snapshots)
             push!(snapshots, s)
             instant = s.instant
         else
@@ -487,6 +491,7 @@ end
 
 function post_simulate(s, snapshots, verbose, output)
     df_snaps = make_df(clean(snapshots), s.topology; verbose)
+    # df_snaps = make_df(snapshots, s.topology; verbose)
     if !isempty(output)
         CSV.write(joinpath(datadir(), output), df_snaps)
         verbose && (@info "Output written in $(datadir())")

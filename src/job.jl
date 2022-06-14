@@ -4,11 +4,11 @@ struct Job <: AbstractJob
     backend::Int
     containers::Int
     data_location::Int
-    duration::Int
+    duration::Float64
     frontend::Int
 end
 
-function job_distributions(;backend, container, data_locations, duration, frontend)
+function job_distributions(; backend, container, data_locations, duration, frontend)
     return Dict(
         :backend => censored(Normal(backend[1], backend[2]); lower=1),
         :container => censored(Normal(container[1], container[2]); lower=1),

@@ -8,6 +8,9 @@ using InteractiveUtils
 # Packages requirement (only KuMo.jl is private and restricted to IIJ lab members)
 using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX, Plots
 
+# ╔═╡ 8e8ece02-0f83-43c1-99be-c3772468e5dc
+using Ipopt
+
 # ╔═╡ d3221f99-adcc-457c-82f5-95aaa2a9e197
 md"""# Series of plots to illustrate the use of pseudo-cost functions
 
@@ -21,6 +24,46 @@ begin
     plot_pc = plot([pc1, pc2], 0:0.01:0.9, label = ["nodes: ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1" "links: ρ -> (ρ + 0.02)^5 / (1 - ρ) + 1"], legend=:topleft)
 	savefig(plot_pc, "pseudo_costs.pdf")
 	plot_pc
+end
+
+# ╔═╡ fed2e759-8515-4461-8f61-fa20cc43c0dd
+pc1(0.01), pc1(0.74)
+
+# ╔═╡ 714f8714-f105-4f59-b8d1-0588cf9a92ca
+pc1(0.57), pc1(0.43)
+
+# ╔═╡ d472be5d-2f5d-47f1-9d0d-3fab8d79eccb
+pseudo_cost(100, 62)
+
+# ╔═╡ 16a05a2e-3c2d-441d-8ee7-1fd0345465ec
+plot(x -> pc1(1/2 + x) - pc1(1/2 - x), 0:0.01:0.5)
+
+# ╔═╡ f4b905e6-b5a9-4326-b705-96de41251de7
+begin
+	X = 0:351
+	Y = 352:398
+	Z = 399:750
+	loads = zeros(sum(length, [X, Y, Z]) + 1, 4)
+	for x in X
+		i = x + 1
+		loads[i + 1, :] = (x == 0 ? zeros(1,4) : loads[i, :]) + loads[i + 1, :]
+		_, j = findmin(pc1, loads[i,:])
+		loads[i + 1, j] = 0.01 + (i == 1 ? 0 : loads[i, j]) 
+	end
+	for x in Y[1:end]
+		i = x + 1
+		loads[i + 1, :] = loads[i, :]
+	end
+	for x in Z
+		i = x + 1
+		loads[i + 1, :] += x == 0 ? zeros(1,4) : loads[i, :]
+		pc_aux = ρ -> (0 < ρ < 1 ? pc1(ρ) : -Inf)
+		_, j = findmax(pc_aux, loads[i,:])
+		loads[i + 1, j] = (i == 1 ? 0 : loads[i, j]) - 0.01
+	end
+	plot_handmade = plot(loads)
+	savefig(plot_handmade, "pseudo_costs_handmade.pdf")
+	plot_handmade
 end
 
 # ╔═╡ bc72d307-12f7-47c6-b90a-062814186978
@@ -49,7 +92,7 @@ Plots after that takes the time of allocation/deallocation as parameter.
 # ╔═╡ 698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═╡ show_logs = false
 # Simulation
-times, df1, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); speed=0);
+times, df1, snaps = simulate(SCENARII[:four_nodes], MinCostFlow(Ipopt.Optimizer); speed=0);
 
 # ╔═╡ b4576a3c-823f-479b-b940-6fb60c824e35
 # ╠═╡ show_logs = false
@@ -186,24 +229,38 @@ end
 
 # ╔═╡ e2144b8b-6b09-4f99-8bf3-819d0a7704f1
 scenario5() = scenario(;
-    duration=10,
-    nodes=(4, 32),
+    duration=100,
+    nodes=(4, 100),
     users=[
-		# user 1
-        user(job(0, 1, rand(1:4), 1, 0), 1/150, rand(1:4);)
-	]
-	
+        # user 1
+        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); stop=34.5),
+        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=6.015, stop=39.0),
+        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=12.03, stop=43.5),
+        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=18.045, stop=48.0),
+        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=22.56, stop=52.5),
+
+        user(job(0, 1, rand(1:2), 2.25, 0), 0.06, rand(1:2); start=43.5, stop=61.5),
+        user(job(0, 1, rand(1:2), 2.25, 0), 0.06, rand(1:2); start=50.25, stop=59.25),
+    ]
 )
 
-# ╔═╡ 2cbf7ae8-e160-48dc-b48d-8482480504d0
-# ╠═╡ show_logs = false
+# ╔═╡ 83f8c3e1-9a29-4e86-9125-ace58b0ad794
 # Simulation
 _, df5, _ = simulate(scenario5(), ShortestPath(); speed=0);
 
 # ╔═╡ c9c4a2e5-0559-4dd1-b887-d02456809af5
 # Line plot
 begin
-    p5_line = @df df5 plot(cols(6:9),
+    p5_line = @df df5 plot(:instant, cols(6:7),
+		legend=:none, tex_output_standalone=true, xlabel="time", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+end
+
+# ╔═╡ 87c8322e-1a0f-4998-be7d-23eaf18820f8
+# Area plot
+begin
+    p5_area = @df df5 areaplot(:instant, cols(6:7),
 		legend=:none, tex_output_standalone=true, xlabel="time", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
@@ -358,6 +415,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Ipopt = "b6b21f68-93f8-5de0-b562-5493be1d77c9"
 KuMo = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
 PGFPlotsX = "8314cec4-20b6-5062-9cdb-752b83310925"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -366,6 +424,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
+Ipopt = "~1.0.2"
 KuMo = "~0.1.16"
 PGFPlotsX = "~1.5.0"
 Plots = "~1.29.1"
@@ -378,7 +437,13 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "fec570e370694c1ca04e763b95e01f138dd63dc3"
+project_hash = "84968b43355a203f576f1f4188e18a064450a851"
+
+[[deps.ASL_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "6252039f98492252f9e47c312c8ffda0e3b9e78d"
+uuid = "ae81ac8f-d209-56e5-92de-9978fef736f9"
+version = "0.1.3+0"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -864,6 +929,18 @@ git-tree-sha1 = "bee5f1ef5bf65df56bdd2e40447590b272a5471f"
 uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
 version = "1.1.0"
 
+[[deps.Ipopt]]
+deps = ["Ipopt_jll", "MathOptInterface"]
+git-tree-sha1 = "8b7b5fdbc71d8f88171865faa11d1c6669e96e32"
+uuid = "b6b21f68-93f8-5de0-b562-5493be1d77c9"
+version = "1.0.2"
+
+[[deps.Ipopt_jll]]
+deps = ["ASL_jll", "Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "MUMPS_seq_jll", "OpenBLAS32_jll", "Pkg"]
+git-tree-sha1 = "e3e202237d93f18856b6ff1016166b0f172a49a8"
+uuid = "9cc047cb-c261-5740-88fc-0cf96f7bdcc7"
+version = "300.1400.400+0"
+
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
 uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
@@ -1037,11 +1114,23 @@ version = "0.3.15"
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
+[[deps.METIS_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "1d31872bb9c5e7ec1f618e8c4a56c8b0d9bddc7e"
+uuid = "d00139f3-1899-568f-a2f0-47f597d42d70"
+version = "5.1.1+0"
+
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "Pkg"]
 git-tree-sha1 = "e595b205efd49508358f7dc670a940c790204629"
 uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
 version = "2022.0.0+0"
+
+[[deps.MUMPS_seq_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "METIS_jll", "OpenBLAS32_jll", "Pkg"]
+git-tree-sha1 = "29de2841fa5aefe615dea179fcde48bb87b58f57"
+uuid = "d7ed1dd3-d0ae-5e8e-bfb4-87a502085b8d"
+version = "5.4.1+0"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
@@ -1131,6 +1220,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "887579a3eb005446d514ab7aeac5d1d027658b8f"
 uuid = "e7412a2a-1a6e-54c0-be00-318e2571c051"
 version = "1.3.5+1"
+
+[[deps.OpenBLAS32_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "9c6c2ed4b7acd2137b878eb96c68e63b76199d0f"
+uuid = "656ef2d0-ae68-5445-9ca0-591084a874a2"
+version = "0.3.17+0"
 
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
@@ -1733,8 +1828,14 @@ version = "0.9.1+5"
 # ╟─d3221f99-adcc-457c-82f5-95aaa2a9e197
 # ╠═61189540-e578-11ec-3030-c3ebb611c28b
 # ╠═21639215-1463-46ff-80a0-f1f2028c7558
+# ╠═fed2e759-8515-4461-8f61-fa20cc43c0dd
+# ╠═714f8714-f105-4f59-b8d1-0588cf9a92ca
+# ╠═d472be5d-2f5d-47f1-9d0d-3fab8d79eccb
+# ╠═16a05a2e-3c2d-441d-8ee7-1fd0345465ec
+# ╠═f4b905e6-b5a9-4326-b705-96de41251de7
 # ╠═bc72d307-12f7-47c6-b90a-062814186978
 # ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
+# ╠═8e8ece02-0f83-43c1-99be-c3772468e5dc
 # ╠═698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═b4576a3c-823f-479b-b940-6fb60c824e35
 # ╠═0f54d3d2-3908-4b6f-9499-fa1d47531a1f
@@ -1751,8 +1852,9 @@ version = "0.9.1+5"
 # ╠═9f7add45-1e75-48ee-8a64-eaad266ddf94
 # ╠═187a9ba4-3cba-44ff-98e1-f4a3369e672a
 # ╠═e2144b8b-6b09-4f99-8bf3-819d0a7704f1
-# ╠═2cbf7ae8-e160-48dc-b48d-8482480504d0
+# ╠═83f8c3e1-9a29-4e86-9125-ace58b0ad794
 # ╠═c9c4a2e5-0559-4dd1-b887-d02456809af5
+# ╠═87c8322e-1a0f-4998-be7d-23eaf18820f8
 # ╠═73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 # ╟─101246ef-1753-4174-ab16-109b425adbec
 # ╠═1c7238b6-6a2c-4123-8f9b-061820e74c98
