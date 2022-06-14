@@ -93,13 +93,13 @@ active resource stay at $\rho = .75$.
 On the other hand, when the number of active resources is decreasing,
 the load of each active resource stay at $\rho = .5$.
 In short, when all resources are equal, the system tries to maintain
-the load of active resources in the range $(.5, .75)$, while keeping
+the load of active resources in the range $[.5, .75]$, while keeping
 idle resources as much as possible.
 
 When resources are not equal, the behavior becomes more complex, but
 the underlying mechanisms are the same.
 Let's take a look at a case of four resources with the cost ratio $1:2:4:8$,
-that is $f_{r_{1}}(\rho) = 2 f_{r_{0}}(\rho)$ and $f_{r_{3}}(\rho) = 8 f_{r_{0}}(\rho)$.
+that is $8 f_{r_{0}} = 4 f_{r_{1}} = 2 f_{r_{2}} = f_{r_{3}}$.
 To activate $r_{1}$, the load of $r_{0}$ goes up to $.84$ to satisfy:
 $f_{r_{1}}(0) = 4 = f_{r_{0}}(.84)$.
 When $r_{1}$ is moving towards idle, the load of $r_{0}$ is $.75$ to
@@ -120,26 +120,25 @@ enable loose automatic distributed load balancing.
 
 \subsection{Variations}
 
-The operator can control the resource utilization by modifying the cost
+The utilization of a resource can be manipulated by modifying the cost
 function of the resource.
-
 \begin{description}
-  \item[lowering/raising utilization] by raising/lowering the pseudo cost. \\
-        $f'(\rho) = f(\rho) + \Delta$ \\
-        or \\
-        $f'(\rho) = (1 \pm \Delta)f(\rho)$ \\
-        The difference from the original is milder for the former additive
-        form; the difference of the latter multiplicative form rapidly grows
-        as the load moves away from the center.
-
-  \item[increasing idle-state] by raising the cost for light load.
-  \item[premium service] can be realized by lowering the target load so
-        that the job runs on lightly loaded resources. \\
-        $f'(\rho) = f(\rho - \Delta)$
-  \item[equal load-balancing] without idle resource pooling can be
+\item	[lowering or raising utilization] corresponds to raising or
+	lowering the cost, e.g., to make the cost $n$ times
+        more expensive, $f'(\rho) = n f(\rho)$.
+        For minor adjustment, one can use an additive form,
+        $f'(\rho) = f(\rho) + \Delta$.
+\item	[idle-state] can be made stickier by raising the cost at
+	  $\rho = 0$,
+  	e.g., $f'(\rho) = \frac{n (2\rho - 1)^{2}}{1 - \rho^{n}} + 1$.
+\item	[premium service] can be realized by lowering the target load so
+        that a premium job are always assigned to lightly loaded resources, 
+        $f'(\rho) = f(\rho + \Delta)$.
+        An economy service can be made by raising the target load.
+\item	[equal load-balancing] without idle resource pooling can be
         achieved by simple monotonic functions, e.g.,
         $f(\rho) = \frac{\rho^{2}}{1 - \rho} + 1$.
-  \item[hierarchical model] will be discussed later in Section XX.
+\item	[hierarchical model] will be discussed later in Section XX.
 \end{description}
 
 \subsection{Jobs}
