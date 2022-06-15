@@ -22,11 +22,11 @@ pricing with idle resource pooling.
 
 \subsection{Pseudo Cost Functions}
 
-\begin{figure}[thb]
+\begin{figure}[tb]
   \begin{center}
-    \includegraphics[width=7.5cm,clip]{costfunc.pdf}
+    \includegraphics[width=1.0\columnwidth]{costfunc.pdf}
     \vspace{-2.0ex}
-    \caption{Standard pseudo cost function}
+    \caption{Standard cost functions}
     \label{fig:std_costfunc}
   \end{center}
 \end{figure}
@@ -52,6 +52,26 @@ the load approaches $1$.
 
 The behavior of the pseudo cost function is illustrated by the
 following examples.
+
+\begin{figure*}[tb]
+  \begin{minipage}{1.0\columnwidth}
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{4node.pdf}
+    \vspace{-2.0ex}
+    \caption{load distribution among 4 equivalent cost functions}
+    \label{fig:4node}
+  \end{center}
+  \end{minipage}
+  \hspace{0.8\columnsep}
+  \begin{minipage}{1.0\columnwidth}
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{4node-ratio.pdf}
+    \vspace{-2.0ex}
+    \caption{load distribution among 4 proportional cost functions}
+    \label{fig:4node-ratio}
+  \end{center}
+  \end{minipage}
+\end{figure*}
 
 Assume a pool of four equivalent resources with the standard pseudo cost
 function (Figure \ref{fig:std_costfunc}).
@@ -130,14 +150,14 @@ function of the resource.
         $f'(\rho) = f(\rho) + \Delta$.
 \item	[idle-state] can be made stickier by raising the cost at
 	  $\rho = 0$,
-  	e.g., $f'(\rho) = \frac{n (2\rho - 1)^{2}}{1 - \rho^{n}} + 1$.
+  	e.g., $f'(\rho) = n (2\rho - 1)^{2}/(1 - \rho^{n}) + 1$.
 \item	[premium service] can be realized by lowering the target load so
         that a premium job are always assigned to lightly loaded resources, 
         $f'(\rho) = f(\rho + \Delta)$.
-        An economy service can be made by raising the target load.
+        Similary, an economy service can be made by raising the target load.
 \item	[equal load-balancing] without idle resource pooling can be
         achieved by simple monotonic functions, e.g.,
-        $f(\rho) = \frac{\rho^{2}}{1 - \rho} + 1$.
+        $f(\rho) = \rho^{2}/(1 - \rho) + 1$.
 \item	[hierarchical model] will be discussed later in Section XX.
 \end{description}
 
@@ -187,4 +207,4 @@ and then, assign $j$ to $i$. \\
 The load of a resource can be measured in a number of ways.  Most
 resources have some form of load report functions built-in.
 A load value does not need to be precise, and a rough approximation is
-enough for resource management.
+enough for loose resource management.

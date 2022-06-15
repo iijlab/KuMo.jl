@@ -5,30 +5,38 @@ necessary solutions for building a working prototype system.
 
 \begin{description}
 
-\item[Model Refinement]  bidirectional links, multiple users per job,
-            interactions among jobs, etc.
+\item[Model Refinement:]  The current model is simplistic. We will add
+  bidirectional links, multiple users per job, interactions among
+  jobs, and so on.
 
-\item[Hierarchical Configurations]
-            rack-level.  datacenter level.
+\item[Hierarchical Configurations:] It would be better to use
+  hierarchical configurations for scalability and for management
+  purposes.
+  For example, a distributed datacenter model can consist of
+  the inter-DC layer with DC-level resources and the intra-DC layer
+  with rack-level resources.
 
-\item[Inter-cloud]
-            hierarchical model naturally extends to inter-cloud model.
-            The mechanism of the idle resource pooling allows utilizing external
-            clouds when only needed.
+\item[Inter-cloud:]
+  The hierarchical model naturally extends to an inter-cloud model in which
+  different cloud systems are federated.
+  The mechanism of the idle resource pooling allows utilizing external
+  clouds when only needed.
 
-\item[Data Migration]
-            The location of data is critical.
-            A possible approach is to migrate data at coarser timescale, based
-            on usage history.
-            Another possibility is design a new distributed storage
-            system in which (cached) data can be easily moved.
+\item[Data Migration:]
+  The location of data is critical.
+  A possible approach is to migrate data at coarser timescale, based
+  on usage history.
+  Another possibility is design a new distributed storage system in
+  which (cached) data can be easily moved.
 
-\item[L2 Paths] It is possible to use idle resource pooling for dynamically
-            creating Layer 2 paths.
+\item[L2 Paths:] It is possible to use idle resource pooling for dynamically
+  creating Layer 2 paths (e.g., light path switching over WDM networks).
 
-\item[Resource discovery and cost exchange protocols]
-            \cite{Albrecht2008}.
+\item[Resource discovery and cost exchange protocols:]
+  It is necessary to develop mechanisms and protocols for finding
+  available resources and their costs~\cite{Albrecht2008}..
 
-\item[routing] SRv6?
+\item[Source Routing:] We assumed that it is possible to select network paths
+  when assigning a job, probabaly using SRv6 or other source routing mechanism.
 
 \end{description}

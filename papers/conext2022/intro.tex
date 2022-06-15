@@ -12,7 +12,9 @@ so as not to overload certain resources.
 
 Next challenge would be to virtualize cloud infrastructure!
 By decoupling infrastructure management from service management,
-cloud operators can be liberated from hardware resource management.
+cloud resources such as servers and networks can be provided with a
+pay-as-you-go model.
+Then, cloud operators are liberated from hardware resource management.
 This is similar to what happens to system administrators by cloud
 computing.
 Moreover, it is not enough to shift responsibility to operators of the
@@ -64,14 +66,15 @@ moves, while a data intensive task will stay close to the data
 regardless of the user location.
 Edge computing is automatically formed using resources close to
 the users.
-As a result, services are inherently fault-tolerant and resilient
+Moreover, services are inherently fault-tolerant and resilient
 against outages or disasters since faulty resources are
 automatically evicted from the resource pool.
 
-The physical resource management becomes simpler, as a physical node
-can be easily added to or deleted from the resource pool.
+The physical resource management becomes simpler, since physical nodes
+can be easily attached to or detached from the resource pool.
 When there is a consistent hotspot, it can be alleviated or solved by
-placing new resources close to the location.
+placing new resources close to the hotspot and attaching them to the
+resource pool.
 
 Diverse resources would be owned and managed by different parties.
 It requires loose management of resources, as small parties cannot
@@ -80,20 +83,8 @@ The utilization of each resource needs to be easily manipulated,
 without affecting the stability of the system.
 
 To realize such systems, it requires various technical advances across
-many fields.  Among other things, new resource management model is
-needed for distributed diverse cloud resources.
-
-%%It is a vision for dynamic distributed resource management in 10 years.
-%%research vision to set long-term directions, find/prioritize research
-%%agenda (beyond current 5G/MEC, including technologies: networking,
-%%cloud, IoT, virtualization, dynamic optimization, resource allocation) .
-%%It combines recent technical trends: micro-services/serverless, NFV,
-%%hybrid-cloud, (mobile) edge computing, machine learning.
-
-%%Current (edge) cloud infrastructure still designed by human, but to
-%%shift to dynamic allocation of storage/computing/networking by machine.
-%%assuming it is possible to freely utilize available resources on the
-%%net with ``pay-as-you-go'' model.
+many fields.  Among other things, new autonomous resource management
+model is needed for distributed diverse cloud resources.
 
 \subsection{Resource Management Model}
 
