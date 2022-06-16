@@ -7,20 +7,38 @@ backpressure against congestion.
 Micro jobs are naturally gravitated to the most cost-efficient
 location.
 
-%% model: cost function: congestion pricing combined with idle resource pooling
+%% model: cost function: congestion pricing combined with idle-resource pooling
 The proposed model is based on congestion pricing in which the cost of
 a resource dynamically changes according to the load of the resource.
 It works as a barrier function for optimization; the capacity
 constraint is enforced by a penelizing cost when approaching the full
 capacity.
 
-Another key idea is {\em idle resource pooling} that tries to put resources
-into idle state as much as possible for energy saving.
-
-The model employs convex pseudo cost functions that combines congestion
-pricing with idle resource pooling.
+Another key idea is {\em idle-resource pooling} that tries to put resources
+into idle state when possible for energy saving.
+We proposed a convex cost function that enables idle-resource pooling
+with congestion pricing.
 
 \subsection{Pseudo Cost Functions}
+
+A pseudo cost function in our model maps the load of a resource
+$\rho \in [0, 1]$ to the corresponding cost.
+The capacity limit is enforced by the cost function that rapidly grows
+as the load approaches $1.0$, which is known as a barrier function in
+optimization theory. 
+
+We use two types of pseudo cost functions: one is the monotonic cost
+function and the other is the convex cost function.
+The monotonic cost function is a simple barrier function that
+monotonically grows with load, up to inifinite as $\rho \to 1$.
+The convex cost function is also a barrier function but also for
+idle-resource pooling.
+In this paper, the monotonic form is used for network links as
+energy-saving-by-idling is not common for network links.
+
+The standard forms that have the minimum cost of $1.0$ are
+shown in Figure~\ref{fig:std_costfunc}. We will show how to manipulate
+the standard functions in Sec.~\ref{sec:variation}.
 
 \begin{figure}[tb]
   \begin{center}
@@ -31,34 +49,38 @@ pricing with idle resource pooling.
   \end{center}
 \end{figure}
 
-The standard pseudo cost function from the load of a resource
-$\rho \in [0, 1]$ to the corresponding cost is in Figure
-\ref{fig:std_costfunc}: \\
+The standard convex cost function is defined as:
+\begin{equation*}
+	f(\rho) = \frac{(2\rho - 1)^{2}}{1 - \rho} + 1
+\end{equation*}
+This function has the properties:
+$min\: f(\rho) = f(.5) = 1$, and $f(0) = f(.75) = 2$.
+The cost grows rapidly when $\rho \ge .75$.
+The system automatically tries to keep $\rho \le .75$,
+aiming at $\rho = .5$.
 
-\( f(\rho) = \frac{(2\rho - 1)^{2}}{1 - \rho} + 1  \) \\
+The standatd monotonic function is deafined as:
+\begin{equation*}
+	f(\rho) = \frac{\rho^{5}}{1 - \rho} + 1
+\end{equation*}
+to roughly match the standard convex function in $[.5, .75]$,
+the working range shown in the next subsection.
 
-This is a convex function with the properties:
-$min f(\rho) = f(.5) = 1$, and $f(0) = f(.75) = 2$.
-The pseudo cost grows rapidly when $\rho \ge .75$.
+Note that the standard forms are defined just for convenience, and
+other functions with a similar shape in $[0,1]$ also work for our
+purposes.
 
-The system automatically tries to keep the load of a resource in the
-working range, $[0 \le \rho \le .75]$, aiming at $\rho = .5$. \\
+\subsection{Idle-Resource Pooling in Action}
 
-In this model, constraints in optimization problems (e.g.,
-capacity limit) are enforced by the rapid increase of the cost function when
-the load approaches $1$.
-
-\subsection{Pseudo Cost Function in Action}
-
-The behavior of the pseudo cost function is illustrated by the
-following examples.
+The behavior of idle-resource pooling by the convex cost function is
+illustrated by the following examples.
 
 \begin{figure*}[tb]
   \begin{minipage}{1.0\columnwidth}
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{4node.pdf}
     \vspace{-2.0ex}
-    \caption{load distribution among 4 equivalent cost functions}
+    \caption{load distribution among 4 equivalent cost nodes}
     \label{fig:4node}
   \end{center}
   \end{minipage}
@@ -67,14 +89,14 @@ following examples.
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{4node-ratio.pdf}
     \vspace{-2.0ex}
-    \caption{load distribution among 4 proportional cost functions}
+    \caption{load distribution among 4 proportional cost nodes}
     \label{fig:4node-ratio}
   \end{center}
   \end{minipage}
 \end{figure*}
 
-Assume a pool of four equivalent resources with the standard pseudo cost
-function (Figure \ref{fig:std_costfunc}).
+Assume a pool of 4 equivalent resources with the standard convex
+cost function in Figure~\ref{fig:4node}.
 Also, assume that micro jobs are continuously assigned to the
 system; each micro job is much smaller than the capacity of a
 resource.
@@ -104,11 +126,11 @@ one resource with the lowest load $\rho < .5$ becomes more expensive
 than the others.
 This one is less preferred for subsequent assignments, and quickly
 loses the load until it becomes idle again, while the other 3 keep
-$\rho = .5$. It repeats for the remaining ones.
+$\rho$ in $[.5, .75]$. It repeats for the remaining ones.
 
-Looking at how the number of active resources changes in a coarser
-timescale,
-when the number of active resources is increasing, the load of each
+It is easy to see how the number of active resources changes when
+there are more resources.
+When the number of active resources is increasing, the load of each
 active resource stay at $\rho = .75$.
 On the other hand, when the number of active resources is decreasing,
 the load of each active resource stay at $\rho = .5$.
@@ -118,8 +140,9 @@ idle resources as much as possible.
 
 When resources are not equal, the behavior becomes more complex, but
 the underlying mechanisms are the same.
-Let's take a look at a case of four resources with the cost ratio $1:2:4:8$,
-that is $8 f_{r_{0}} = 4 f_{r_{1}} = 2 f_{r_{2}} = f_{r_{3}}$.
+Let's take a look at a case of 4 resources with the cost ratio $1:2:4:8$,
+that is $8 f_{r_{0}} = 4 f_{r_{1}} = 2 f_{r_{2}} = f_{r_{3}}$ in
+Figure~\ref{fig:4node-ratio}.
 To activate $r_{1}$, the load of $r_{0}$ goes up to $.84$ to satisfy:
 $f_{r_{1}}(0) = 4 = f_{r_{0}}(.84)$.
 When $r_{1}$ is moving towards idle, the load of $r_{0}$ is $.75$ to
@@ -139,6 +162,7 @@ However, our goal is not to achieve the theoretical optimum but to
 enable loose automatic distributed load balancing.
 
 \subsection{Variations}
+\label{sec:variation}
 
 The utilization of a resource can be manipulated by modifying the cost
 function of the resource.
@@ -155,52 +179,46 @@ function of the resource.
         that a premium job are always assigned to lightly loaded resources, 
         $f'(\rho) = f(\rho + \Delta)$.
         Similary, an economy service can be made by raising the target load.
-\item	[equal load-balancing] without idle resource pooling can be
-        achieved by simple monotonic functions, e.g.,
-        $f(\rho) = \rho^{2}/(1 - \rho) + 1$.
-\item	[hierarchical model] will be discussed later in Section XX.
 \end{description}
 
-\subsection{Jobs}
+\subsection{Jobs Assignment}
 
-micro job $J(p, q, r, s)$	\\
-$p$: $\sharp$ of micro containers	\\
-$q$: frontend communications (Mbps)	\\
-$r$: backend communications (Mbps)	\\
-$s$: $\sharp$ of time slots (sec)	\\
+We use a simple micro job model that defines the required resources
+for a micro job as $J(p, q, r, s)$ where 
+$p$: the number of micro containers, 
+$q$: frontend communications with the user, 
+$r$: backend communications with data objects (e.g., database), and
+$s$: the number of time slots.
+For simplicity, we do not distinguish directions of communications for
+$q$ and $r$, and assume only one user and one data object per job.
+The unit is one micro container for $p$, 1Mbps for $q$ and $r$, and 1
+second for $s$.
 
-For simplicity, we do not distinguish directions of communications for $q$ and $r$.
+Optionally, a job can specify weights for the cost calculation with
+$p$, $q$, $r$: e.g., an interactive job may raise the weight for the
+frontend communication to place the job close to the user.
 
-Optionally, a job can specify weights for the cost calculation with $p$, $q$, $r$:
-e.g., an interactive job may raise the weight for the frontend
-communication to place the job close to the user.
+To instantiate a micro job requested from a user, the system finds the
+best node to allocate the required resource for $J$: $p$, $q$ and $r$
+for duration $s$.
 
-\subsection{Job Assignment}
+The pseudo cost $E$ to host job $j$ for a unit time at node $i$ for
+user $m$ and data object $o$ is:
+\begin{eqnarray*}
+&&  E(j, i)     = H(j,i) + G(j,i,m,o) \\
+&&  H(j,i)      = p \cdot f(\rho_{i}) \\
+&&  G(j,i,m,o)  = q \cdot \smashoperator{\sum_{l \in path(m,i)}} f(\rho_{l}) + r \cdot \smashoperator{\sum_{l \in path(i,o)}} f(\rho_{l})
+\end{eqnarray*}
+here, $H(j, i)$ is the computing cost to run $j$ at $i$, and
+$G(j, i, m, o)$ is the communication cost to run $j$ at $i$
+between $m$ and $o$, and
+$path(m,i)$ is a set of links in the best path from $m$ to $i$.
 
-To instantiate a micro job requested from a user, the system allocates
-the required resource for $J$: $p$, $q$ and $r$ for duration $s$.
-
-%%pseudo cost: is used to solve the resource allocation problems;
-%%it is not a real cost such as service charges. \\
-%%$f(r, t, s)$: cost function for resource $r$ (micro container $P$ or link $L$ )
-%%at time $t$ for $s$ time slots. \\
-%%$f(r, t, s)$ is a function of the load of $r$, $\rho_{r}$ at $t$. \\
-%%$f(r)$: we omit $t$ and $s$ for $t=t_{current}$ and for a unit time (1 sec)  \\
-
-
-resource unit: one micro container for $P$, 1Mbps for $L$. \\
-$H(j, i)$: CPU cost to run $j$ at $i$ \\
-\( H(j, i) = f(i) \cdot p \)	\\
-$G(j, i, m, o)$: communication cost to run $j$ at $i$ between $m$ and $o$. \\
-$path(m,i)$: a set of links in the best path from $m$ to $i$. \\
-\( G(j, i, m, o) = \sum_{l \in path(m,i)} f(l) \cdot q + \sum_{l \in path(i,o)} f(l) \cdot r \) \\
-pseudo cost $E$ to host job $j$ for a unit time at node $i$ for user $m$, data obj $o$: \\
-\( E(j, i)  =  H(j,i) + G(j,i,m,o) =  f(i) \cdot p + \sum_{l \in path(m,i)} f(l) \cdot q + \sum_{l \in path(i,o)} f(l) \cdot r \) \\
-(For now, we assume only one user and one data object per job) \\
-To assign Job $j$, we simply find: \\
-\(  argmin_{i} \: E(j, i)   \)  \\
-and then, assign $j$ to $i$. \\
-
+To assign Job $j$, the system simply finds
+\begin{equation*}
+	argmin_{i} \: E(j, i)
+\end{equation*}
+and then, assign $j$ to $i$.
 
 \subsection{Misc}
 
@@ -208,3 +226,8 @@ The load of a resource can be measured in a number of ways.  Most
 resources have some form of load report functions built-in.
 A load value does not need to be precise, and a rough approximation is
 enough for loose resource management.
+
+On the other hand, if each allocation is not small enough both in size
+and duration, the loads may not converge as expected.
+That is, micro service is the enabler for this approach.
+
