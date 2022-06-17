@@ -6,7 +6,7 @@ function scenario5(;
     max_load=3.5,
     nodes=(4, 10),
     rate=0.01,
-    j=job(0, 1, rand(1:4), 0.1, 0)
+    j=job(0, 1, rand(1:4), 0.5, 0)
 )
     _requests = Vector{KuMo.Request{typeof(j)}}()
 
