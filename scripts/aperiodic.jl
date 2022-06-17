@@ -1,71 +1,60 @@
 # Packages requirement (only KuMo.jl is private and restricted to IIJ lab members)
+
 using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX, Plots
 
 function scenario5(;
-    max_load = 3.48,
-    nodes = (4, 100),
-    rate = 0.01,
-    j = job(0, 1, rand(1:4), jd, 0),
+    max_load=3.5,
+    nodes=(4, 10),
+    rate=0.01,
+    j=job(0, 1, rand(1:4), 0.1, 0)
 )
     _requests = Vector{KuMo.Request{typeof(j)}}()
-    total_capacity = prod(nodes)
 
-    c = nodes[2]
+    L = prod(nodes)
+    r = rate
+    λ = max_load
+    n = nodes[1]
+    δ = j.duration
+    c = j.containers
 
-    jd = j.duration
-    jc = j.containers
+    σ = c / (100 * r)
+    γ = δ / σ
 
-    γ = jd * jc / (c * rate)
+    π1 = λ / r
+    π2 = (2n - λ) / r
 
-    for t in 0:γ:(max_load * 100)
-
-    end
-
-
-
-    total_capacity = prod(nodes)
-
-    c = nodes[2]
-
-    γ = rate * c
-    period = jd / γ
-    plateau = c / γ
-
-    π1 = c * max_load / γ
-    π2 = π1 + plateau - period
-
-    @info "debrief" total_capacity γ period c plateau π1 π2 rate
-
-    for (i, t) in enumerate(0:period:(π1 - period))
+    for (i, t) in enumerate(σ:σ:π1)
         k = (i - 1) ÷ γ + 1
         foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:k)
+        t ≈ π1 && @info("k = $k")
     end
 
-    for t in π1:period:(π2 - period)
-        foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:π1)
+    χ = ceil(Int, λ / (δ * r))
+    for t in π1+σ:σ:π2
+        foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:χ)
     end
 
-    it = π2:period:(π1+π2-period)
-    for (i, t) in enumerate(it)
-        ι = length(it) - i
-        k = (ι - 1) ÷ γ + 1
+    for (i, t) in enumerate(π2+σ:σ:π1+π2)
+        k = χ - (i - 1) ÷ γ
         foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:k)
     end
 
+    @info "Parameters" L r λ n δ c σ γ π1 π2 χ length(_requests)
+
     scenario(;
-    duration=1000,
-    # nodes=[
-    #     MultiplicativeNode(100, 1),
-    #     MultiplicativeNode(100, 2),
-    #     MultiplicativeNode(100, 4),
-    #     MultiplicativeNode(100, 8),
-    # ],
-    nodes = (4, 100),
-    users=[
-        # user 1
-        user(KuMo.Requests(_requests), 1),
-    ]
-)
+        duration=1000,
+        # nodes=[
+        #     MultiplicativeNode(100, 1),
+        #     MultiplicativeNode(100, 2),
+        #     MultiplicativeNode(100, 4),
+        #     MultiplicativeNode(100, 8),
+        # ],
+        nodes=(4, 100),
+        users=[
+            # user 1
+            user(KuMo.Requests(_requests), 1),
+        ]
+    )
 end
 
 # Simulation
@@ -78,3 +67,4 @@ begin
         title="Resources allocations using basic pseudo-cost functions", w=1.25,
     )
 end
+
