@@ -1,12 +1,12 @@
 # Packages requirement (only KuMo.jl is private and restricted to IIJ lab members)
 
-using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX, Plots
+using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX
 
 function scenario5(;
-    max_load=3.5,
-    nodes=(4, 10),
+    max_load=1.75,
+    nodes=(2, 10),
     rate=0.01,
-    j=job(0, 1, rand(1:4), 0.5, 0)
+    j=job(0, 1, 1, 0.5, 0)
 )
     _requests = Vector{KuMo.Request{typeof(j)}}()
 
@@ -17,19 +17,18 @@ function scenario5(;
     δ = j.duration
     c = j.containers
 
-    σ = c / (100 * r)
+    σ = min(δ, c / (100 * r))
     γ = δ / σ
 
     π1 = λ / r
     π2 = (2n - λ) / r
 
+    χ = 0
     for (i, t) in enumerate(σ:σ:π1)
-        k = (i - 1) ÷ γ + 1
-        foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:k)
-        t ≈ π1 && @info("k = $k")
+        χ = (i - 1) ÷ γ + 1
+        foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:χ)
     end
 
-    χ = ceil(Int, λ / (δ * r))
     for t in π1+σ:σ:π2
         foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:χ)
     end
@@ -67,4 +66,3 @@ begin
         title="Resources allocations using basic pseudo-cost functions", w=1.25,
     )
 end
-
