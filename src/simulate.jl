@@ -33,7 +33,7 @@ end
 function push_snap!(snapshots, state, total, selected, duration, solving_time, instant, n)
     links = deepcopy(state.links[1:n, 1:n])
     nodes = deepcopy(state.nodes[1:n])
-    snap = SnapShot(State(links, nodes), total, selected, duration, solving_time, instant)
+    snap = SnapShot(State(links, nodes), total, selected, duration, solving_time, round(instant; digits=5))
     push!(snapshots, snap)
 end
 
@@ -409,7 +409,7 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{0})
                 ProgressMeter.update!(p, ii)
                 continue
             else
-                unchecked_unload = false
+                # unchecked_unload = false
             end
         end
 
@@ -450,7 +450,7 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{0})
             unload = Unload(task.occ + j.duration, best_node, j.containers, best_links)
             insert_sorted!(unloads, unload, next_unload)
         else
-            unchecked_unload = false
+            # unchecked_unload = false
             push!(queued, task)
         end
 
@@ -490,8 +490,8 @@ function clean(snaps)
 end
 
 function post_simulate(s, snapshots, verbose, output)
-    df_snaps = make_df(clean(snapshots), s.topology; verbose)
-    # df_snaps = make_df(snapshots, s.topology; verbose)
+    # df_snaps = make_df(clean(snapshots), s.topology; verbose)
+    df_snaps = make_df(snapshots, s.topology; verbose)
     if !isempty(output)
         CSV.write(joinpath(datadir(), output), df_snaps)
         verbose && (@info "Output written in $(datadir())")

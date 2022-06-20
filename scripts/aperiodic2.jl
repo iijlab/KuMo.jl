@@ -1,12 +1,12 @@
 # Packages requirement (only KuMo.jl is private and restricted to IIJ lab members)
 
-using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX
+using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX, Plots
 
 function scenario5(;
     max_load=3.5,
-    nodes=(4, 1000),
-    rate=0.001,
-    j=job(0, 1, 1, 105, 0)
+    nodes=(4, 100),
+    rate=0.01,
+    j=job(0, 1, rand(1:4), 1.0, 0)
 )
     _requests = Vector{KuMo.Request{typeof(j)}}()
 
@@ -24,14 +24,20 @@ function scenario5(;
     π2 = (2n - λ) / r
 
     χ = 0
-    for (i, t) in enumerate(σ:σ:π1)
-        χ = (i - 1) ÷ γ + 1
-        foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:χ)
-    end
-
-    # for t in π1+σ:σ:π2
+    # for (i, t) in enumerate(σ:σ:π1)
+    #     χ = (i - 1) ÷ γ + 1
     #     foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:χ)
     # end
+
+    for i in 1:π1, t in i:δ:π1
+        push!(_requests, KuMo.Request(j, t))
+    end
+
+    # for i in π1+1:δ:π2
+    #     foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:χ)
+    # end
+
+
 
     # for (i, t) in enumerate(π2+σ:σ:π1+π2)
     #     k = χ - (i - 1) ÷ γ
