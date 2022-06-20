@@ -490,8 +490,8 @@ function clean(snaps)
 end
 
 function post_simulate(s, snapshots, verbose, output)
-    # df_snaps = make_df(clean(snapshots), s.topology; verbose)
-    df_snaps = make_df(snapshots, s.topology; verbose)
+    df_snaps = make_df(clean(snapshots), s.topology; verbose)
+    # df_snaps = make_df(snapshots, s.topology; verbose)
     if !isempty(output)
         CSV.write(joinpath(datadir(), output), df_snaps)
         verbose && (@info "Output written in $(datadir())")

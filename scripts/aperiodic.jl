@@ -1,12 +1,12 @@
 # Packages requirement (only KuMo.jl is private and restricted to IIJ lab members)
 
-using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX
+using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX, Plots
 
 function scenario5(;
     max_load=3.5,
-    nodes=(4, 1000),
-    rate=0.001,
-    j=job(0, 1, 1, 105, 0)
+    nodes=(4, 100),
+    rate=0.01,
+    j=job(0, 1, rand(1:4), 1, 0)
 )
     _requests = Vector{KuMo.Request{typeof(j)}}()
 
@@ -17,38 +17,26 @@ function scenario5(;
     δ = j.duration
     c = j.containers
 
-    σ = min(δ, c / (100 * r))
-    γ = δ / σ
-
     π1 = λ / r
     π2 = (2n - λ) / r
 
-    χ = 0
-    for (i, t) in enumerate(σ:σ:π1)
-        χ = (i - 1) ÷ γ + 1
-        foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:χ)
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
+        end
     end
 
-    # for t in π1+σ:σ:π2
-    #     foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:χ)
-    # end
-
-    # for (i, t) in enumerate(π2+σ:σ:π1+π2)
-    #     k = χ - (i - 1) ÷ γ
-    #     foreach(_ -> push!(_requests, KuMo.Request(j, t)), 1:k)
-    # end
-
-    @info "Parameters" L r λ n δ c σ γ π1 π2 χ length(_requests)
+    @info "Parameters" L r λ n δ c π1 π2 length(_requests)
 
     scenario(;
         duration=1000,
-        # nodes=[
-        #     MultiplicativeNode(100, 1),
-        #     MultiplicativeNode(100, 2),
-        #     MultiplicativeNode(100, 4),
-        #     MultiplicativeNode(100, 8),
-        # ],
-        nodes=(4, 100),
+        nodes=[
+            MultiplicativeNode(100, 1),
+            MultiplicativeNode(100, 2),
+            MultiplicativeNode(100, 4),
+            MultiplicativeNode(100, 8),
+        ],
+        # nodes=(4, 100),
         users=[
             # user 1
             user(KuMo.Requests(_requests), 1),
