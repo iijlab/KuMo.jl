@@ -35,6 +35,8 @@ export user
 export MinCostFlow
 export ShortestPath
 
+export Request
+
 export Link
 export FreeLink
 
