@@ -9,11 +9,11 @@
   \end{center}
 \end{figure}
 
-A simple system configuration with 2 data centers and 2 micro
-datacenters is shown in Figure~\ref{fig:system}.
-When a user requests a service to a nearby service server,
+A simple system configuration with 2 data centers and 2
+micro-datacenters is shown in Figure~\ref{fig:system}.
+When a user requests a service to a nearby service allocation server,
 the service server instantiates the requested service into a series of
-micro service jobs.
+microservice jobs.
 The server finds the required resources for each job,
 identifies the locations of the user and the required data object,
 asks available resources (or their proxies) for the current costs,
@@ -26,29 +26,29 @@ resources have some form of load report functions built-in.
 A load value does not need to be precise, and a rough approximation is
 enough for loose resource management.
 On the other hand, if each allocation is not small enough both in size
-and duration, the loads may not converge as expected.
-That is, micro service is the enabler for this approach.
+and in duration, the loads may not converge as expected.
+That is, microservice is the enabler for this approach.
 
 We use a simple micro job model that defines the required resources
-for a micro job as $J(p, q, r, s)$ where 
+for a micro-job as $J(p, q, r, s)$ where 
 $p$ is the number of micro containers, 
 $q$ is frontend communication with the user, 
 $r$ is backend communication with data objects (e.g., database), and
 $s$ is the number of time slots.
+The unit is one micro-container for $p$, 1Mbps for $q$ and $r$, and 1
+second for $s$.
 For simplicity in the paper, we do not distinguish directions of
 communications for $q$ and $r$, and assume only one user and one data
 object per job.
-The unit is one micro container for $p$, 1Mbps for $q$ and $r$, and 1
-second for $s$.
 
-Optionally, a job can be associated with weights for the cost
+A job can be optionally associated with weights for the cost
 calculation with $p$, $q$, and $r$: e.g., an interactive job may raise
 the weight for the frontend communication to place the job close to
 the user.
 
-To instantiate a micro job requested from a user, the system finds the
-best node to allocate the required resource for $J$: $p$, $q$ and $r$
-for duration $s$.
+To instantiate a micro-job requested from a user, the service
+server finds the best node to allocate the required resource
+for $J$: $p$, $q$ and $r$ for duration $s$.
 
 The pseudo cost $E$ to host job $j$ for a unit time at node $i$ for
 user $m$ and data object $o$ is:
@@ -65,7 +65,7 @@ between $m$ and $o$.
 $f(\rho)$ is the cost fuction of a resource load, and $path(m,i)$ is a set
 of links from $m$ to $i$ (e.g., the shortest path weighted by cost).
 
-To assign Job $j$, the system simply finds the lowest cost node $i$:
+To assign Job $j$, the server simply finds the lowest cost node $i$:
 \begin{equation*}
 	argmin_{i} \: E(j, i)
 \end{equation*}
@@ -77,7 +77,7 @@ To assign Job $j$, the system simply finds the lowest cost node $i$:
 Our model employs a parametric representation of pseudo cost, as a
 function of load, and uses it for load control and also as
 backpressure against congestion.
-Micro jobs are naturally gravitated to the most cost-efficient
+Micro-jobs are naturally gravitated to the most cost-efficient
 location.
 
 %% model: cost function: congestion pricing combined with idle-resource pooling
@@ -109,7 +109,7 @@ energy-saving-by-idling is not common for network links.
 
 The standard forms that have the minimum cost of $1.0$ are
 shown in Figure~\ref{fig:std_costfunc}. We will show how to manipulate
-the standard functions in Sec.~\ref{sec:variation}.
+the cost functions in Sec.~\ref{sec:variation}.
 
 \begin{figure}[tb]
   \begin{center}
@@ -135,7 +135,7 @@ The standatd monotonic function is deafined as:
 	f(\rho) = \frac{\rho^{5}}{1 - \rho} + 1
 \end{equation*}
 to roughly match the standard convex function in $[.5, .75]$,
-the working load range explained in the next subsection.
+the {\em working load range} explained in the next subsection.
 
 Note that the standard forms are defined just for convenience, and
 other functions with a similar shape in $[0,1]$ also work for our
@@ -169,13 +169,13 @@ Figure~\ref{fig:4node-ratio}.
 
 Assume a pool of 4 equivalent resources with the standard convex
 cost function.
-Also, assume that micro jobs are continuously assigned to the
-system; each micro job is much smaller than the capacity of a
+Also, assume that micro-jobs are continuously assigned to the
+system; each micro-job is much smaller than the capacity of a
 resource.
 
 The initial system load $\sum \rho$ is $0$, and gradually increased up
-to $3.5$ at time 350. After time 400, the system load is gradually
-decreasesd back to $0$ at time 750.
+to $3.5$ until time 350. After time 400, the system load is gradually
+decreasesd back to $0$ until time 750.
 Here, load $1.0$ is the capacity of a single resource. 
 Initially, all resources in the pool are idle, and their costs are
 all $f(0)= 2$.
@@ -239,19 +239,19 @@ enable loose automatic distributed load balancing.
 
 The utilization of a resource can be manipulated by modifying the cost
 function of the resource.
-\begin{description}
-\item	[lowering or raising utilization] corresponds to raising or
-	lowering the cost, e.g., to make the cost $n$ times
-        more expensive, $f'(\rho) = n f(\rho)$.
-        For minor adjustment, one can use an additive form,
-        $f'(\rho) = f(\rho) + \Delta$.
-\item	[idle-state] can be made stickier by raising the cost at
-	  $\rho = 0$,
-  	e.g., $f'(\rho) = n (2\rho - 1)^{2}/(1 - \rho^{n}) + 1$.
-\item	[premium service] can be realized by lowering the target load so
-        that a premium job are always assigned to lightly loaded resources, 
-        $f'(\rho) = f(\rho + \Delta)$.
-        Similary, an economy service can be made by raising the target load.
-\end{description}
 
+One can {\bf lower or raise the utilization} of a resource by raising or
+lowering the cost.
+To make the cost $n$ times more expensive, $f'(\rho) = n f(\rho)$.
+For minor adjustment, one can use an additive form,
+$f'(\rho) = f(\rho) + \Delta$.
+
+The {\bf idle-state can be made stickier} by raising the cost at $\rho = 0$:
+e.g., $f'(\rho) = n (2\rho - 1)^{2}/(1 - \rho^{n}) + 1$.
+
+A {\bf premium service} can be realized by lowering the target load so
+that premium jobs are always assigned to lightly loaded resources, 
+$f'(\rho) = f(\rho + \Delta)$.
+Similary, an {\bf economy service} can be made by raising the target
+load.
 
