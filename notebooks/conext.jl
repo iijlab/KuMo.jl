@@ -587,7 +587,7 @@ function scenario_b2(;
     max_load=3.50,
     nodes=(4, 100),
     rate=0.01,
-    j=job(0, 1, rand(1:4), 3.25, 0)
+    j=job(0, 1, rand(1:4), 4, 0)
 )
     _requests = Vector{KuMo.Request{typeof(j)}}()
 
@@ -619,7 +619,7 @@ function scenario_b2(;
 		],
         users=[
             # user 1
-            user(KuMo.Requests(_requests), 1),
+            user(KuMo.Requests(_requests), rand(1:4)),
 		],
 	    links=[
 	    	(1, 2, 200.0), (2, 3, 200.0), (3, 4, 200.0), (4, 1, 200.0),
@@ -672,6 +672,62 @@ begin
 	savefig(pb_1_area, "square_long-duration_area.pdf")
 	savefig(pb_2_line, "square_aperiodic_multiplicative_line.pdf")
 	savefig(pb_2_area, "square_aperiodic_multiplicative_area.pdf")
+end
+
+# ╔═╡ 21fc0470-2c99-45fb-a3d2-e9cd40b01835
+md"""
+## Complex Scenarii
+"""
+
+# ╔═╡ 22f9488e-73c4-4d0b-8d42-abd654b99795
+function scenario_c1()
+	j=job(0, 1, rand(1:4), 4, 0)
+    _requests = Vector{KuMo.Request{typeof(j)}}()
+
+    scenario(;
+        duration=50,
+        nodes=[
+			Node(1000),
+			Node(1000),
+			Node(100),
+			Node(100),
+		],
+        users=[
+			# user 1
+	        user(job(10, 1, 3, 4, 50), 1.0/100, 3;)
+			# user 2
+			user(job(50, 1, 1, 4, 10), 1.0/100, 1;)
+			# user 3
+			user(job(10, 1, 4, 4, 50), 1.0/100, 2;)
+			# user 4
+			user(job(10, 1, 2, 4, 10), 1.0/100, 4;)
+		],
+	    links=[
+	    	(1, 2, 200.0), (2, 3, 200.0), (3, 1, 200.0), (4, 1, 200.0),
+	        (2, 1, 200.0), (3, 2, 200.0), (1, 3, 200.0), (1, 4, 200.0),
+	    ],
+    )
+end
+
+# ╔═╡ 2a9aadf8-cbd3-43ab-b8a6-14025d551208
+# ╠═╡ show_logs = false
+# Simulation
+_, dfc1, _ = simulate(scenario_c1(), ShortestPath(); speed=0);
+
+# ╔═╡ 38e2b098-72d0-4b9c-ade7-c970a8fd1968
+# Line plot
+begin
+    pc_1_nodes = @df dfc1 plot(:instant,
+        cols(6:9), tex_output_standalone=true, xlabel="time",
+        ylabel="load", title="Resources allocations using basic pseudo-cost functions",
+        w=1.25,
+    );
+	pc_1_links = @df dfc1 plot(:instant,
+        cols(10:17), tex_output_standalone=true, xlabel="time",
+        ylabel="load",
+        w=1.25,
+	);
+	pc_1_line = plot(pc_1_nodes, pc_1_links, layout = grid(2,1))
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2102,5 +2158,9 @@ version = "0.9.1+5"
 # ╠═3bd49fa3-9231-4160-bc70-bf91485a26c6
 # ╠═7c0bd323-1407-4c9d-afb6-1fabb616352c
 # ╠═8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
+# ╟─21fc0470-2c99-45fb-a3d2-e9cd40b01835
+# ╠═22f9488e-73c4-4d0b-8d42-abd654b99795
+# ╠═2a9aadf8-cbd3-43ab-b8a6-14025d551208
+# ╠═38e2b098-72d0-4b9c-ade7-c970a8fd1968
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
