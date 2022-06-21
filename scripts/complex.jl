@@ -1,20 +1,35 @@
 using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX, Plots
 
 function scenario_c1()
-	j=job(0, 1, rand(1:4), 4, 0)
-    _requests = Vector{KuMo.Request{typeof(j)}}()
+	j1=job(75, 30, 2, 10, 20)
+    user1 = user(requests(PeriodicRequests(
+        j1, 1.0/10;
+        start = 0., stop = 100.)), 3
+    )
+
+	j2=job(75, 30, 1, 10, 20)
+    user2 = user(PeriodicRequests(
+        j2, 1.0/10;
+        start = 0., stop = 100.), 3
+    )
+    # user2 = user(PeriodicRequests(j, 1.0/150; start = 0., stop = 10.), 3)
+
+    userss = [user1, user2]
+
+    @info typeof(userss)
 
     scenario(;
-        duration=10,
+        duration=1000,
         nodes=[
-			Node(1000),
-			Node(1000),
+			Node(120),
 			Node(100),
-			Node(100),
+			Node(10),
+			Node(10),
 		],
         users=[
 			# user 1
-	        user(job(10, 1, 2, 1, 50), 1.0/1000, 3;)
+	        user1,
+            user2,
 			# # user 2
 			# user(job(50, 1, 1, 1, 10), 1.0/1000, 1;)
 			# # user 3
@@ -23,8 +38,8 @@ function scenario_c1()
 			# user(job(10, 1, 2, 1, 10), 1.0/1000, 4;)
 		],
 	    links=[
-	    	(1, 2, 200.0), (2, 3, 200.0), (3, 1, 200.0), (4, 1, 200.0),
-	        (2, 1, 200.0), (3, 2, 200.0), (1, 3, 200.0), (1, 4, 200.0),
+	    	(1, 2, 100.0), (2, 3, 100.0), (3, 1, 100.0), (4, 1, 100.0),
+	        (2, 1, 100.0), (3, 2, 10.0), (1, 3, 100.0), (1, 4, 100.0),
 	    ],
     )
 end

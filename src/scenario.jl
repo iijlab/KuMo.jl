@@ -2,7 +2,7 @@ struct Scenario{N<:AbstractNode,L<:AbstractLink,R<:AbstractRequests}
     data::Dictionary{Int,Data}
     duration::Real
     topology::Topology{N,L}
-    users::Dictionary{Int,User{R}}
+    users::Dictionary{Int,User}
 end
 
 function make_nodes(nodes)
@@ -81,7 +81,11 @@ function make_users(n::Int, rate, locations, jd, data)
 end
 
 function make_users(users, locations, data)
-    _users = Dictionary(users)
+    types = Set{Type}()
+    foreach(u -> push!(types, typeof(u).parameters[1]), users)
+    UT = Union{collect(types)...}
+
+    _users = Dictionary{Int, UT}(users)
     for i in 1:length(users)
         set!(data, i, Data(rand(locations)))
     end

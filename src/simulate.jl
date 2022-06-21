@@ -34,6 +34,7 @@ function push_snap!(snapshots, state, total, selected, duration, solving_time, i
     links = deepcopy(state.links[1:n, 1:n])
     nodes = deepcopy(state.nodes[1:n])
     snap = SnapShot(State(links, nodes), total, selected, duration, solving_time, round(instant; digits=5))
+    @info "debug links 2" snap.state.links
     push!(snapshots, snap)
 end
 
@@ -147,9 +148,15 @@ function inner_queue(
 
     paths_user = dijkstra_shortest_paths(g, u, link_costs; trackvertices=true)
     paths_data = dijkstra_shortest_paths(g, j.data_location, link_costs; trackvertices=true)
-    best_cost, best_node = findmin(paths_user.dists + paths_data.dists + [node_costs[i] for i in keys(node_costs)])
+    best_cost, best_node = findmin(
+        paths_user.dists + paths_data.dists +
+        [node_costs[i] for i in keys(node_costs)]
+    )
 
-    best_nodes = findall(x -> x == best_cost, paths_user.dists + paths_data.dists + [node_costs[i] for i in keys(node_costs)])
+    best_nodes = findall(
+        x -> x == best_cost,
+        paths_user.dists + paths_data.dists + [node_costs[i] for i in keys(node_costs)]
+    )
 
     best_node = minimum(best_nodes)
 
@@ -159,9 +166,12 @@ function inner_queue(
     foreach(p -> best_links[p.first, p.second] = j.frontend, path_user)
     foreach(p -> best_links[p.first, p.second] = j.backend, path_data)
 
+    @info "debug links" best_links best_node
+
     return best_links, best_cost, best_node
 end
 
+# FIXME - links indices
 function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     function shape_entry(s)
         entry = Vector{Pair{String,Float64}}()
@@ -174,7 +184,7 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
         foreach(p -> push!(entry, string(p.first) => p.second / capacity(topo.nodes[p.first])), pairs(s.state.nodes))
 
         for (i, j) in keys(topo.links)
-            push!(entry, string((i, j)) => s.state.links[i, j] / capacity(topo.links[(i, j)]))
+            push!(entry, string((i, j)) => s.state.links[j, i] / capacity(topo.links[(j, i)]))
         end
 
         return entry
