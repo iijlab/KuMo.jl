@@ -1,45 +1,44 @@
 using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX, Plots
 
 function scenario_c1()
-	j1=job(75, 30, 2, 10, 20)
-    user1 = user(requests(PeriodicRequests(
-        j1, 1.0/10;
-        start = 0., stop = 100.)), 3
-    )
+	j1 = job(10, 10, 2, 50, 5)
+    π1 = 0.1
+    req1 = [Request(j1, t) for t in π1:π1:12*π1]
+    user1 = user(req1, 3)
 
-	j2=job(75, 30, 1, 10, 20)
-    user2 = user(PeriodicRequests(
-        j2, 1.0/10;
-        start = 0., stop = 100.), 3
-    )
-    # user2 = user(PeriodicRequests(j, 1.0/150; start = 0., stop = 10.), 3)
+	j2 = job(5, 5, 1, 1, 10)
+    π2 = 0.001
+    req2 = [Request(j2, t) for t in π2:π2:10.]
+    user2 = user(req2, 3)
 
-    userss = [user1, user2]
+    j3 = job(10, 10, 2, 1, 5)
+    π3 = 0.001
+    req3 = [Request(j3, t) for t in π3:π3:10.]
+    user3 = user(req3, 4)
 
-    @info typeof(userss)
+	j4 = job(5, 1, 1, 4, 25)
+    π4 = 0.001
+    req4 = [Request(j4, t) for t in π4:π4:10.]
+    user4 = user(req4, 4)
+
 
     scenario(;
         duration=1000,
         nodes=[
-			Node(120),
 			Node(100),
+			Node(150),
 			Node(10),
 			Node(10),
 		],
         users=[
-			# user 1
-	        user1,
-            user2,
-			# # user 2
-			# user(job(50, 1, 1, 1, 10), 1.0/1000, 1;)
-			# # user 3
-			# user(job(10, 1, 4, 1, 50), 1.0/1000, 2;)
-			# # user 4
-			# user(job(10, 1, 2, 1, 10), 1.0/1000, 4;)
+            user1,
+            # user2,
+            # user3,
+            # user4,
 		],
 	    links=[
-	    	(1, 2, 100.0), (2, 3, 100.0), (3, 1, 100.0), (4, 1, 100.0),
-	        (2, 1, 100.0), (3, 2, 10.0), (1, 3, 100.0), (1, 4, 100.0),
+	    	(1, 2, 150.0), (2, 3, 50.0), (3, 1, 50.0), (4, 1, 50.0),
+	        (2, 1, 150.0), (3, 2, 50.0), (1, 3, 50.0), (1, 4, 50.0),
 	    ],
     )
 end

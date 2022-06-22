@@ -34,7 +34,6 @@ function push_snap!(snapshots, state, total, selected, duration, solving_time, i
     links = deepcopy(state.links[1:n, 1:n])
     nodes = deepcopy(state.nodes[1:n])
     snap = SnapShot(State(links, nodes), total, selected, duration, solving_time, round(instant; digits=5))
-    @info "debug links 2" snap.state.links
     push!(snapshots, snap)
 end
 
@@ -132,43 +131,119 @@ function inner_queue(
     best_cost = Inf
 
     node_costs = nothing
-    link_costs = nothing
+    data_costs = nothing
+    user_costs = nothing
+    total_cost = Inf
+
+    data_path = Vector{Pair{Int,Int}}()
+    user_path = Vector{Pair{Int,Int}}()
+
+    # computing shortest paths starting with frontend (user)
     lock(lck)
     try
-        node_costs = map(v -> pseudo_cost(v.second, state.nodes[v.first]), pairs(nodes))
-        link_costs = zeros(size(capacities))
-        for i in 1:size(state.links, 1), j in 1:size(state.links, 1)
-            if (i, j) ∈ keys(links)
-                link_costs[i, j] = pseudo_cost(links[(i, j)], state.links[i, j])
+        node_costs = map(
+            v -> pseudo_cost(v.second, state.nodes[v.first] + j.containers),
+            pairs(nodes)
+        )
+        user_costs = zeros(size(capacities))
+        for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
+            if (i, k) ∈ keys(links)
+                user_costs[i, k] = pseudo_cost(links[(i, k)], state.links[i, k] + j.frontend)
             end
         end
     finally
         unlock(lck)
     end
+    paths_user = dijkstra_shortest_paths(g, u, user_costs; trackvertices=true)
 
-    paths_user = dijkstra_shortest_paths(g, u, link_costs; trackvertices=true)
-    paths_data = dijkstra_shortest_paths(g, j.data_location, link_costs; trackvertices=true)
-    best_cost, best_node = findmin(
-        paths_user.dists + paths_data.dists +
-        [node_costs[i] for i in keys(node_costs)]
-    )
+    for v in keys(node_costs)
+        current_path = retrieve_path(u, v, paths_user)
 
-    best_nodes = findall(
-        x -> x == best_cost,
-        paths_user.dists + paths_data.dists + [node_costs[i] for i in keys(node_costs)]
-    )
+        charges = zeros(size(capacities))
+        for p in current_path
+            a, b = p.first, p.second
+            charges[a, b] = state.links[a, b] + j.frontend
+        end
 
-    best_node = minimum(best_nodes)
+        lock(lck)
+        try
+            data_costs = zeros(size(capacities))
+            for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
+                if (i, k) ∈ keys(links)
+                    data_costs[i, k] = pseudo_cost(links[(i, k)], charges[i, k] + j.backend)
+                end
+            end
+        finally
+            unlock(lck)
+        end
 
-    path_user = retrieve_path(u, best_node, paths_user)
-    path_data = retrieve_path(j.data_location, best_node, paths_data)
+        paths_data = dijkstra_shortest_paths(
+            g, j.data_location, data_costs;
+            trackvertices=true
+        )
 
-    foreach(p -> best_links[p.first, p.second] = j.frontend, path_user)
-    foreach(p -> best_links[p.first, p.second] = j.backend, path_data)
+        current_cost = paths_user.dists[v] + paths_data.dists[v] + node_costs[v]
+        if current_cost ≤ total_cost
+            total_cost = current_cost
+            data_path = retrieve_path(j.data_location, v, paths_data)
+            user_path = current_path
+            best_node = v
+        end
+    end
 
-    @info "debug links" best_links best_node
+    # computing shortest paths starting with backend (data)
+    lock(lck)
+    try
+        data_costs = zeros(size(capacities))
+        for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
+            if (i, k) ∈ keys(links)
+                data_costs[i, k] = pseudo_cost(links[(i, k)], state.links[i, k] + j.backend)
+            end
+        end
+    finally
+        unlock(lck)
+    end
+    paths_data = dijkstra_shortest_paths(g, j.data_location, data_costs; trackvertices=true)
 
-    return best_links, best_cost, best_node
+    for v in keys(node_costs)
+        current_path = retrieve_path(j.data_location, v, paths_data)
+
+        charges = zeros(size(capacities))
+        for p in current_path
+            a, b = p.first, p.second
+            charges[a, b] = state.links[a, b] + j.backend
+        end
+
+        lock(lck)
+        try
+            user_costs = zeros(size(capacities))
+            for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
+                if (i, k) ∈ keys(links)
+                    user_costs[i, k] = pseudo_cost(links[(i, k)], charges[i, k] + j.frontend)
+                end
+            end
+        finally
+            unlock(lck)
+        end
+
+        paths_user = dijkstra_shortest_paths(
+            g, u, user_costs;
+            trackvertices=true
+        )
+
+        current_cost = paths_user.dists[v] + paths_data.dists[v] + node_costs[v]
+        if current_cost ≤ total_cost
+            total_cost = current_cost
+            data_path = current_path
+            user_path = retrieve_path(u, v, paths_user)
+            best_node = v
+        end
+    end
+
+    foreach(p -> best_links[p.first, p.second] = j.frontend, user_path)
+    foreach(p -> best_links[p.first, p.second] += j.backend, data_path)
+
+    return best_links, total_cost, best_node
 end
 
 # FIXME - links indices
@@ -224,6 +299,7 @@ end
 
 function init_user(::Scenario, u::User, tasks, ::Requests)
     foreach(r -> insert_sorted!(tasks, Load(r.start, u.location, r.job)), u.job_requests.requests)
+    @info "debug" tasks
 end
 
 function init_simulate(s, algo, tasks, start)
@@ -369,7 +445,7 @@ function insert_sorted!(w, val, it=iterate(w))
     push!(w, val)
 end
 
-function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{0})
+function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
     tasks, queued, unloads = containers
     times, snapshots, g, capacities, n, state, demands = args_loop
 
@@ -396,21 +472,28 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{0})
         start_iteration = time()
 
         next_queued = iterate(queued, previous_queued)
+        if next_queued !== nothing && !unchecked_unload
+            @warn "debug !unchecked" next_queued ii
+        end
         if next_queued !== nothing && unchecked_unload
+            @info "debug entering queued" next_queued ii
             (task, _) = next_queued
             best_links, best_cost, best_node, is_valid =
                 execute_valid_load(s, task, g, capacities, state, algo, demands)
 
             if is_valid
+                @info "debug is_valid" task
                 j = task.job
                 # Add load
                 add_load!(state, best_links, j.containers, best_node, n)
 
+                @warn "debug snapshots prior push" snapshots last_unload n
                 # Snap new state
                 push_snap!(snapshots, state, 0, 0, 0, 0, last_unload, n)
+                @warn "debug snapshots after push" snapshots last_unload n
 
                 # Assign unload
-                unload = Unload(task.occ + j.duration, best_node, j.containers, best_links)
+                unload = Unload(last_unload + j.duration, best_node, j.containers, best_links)
                 insert_sorted!(unloads, unload, next_unload)
 
                 # Advance iterator
@@ -419,7 +502,8 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{0})
                 ProgressMeter.update!(p, ii)
                 continue
             else
-                # unchecked_unload = false
+                @info "debug !is_valid"
+                unchecked_unload = false
             end
         end
 
@@ -443,6 +527,7 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{0})
         end
 
         # Nothing can be unload or exexecuted from the queue => load new task
+        # isnothing(next_task) && break
         (task, ts) = next_task
         best_links, best_cost, best_node, is_valid =
             execute_valid_load(s, task, g, capacities, state, algo, demands)
@@ -460,7 +545,7 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val{0})
             unload = Unload(task.occ + j.duration, best_node, j.containers, best_links)
             insert_sorted!(unloads, unload, next_unload)
         else
-            # unchecked_unload = false
+            unchecked_unload = false
             push!(queued, task)
         end
 
@@ -500,8 +585,8 @@ function clean(snaps)
 end
 
 function post_simulate(s, snapshots, verbose, output)
-    df_snaps = make_df(clean(snapshots), s.topology; verbose)
-    # df_snaps = make_df(snapshots, s.topology; verbose)
+    # df_snaps = make_df(clean(snapshots), s.topology; verbose)
+    df_snaps = make_df(snapshots, s.topology; verbose)
     if !isempty(output)
         CSV.write(joinpath(datadir(), output), df_snaps)
         verbose && (@info "Output written in $(datadir())")

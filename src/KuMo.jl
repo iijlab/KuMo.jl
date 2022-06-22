@@ -37,6 +37,7 @@ export ShortestPath
 
 export PeriodicRequests
 export Request
+export Requests
 
 export Link
 export FreeLink
