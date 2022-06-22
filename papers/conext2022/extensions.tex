@@ -1,46 +1,73 @@
+%% summary and future work
 
-The basic resource management model has been presented.
-But there exists a rich area for further research, as well as
-necessary solutions for building a working prototype system.
+In this paper, we have presented the cloud morphing vision for
+future distributed cloud services,
+proposed a cost function based resource allocation model,
+and presented the basic idea for idle-resource pooling.
+We are planning to refine the proposed model and developing a working
+prototype system.
 
-\begin{description}
+For model refinement,
+the current model is simplistic. We will add bidirectional links,
+multiple users per job, interactions among jobs, and so on.
+We did not consider dependency among microservice jobs but it would be
+necessary to investigate the impact of the interplay of microservice
+jobs ~\cite{Suresh-SOA-SOCC2017}.
 
-\item[Model Refinement:]  The current model is simplistic. We will add
-  bidirectional links, multiple users per job, interactions among
-  jobs, and so on.
+For prototype development,
+we need realistic microservice workload models.
+Also, it is necessary to develop mechanisms and protocols for
+discovering available resources~\cite{Albrecht2008} and exchanging
+cost information.
+A path selection mechanism is also needed when assigning a job,
+probabaly using SRv6 or other source routing mechanism.
 
-\item[Hierarchical Configurations:] It would be better to use
-  hierarchical configurations for scalability and for management
-  purposes.
-  For example, a distributed datacenter model can consist of
-  the inter-DC layer with DC-level resources and the intra-DC layer
-  with rack-level resources.
+There exists a rich area for further research.
+\noindent
+{\bf How to tune the cost function:}  It may not be straightforward
+to obtain expected results by tuning the cost function, as it may
+induce side effects.
+It would be interesting to apply reinforcement learning to cost
+tuning.
 
-\item[Inter-cloud:]
-  The hierarchical model naturally extends to an inter-cloud model in which
-  different cloud systems are federated.
-  The mechanism of the idle resource pooling allows utilizing external
-  clouds when only needed.
+\noindent
+{\bf Hierarchical Configurations:} It would be better to use
+hierarchical configurations for scalability and for management
+purposes.
+For example, a distributed datacenter model can consist of
+the inter-DC layer with DC-level resources and the intra-DC layer
+with rack-level resources.
 
-\item [Business Model:] charging, authentification and authorization.
+\noindent
+{\bf Inter-cloud:}
+The proposed system was originally designed mainly for a single
+administrave dmain.
+The hierarchical model, however, naturally extends to an inter-cloud
+model in which different cloud systems are federated.
+The mechanism of the idle resource pooling allows utilizing external
+clouds when only needed.
 
-\item[Data Migration:]
-  The location of data is critical.
-  A possible approach is to migrate data at coarser timescale, based
-  on usage history.
-  Another possibility is design a new distributed storage system in
-  which (cached) data can be easily moved.
+\noindent
+{\bf Crowdsourcing resource supply:}
+It would be possible to crowdsource the role of resource providers. 
+Then, we need a monetary charging, authentification and authorization
+mechanisms to add externally provided resources to the resource pool.
 
-\item[L2 Paths:] It is possible to use idle resource pooling for dynamically
-  creating Layer 2 paths (e.g., light path switching over WDM networks).
+\noindent
+{\bf Data Migration:}
+The location of data is critical for the pseudo cost so that data
+placement would play an important role for cloud morphing. 
+A possible approach is to migrate data at coarser timescale, based
+on usage history.
+Another possibility is design a new distributed storage system
+suitable to the cloud morphing model in which (cached) data can be
+easily moved.
 
-\item[Resource discovery and cost exchange protocols:]
-  It is necessary to develop mechanisms and protocols for finding
-  available resources and their costs~\cite{Albrecht2008}..
+\noindent
+{\bf L2 Paths:}
+idle-resource pooling is not used for network links in this paper but
+it is possible to use it for dynamically creating Layer 2 paths (e.g.,
+lightpath switching over WDM networks).
 
-\item[Source Routing:] We assumed that it is possible to select network paths
-  when assigning a job, probabaly using SRv6 or other source routing mechanism.
-
-\item[Dependency among micro services:]~\cite{Suresh-SOA-SOCC2017}
-  
-\end{description}
+Our simulation tool is publicly available from (URL removed for
+review).

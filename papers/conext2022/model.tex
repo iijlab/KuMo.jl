@@ -132,7 +132,7 @@ aiming at $\rho = .5$.
 
 The standatd monotonic function is deafined as:
 \begin{equation*}
-	f(\rho) = \frac{\rho^{5}}{1 - \rho} + 1
+	f(\rho) = \frac{\rho^{4.5}}{1 - \rho} + 1
 \end{equation*}
 to roughly match the standard convex function in $[.5, .75]$,
 the {\em working load range} explained in the next subsection.
@@ -232,14 +232,15 @@ $f(.5)$ for the deactivating one.
 When the load of a resource fluctuates too rapidly,
 a smoothing filter such as an exponetially weighted moving average
 can be used to stabilize the behavior.
-Our goal is not to achieve the theoretical optimum but to
+
+Note that our goal is not to achieve the theoretical optimum but to
 enable loose automatic distributed load balancing.
 
 \subsection{Manipulating the Cost Function}
 \label{sec:variation}
 
 The utilization of a resource can be manipulated by modifying the cost
-function of the resource.
+function of the resource as shown in Figure~\ref{fig:costfunc3}.
 
 One can {\bf lower or raise the utilization} of a resource by raising or
 lowering the cost.
@@ -259,9 +260,19 @@ load.
 
 \begin{figure}[tb]
   \begin{center}
+    \includegraphics[width=1.0\columnwidth]{costfunc3.pdf}
+    \vspace{-2.0ex}
+    \caption{Manipulating convex cost functions}
+    \label{fig:costfunc3}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}[tb]
+  \begin{center}
     \includegraphics[width=1.0\columnwidth]{lowering.pdf}
     \vspace{-2.0ex}
-    \caption{Manipulating Cost Functions}
+    \caption{Data intensive and interactive jobs}
     \label{fig:lowering}
   \end{center}
 \end{figure}
@@ -273,7 +284,7 @@ and n1 because of the difference in their capacity.
 The first wave contains only data intensive jobs, and all jobs are
 assigned to the node that has the object (n3).
 The second and third waves contain only interactive jobs, and most of
-the jobs are assigned the node closest to the user (n0) but some
+the jobs are assigned to the node closest to the user (n0) but some
 overflowing jobs are assigned to n2.
-In the third wave, the cost function is manipulated to reduce the load
-of n0 by multiplying the cost function by 1.5.
+In the third wave, the cost function of n0 is manipulated to reduce
+the load by multiplying the cost function by 1.5.a
