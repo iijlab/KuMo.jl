@@ -269,6 +269,15 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     df = DataFrame(shape_entry(first(snapshots)))
     foreach(e -> push!(df, Dict(shape_entry(e))), snapshots[2:end])
 
+    acc = Vector{Symbol}()
+    for (i, col) in enumerate(propertynames(df))
+        if i < 6 || !all(iszero, df[!,col])
+            push!(acc, col)
+        end
+    end
+
+    df = df[!,acc]
+
     verbose && pretty_table(describe(df))
 
     return df

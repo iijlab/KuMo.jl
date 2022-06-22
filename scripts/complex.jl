@@ -55,15 +55,20 @@ _, dfc1, _ = simulate(scenario_c1(), ShortestPath(); speed=0);
 
 # Line plot
 begin
+    a, b, c, d = marks(dfc1)
     pc_1_nodes = @df dfc1 plot(:instant,
-        cols(6:9), tex_output_standalone=true, xlabel="time",
+        cols(a:b), tex_output_standalone=true, xlabel="time",
         ylabel="load", title="Resources allocations using basic pseudo-cost functions",
         w=1.25,
     );
 	pc_1_links = @df dfc1 plot(:instant,
-        cols(10:17), tex_output_standalone=true, xlabel="time",
+        cols(c:d), tex_output_standalone=true, xlabel="time",
         ylabel="load",
         w=1.25,
 	);
 	pc_1_line = plot(pc_1_nodes, pc_1_links, layout = grid(2,1))
 end
+
+plot_nodes(dfc1)
+plot_links(dfc1)
+# plot_resources(dfc1; layout = grid(2, 1))
