@@ -1,23 +1,23 @@
 using KuMo, DataFrames, StatsPlots, CSV, PGFPlotsX, Plots
 
 function scenario_c1()
-	j1 = job(10, 10, 2, 50, 5)
+	j1 = job(10, 10, 2, 4, 5)
     π1 = 0.1
-    req1 = [Request(j1, t) for t in π1:π1:12*π1]
+    req1 = [Request(j1, t) for t in π1:π1:10.]
     user1 = user(req1, 3)
 
-	j2 = job(5, 5, 1, 1, 10)
-    π2 = 0.001
+	j2 = job(5, 5, 1, 4, 10)
+    π2 = 0.1
     req2 = [Request(j2, t) for t in π2:π2:10.]
     user2 = user(req2, 3)
 
-    j3 = job(10, 10, 2, 1, 5)
-    π3 = 0.001
+    j3 = job(10, 10, 2, 4, 5)
+    π3 = 0.1
     req3 = [Request(j3, t) for t in π3:π3:10.]
     user3 = user(req3, 4)
 
 	j4 = job(5, 1, 1, 4, 25)
-    π4 = 0.001
+    π4 = 0.1
     req4 = [Request(j4, t) for t in π4:π4:10.]
     user4 = user(req4, 4)
 
@@ -32,13 +32,13 @@ function scenario_c1()
 		],
         users=[
             user1,
-            # user2,
-            # user3,
-            # user4,
+            user2,
+            user3,
+            user4,
 		],
 	    links=[
-	    	(1, 2, 150.0), (2, 3, 50.0), (3, 1, 50.0), (4, 1, 50.0),
-	        (2, 1, 150.0), (3, 2, 50.0), (1, 3, 50.0), (1, 4, 50.0),
+	    	(1, 2, 150.0), (2, 3, 150.0), (3, 1, 50.0), (4, 1, 50.0),
+	        (2, 1, 150.0), (3, 2, 150.0), (1, 3, 50.0), (1, 4, 50.0),
 	    ],
     )
 end

@@ -299,7 +299,7 @@ end
 
 function init_user(::Scenario, u::User, tasks, ::Requests)
     foreach(r -> insert_sorted!(tasks, Load(r.start, u.location, r.job)), u.job_requests.requests)
-    @info "debug" tasks
+    @debug "debug" tasks
 end
 
 function init_simulate(s, algo, tasks, start)
@@ -473,24 +473,24 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
 
         next_queued = iterate(queued, previous_queued)
         if next_queued !== nothing && !unchecked_unload
-            @warn "debug !unchecked" next_queued ii
+            @debug "debug !unchecked" next_queued ii
         end
         if next_queued !== nothing && unchecked_unload
-            @info "debug entering queued" next_queued ii
+            @debug "debug entering queued" next_queued ii
             (task, _) = next_queued
             best_links, best_cost, best_node, is_valid =
                 execute_valid_load(s, task, g, capacities, state, algo, demands)
 
             if is_valid
-                @info "debug is_valid" task
+                @debug "debug is_valid" task
                 j = task.job
                 # Add load
                 add_load!(state, best_links, j.containers, best_node, n)
 
-                @warn "debug snapshots prior push" snapshots last_unload n
+                @debug "debug snapshots prior push" snapshots last_unload n
                 # Snap new state
                 push_snap!(snapshots, state, 0, 0, 0, 0, last_unload, n)
-                @warn "debug snapshots after push" snapshots last_unload n
+                @debug "debug snapshots after push" snapshots last_unload n
 
                 # Assign unload
                 unload = Unload(last_unload + j.duration, best_node, j.containers, best_links)
@@ -502,7 +502,7 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
                 ProgressMeter.update!(p, ii)
                 continue
             else
-                @info "debug !is_valid"
+                @debug "debug !is_valid"
                 unchecked_unload = false
             end
         end
@@ -585,8 +585,8 @@ function clean(snaps)
 end
 
 function post_simulate(s, snapshots, verbose, output)
-    # df_snaps = make_df(clean(snapshots), s.topology; verbose)
-    df_snaps = make_df(snapshots, s.topology; verbose)
+    df_snaps = make_df(clean(snapshots), s.topology; verbose)
+    # df_snaps = make_df(snapshots, s.topology; verbose)
     if !isempty(output)
         CSV.write(joinpath(datadir(), output), df_snaps)
         verbose && (@info "Output written in $(datadir())")
