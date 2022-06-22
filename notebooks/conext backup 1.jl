@@ -34,16 +34,6 @@ begin
 end;
   ╠═╡ =#
 
-# ╔═╡ 7c825937-a677-4b53-8ac9-73ddc172474f
-# utility function
-function marks(df)
-	a = 6
-	b = findfirst(map(x -> occursin("(", x), names(df))) - 1
-	c = b + 1
-	d = length(names(df))
-	return a, b, c, d
-end
-
 # ╔═╡ 6eff9ab6-620a-4a31-833d-8b8ec2b399a6
 md"""
 ## Nodes-only scenarii
@@ -691,70 +681,49 @@ md"""
 
 # ╔═╡ 22f9488e-73c4-4d0b-8d42-abd654b99795
 function scenario_c1()
-	j1 = job(100, 5, 4, 3, 1)
-    π1 = 0.001
-    req1 = [Request(j1, t) for t in π1:π1:10.]
-    user1 = user(req1, 3)
-
-	j2 = job(1, 1, 0, 4, 2)
-    π2 = 0.1
-    req2 = [Request(j2, t) for t in π2:π2:10.]
-    user2 = user(req2, 3)
-
-    _requests = Vector{KuMo.Request{typeof(j1)}}()
-
-    L = 1000
-    r = 0.01
-    λ = 1.
-    n = 1
-    δ = j1.duration
-    c = j1.containers
-
-    π1 = λ / r
-    π2 = (2n - λ) / r
-
-    for i in 0:π1+π2
-        for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(j1, t))
-        end
-    end
-
+	j=job(0, 1, rand(1:4), 4, 0)
+    _requests = Vector{KuMo.Request{typeof(j)}}()
 
     scenario(;
-        duration=1000,
+        duration=50,
         nodes=[
-			Node(100),
-			Node(100),
 			Node(1000),
 			Node(1000),
+			Node(100),
+			Node(100),
 		],
         users=[
-            user(_requests, 1)
-            # user1,
-            # user2,
+			# user 1
+	        user(job(10, 1, 3, 4, 50), 1.0/100, 3;)
+			# user 2
+			user(job(50, 1, 1, 4, 10), 1.0/100, 1;)
+			# user 3
+			user(job(10, 1, 4, 4, 50), 1.0/100, 2;)
+			# user 4
+			user(job(10, 1, 2, 4, 10), 1.0/100, 4;)
 		],
 	    links=[
-	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
-	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
+	    	(1, 2, 200.0), (2, 3, 200.0), (3, 1, 200.0), (4, 1, 200.0),
+	        (2, 1, 200.0), (3, 2, 200.0), (1, 3, 200.0), (1, 4, 200.0),
 	    ],
     )
 end
 
 # ╔═╡ 2a9aadf8-cbd3-43ab-b8a6-14025d551208
+# ╠═╡ show_logs = false
 # Simulation
 _, dfc1, _ = simulate(scenario_c1(), ShortestPath(); speed=0);
 
 # ╔═╡ 38e2b098-72d0-4b9c-ade7-c970a8fd1968
 # Line plot
 begin
-	a, b, c, d = marks(dfc1)
     pc_1_nodes = @df dfc1 plot(:instant,
-        cols(a:b), tex_output_standalone=true, xlabel="time",
+        cols(6:9), tex_output_standalone=true, xlabel="time",
         ylabel="load", title="Resources allocations using basic pseudo-cost functions",
         w=1.25,
     );
 	pc_1_links = @df dfc1 plot(:instant,
-        cols(c:d), tex_output_standalone=true, xlabel="time",
+        cols(10:17), tex_output_standalone=true, xlabel="time",
         ylabel="load",
         w=1.25,
 	);
@@ -774,7 +743,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-KuMo = "~0.1.20"
+KuMo = "~0.1.19"
 PGFPlotsX = "~1.5.0"
 Plots = "~1.30.0"
 StatsPlots = "~0.14.34"
@@ -786,7 +755,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "76005d5bf994789aa7182464230a7d3c77e66270"
+project_hash = "54adcc28eaab1b61379bd2672c25579e885f8fc3"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1082,9 +1051,9 @@ version = "4.4.0+0"
 
 [[deps.FFTW]]
 deps = ["AbstractFFTs", "FFTW_jll", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
-git-tree-sha1 = "90630efff0894f8142308e334473eba54c433549"
+git-tree-sha1 = "505876577b5481e50d089c1c68899dfb6faebc62"
 uuid = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-version = "1.5.0"
+version = "1.4.6"
 
 [[deps.FFTW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1197,9 +1166,9 @@ version = "1.3.14+0"
 
 [[deps.Graphs]]
 deps = ["ArnoldiMethod", "Compat", "DataStructures", "Distributed", "Inflate", "LinearAlgebra", "Random", "SharedArrays", "SimpleTraits", "SparseArrays", "Statistics"]
-git-tree-sha1 = "db5c7e27c0d46fd824d470a3c32a4fc6c935fa96"
+git-tree-sha1 = "4888af84657011a65afc7a564918d281612f983a"
 uuid = "86223c79-3864-5bf0-83f7-82e725a168b6"
-version = "1.7.1"
+version = "1.7.0"
 
 [[deps.Grisu]]
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
@@ -1325,9 +1294,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "6934af04fa3d2f22690f6f28fb1d03135babc501"
+git-tree-sha1 = "07e6202ddc4701f648bc3cadfddb701802a8ccaf"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.20"
+version = "0.1.19"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1802,9 +1771,9 @@ version = "1.2.2"
 
 [[deps.StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
-git-tree-sha1 = "642f08bf9ff9e39ccc7b710b2eb9a24971b52b1a"
+git-tree-sha1 = "8977b17906b0a1cc74ab2e3a05faa16cf08a8291"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.33.17"
+version = "0.33.16"
 
 [[deps.StatsFuns]]
 deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
@@ -2142,7 +2111,6 @@ version = "0.9.1+5"
 # ╠═61189540-e578-11ec-3030-c3ebb611c28b
 # ╠═21639215-1463-46ff-80a0-f1f2028c7558
 # ╠═bc72d307-12f7-47c6-b90a-062814186978
-# ╠═7c825937-a677-4b53-8ac9-73ddc172474f
 # ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
 # ╠═698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═b4576a3c-823f-479b-b940-6fb60c824e35

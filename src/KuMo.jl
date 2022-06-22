@@ -16,6 +16,8 @@ using ProgressMeter
 using Random
 using SimpleTraits
 using SparseArrays
+using StatsPlots
+using StatsPlots: grid
 
 # SECTION - exports
 export job
@@ -23,13 +25,18 @@ export job_distributions
 export make_df
 export make_links
 export make_nodes
+export marks
 export mincost_flow
+export plot_links
+export plot_nodes
+export plot_resources
 export predict_cost
 export predict_best_cost
 export pseudo_cost
 export requests
 export scenario
 export simulate
+export simulate_and_plot
 export user
 
 export MinCostFlow
@@ -52,6 +59,9 @@ export IdleStateNode
 export SCENARII
 
 ## SECTION - includes
+
+# utilities
+include("utilities.jl")
 
 # defines structure for data items
 include("data.jl")
