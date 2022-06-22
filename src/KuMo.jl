@@ -17,6 +17,7 @@ using Random
 using SimpleTraits
 using SparseArrays
 using StatsPlots
+using StatsPlots: grid
 
 # SECTION - exports
 export job
@@ -35,6 +36,7 @@ export pseudo_cost
 export requests
 export scenario
 export simulate
+export simulate_and_plot
 export user
 
 export MinCostFlow
