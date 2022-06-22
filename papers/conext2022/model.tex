@@ -62,7 +62,7 @@ between $m$ and $o$.
 &&  H(j,i)      = p \cdot f(\rho_{i}) \\
 &&  G(j,i,m,o)  = q \cdot \smashoperator{\sum_{l \in path(m,i)}} f(\rho_{l}) + r \cdot \smashoperator{\sum_{l \in path(i,o)}} f(\rho_{l})
 \end{eqnarray*}
-$f(\rho)$ is the cost fuction of a resource load, and $path(m,i)$ is a set
+$f(\rho)$ is the cost function of a resource load, and $path(m,i)$ is a set
 of links from $m$ to $i$ (e.g., the shortest path weighted by cost).
 
 To assign Job $j$, the server simply finds the lowest cost node $i$:
@@ -84,7 +84,7 @@ location.
 The proposed model is based on congestion pricing in which the cost of
 a resource dynamically changes according to the load of the resource.
 It works as a barrier function for optimization; the capacity
-constraint is enforced by a penelizing cost when approaching the full
+constraint is enforced by a penalizing cost when approaching the full
 capacity.
 
 Another key idea is {\em idle-resource pooling} that tries to put resources
@@ -101,7 +101,7 @@ optimization theory.
 We use two types of pseudo cost functions: one is the monotonic cost
 function and the other is the convex cost function.
 The monotonic cost function is a simple barrier function that
-monotonically grows with load, up to inifinite as $\rho \to 1$.
+monotonically grows with load, up to infinite as $\rho \to 1$.
 The convex cost function is also a barrier function but also for
 idle-resource pooling.
 In this paper, the monotonic form is used for network links as
@@ -130,7 +130,7 @@ The cost grows rapidly when $\rho \ge .75$.
 The system automatically tries to keep $\rho \le .75$,
 aiming at $\rho = .5$.
 
-The standatd monotonic function is deafined as:
+The standard monotonic function is defined as:
 \begin{equation*}
 	f(\rho) = \frac{\rho^{4.5}}{1 - \rho} + 1
 \end{equation*}
@@ -175,7 +175,7 @@ resource.
 
 The initial system load $\sum \rho$ is $0$, and gradually increased up
 to $3.5$ until time 350. After time 400, the system load is gradually
-decreasesd back to $0$ until time 750.
+decreased back to $0$ until time 750.
 Here, load $1.0$ is the capacity of a single resource. 
 Initially, all resources in the pool are idle, and their costs are
 all $f(0)= 2$.
@@ -189,7 +189,7 @@ allocation so that both loads move towards $\rho_{0} = \rho_{1} = .5$,
 where both are balanced.
 Both loads rise again until $\rho_{r_{0}} = \rho_{r_{1}} = .75$,
 where the third resource $r_{2}$ kicks in.
-It repeats for $r_{3}$, but no more idle resouce is available
+It repeats for $r_{3}$, but no more idle resource is available
 when $\sum \rho$ reaches $3.0$ so that the loads grow beyond $.75$
 up to $\sum \rho = 3.5$ with $\rho = .875$ for each.
 
@@ -230,7 +230,7 @@ idle, the load of the remaining ones stay at the matching cost at
 $f(.5)$ for the deactivating one.
 
 When the load of a resource fluctuates too rapidly,
-a smoothing filter such as an exponetially weighted moving average
+a smoothing filter such as an exponentially weighted moving average
 can be used to stabilize the behavior.
 
 Note that our goal is not to achieve the theoretical optimum but to
@@ -255,7 +255,7 @@ $f'(\rho) = n (2\rho - 1)^{2}/(1 - \rho^{n}) + 1$.
 A {\bf premium service} can be realized by lowering the target load so
 that premium jobs are always assigned to lightly loaded resources, 
 $f'(\rho) = f(\rho + \Delta)$.
-Similary, an {\bf economy service} can be made by raising the target
+Similarly, an {\bf economy service} can be made by raising the target
 load.
 
 \begin{figure}[tb]
