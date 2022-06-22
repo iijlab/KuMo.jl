@@ -34,16 +34,6 @@ begin
 end;
   ╠═╡ =#
 
-# ╔═╡ 7c825937-a677-4b53-8ac9-73ddc172474f
-# utility function
-function marks(df)
-	a = 6
-	b = findfirst(map(x -> occursin("(", x), names(df))) - 1
-	c = b + 1
-	d = length(names(df))
-	return a, b, c, d
-end
-
 # ╔═╡ 6eff9ab6-620a-4a31-833d-8b8ec2b399a6
 md"""
 ## Nodes-only scenarii
@@ -59,8 +49,7 @@ Plots after that takes the time of allocation/deallocation as parameter.
 
 # ╔═╡ 698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═╡ show_logs = false
-# Simulation
-times, df1, snaps = simulate(SCENARII[:four_nodes], ShortestPath(); speed=0);
+simulate_and_plot(SCENARII[:four_nodes], ShortestPath())
 
 # ╔═╡ b4576a3c-823f-479b-b940-6fb60c824e35
 # ╠═╡ show_logs = false
@@ -774,7 +763,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-KuMo = "~0.1.20"
+KuMo = "~0.1.21"
 PGFPlotsX = "~1.5.0"
 Plots = "~1.30.0"
 StatsPlots = "~0.14.34"
@@ -1324,10 +1313,10 @@ uuid = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
 version = "0.6.3"
 
 [[deps.KuMo]]
-deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "6934af04fa3d2f22690f6f28fb1d03135babc501"
+deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PrettyTables", "ProgressMeter", "Random", "RecipesBase", "SimpleTraits", "SparseArrays", "StatsPlots"]
+git-tree-sha1 = "be5d6ff7b11555e2902fabe5645c5930e24e0d02"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.20"
+version = "0.1.21"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2142,7 +2131,6 @@ version = "0.9.1+5"
 # ╠═61189540-e578-11ec-3030-c3ebb611c28b
 # ╠═21639215-1463-46ff-80a0-f1f2028c7558
 # ╠═bc72d307-12f7-47c6-b90a-062814186978
-# ╠═7c825937-a677-4b53-8ac9-73ddc172474f
 # ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
 # ╠═698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═b4576a3c-823f-479b-b940-6fb60c824e35

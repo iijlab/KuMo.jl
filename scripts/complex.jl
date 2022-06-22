@@ -51,3 +51,5 @@ function scenario_c1()
 end
 
 simulate_and_plot(scenario_c1(), ShortestPath())
+
+simulate_and_plot(SCENARII[:four_nodes], ShortestPath())
