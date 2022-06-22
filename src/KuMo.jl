@@ -23,17 +23,21 @@ export job_distributions
 export make_df
 export make_links
 export make_nodes
-export requests
 export mincost_flow
 export predict_cost
 export predict_best_cost
 export pseudo_cost
+export requests
 export scenario
 export simulate
 export user
 
 export MinCostFlow
 export ShortestPath
+
+export PeriodicRequests
+export Request
+export Requests
 
 export Link
 export FreeLink
@@ -48,9 +52,6 @@ export IdleStateNode
 export SCENARII
 
 ## SECTION - includes
-
-# common code for KuMo.jl
-include("common.jl")
 
 # defines structure for data items
 include("data.jl")

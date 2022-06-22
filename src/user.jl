@@ -7,6 +7,8 @@ user(jr, loc::Int) = User(jr, loc)
 
 user(jr, loc) = user(jr, rand(loc))
 
+user(jr::Vector{R}, loc::Int) where {R<:Request} = user(requests(jr), loc)
+
 function user(job, period, loc; start=-Inf, stop=Inf)
     return user(PeriodicRequests(job, period; start, stop), loc)
 end

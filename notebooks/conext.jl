@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.8
+# v0.19.9
 
 using Markdown
 using InteractiveUtils
@@ -18,8 +18,8 @@ The package `KuMo.jl` is used both as an interface and a simulator of scenarii. 
 begin
 	pc1 = ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1
 	pc2 = ρ ->　ρ^2 / (1 - ρ) + 1
-	pc3 = ρ ->　(ρ + 0.02)^5 / (1 - ρ) + 1
-    plot_pc = plot([pc1, pc2, pc3], 0:0.01:0.9, label = ["ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1" "ρ ->　(ρ + 0.02)^5 / (1 - ρ) + 1" "ρ -> (ρ + 0.02)^5 / (1 - ρ) + 1"], legend=:topleft)
+	pc3 = ρ ->　ρ^4.5 / (1 - ρ) + 1
+    plot_pc = plot([pc1, pc2, pc3], 0:0.01:0.9, label = ["ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1" "ρ -> ρ^2 / (1 - ρ) + 1" "ρ -> ρ^4.5 / (1 - ρ) + 1"], legend=:topleft)
 	savefig(plot_pc, "pseudo_costs.pdf")
 	plot_pc
 end
@@ -59,7 +59,6 @@ begin
 		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
 		title="Resources allocations using basic pseudo-cost functions", w=1.25,
     );
-    # vline!([76, 152, 228, 304], w=0.75, color=:pink, style=:dash, legend=:none);
 end
 
 # ╔═╡ 0f54d3d2-3908-4b6f-9499-fa1d47531a1f
@@ -117,8 +116,8 @@ scenario3() = scenario(;
     duration=10,
     nodes=(4, 32),
     users=[
-		KuMo.user(KuMo.Job(0, 1, rand(1:4), 1, 0), 1.0/50, rand(1:4); start=4.01, stop=6.)
-        KuMo.user(KuMo.Job(0, 1, rand(1:4), 1, 0), 1.0/50, rand(1:4);)
+		user(job(0, 1, rand(1:4), 1, 0), 1.0/50, rand(1:4); start=4.01, stop=6.)
+        user(job(0, 1, rand(1:4), 1, 0), 1.0/50, rand(1:4);)
 	]
 )
 
@@ -152,13 +151,13 @@ scenario4() = scenario(;
     nodes=(4, 32),
     users=[
 		# user 1
-        KuMo.user(KuMo.Job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4);)
+        user(job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4);)
 		# user 2
-		KuMo.user(KuMo.Job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4); stop=12.)
+		user(job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4); stop=12.)
 		# user 3
-		KuMo.user(KuMo.Job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4); start=2.01, stop=5.)
+		user(job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4); start=2.01, stop=5.)
 		# user 4
-		KuMo.user(KuMo.Job(0, 1, rand(1:4), 1, 0), 1.0/75, rand(1:4); start=7.01, stop=9.)
+		user(job(0, 1, rand(1:4), 1, 0), 1.0/75, rand(1:4); start=7.01, stop=9.)
 	]
 )
 
@@ -186,21 +185,41 @@ begin
 end
 
 # ╔═╡ e2144b8b-6b09-4f99-8bf3-819d0a7704f1
-scenario5() = scenario(;
-    duration=100,
+function scenario5(;
+    max_load=3.50,
     nodes=(4, 100),
-    users=[
-        # user 1
-        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); stop=34.5),
-        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=6.015, stop=39.0),
-        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=12.03, stop=43.5),
-        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=18.045, stop=48.0),
-        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=22.56, stop=52.5),
-
-        user(job(0, 1, rand(1:2), 2.25, 0), 0.06, rand(1:2); start=43.5, stop=61.5),
-        user(job(0, 1, rand(1:2), 2.25, 0), 0.06, rand(1:2); start=50.25, stop=59.25),
-    ]
+    rate=0.01,
+    j=job(0, 1, rand(1:4), 3.25, 0)
 )
+    _requests = Vector{KuMo.Request{typeof(j)}}()
+
+    L = prod(nodes)
+    r = rate
+    λ = max_load
+    n = nodes[1]
+    δ = j.duration
+    c = j.containers
+
+    π1 = λ / r
+    π2 = (2n - λ) / r
+
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
+        end
+    end
+
+    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
+
+    scenario(;
+        duration=1000,
+        nodes=(4, 100),
+        users=[
+            # user 1
+            user(KuMo.Requests(_requests), 1),
+        ]
+    )
+end
 
 # ╔═╡ 83f8c3e1-9a29-4e86-9125-ace58b0ad794
 # ╠═╡ show_logs = false
@@ -226,25 +245,47 @@ begin
 end
 
 # ╔═╡ 971d2a6e-72bb-4875-aee7-aeab10878dec
-scenario6() = scenario(;
-    duration=100,
-    nodes=[
-        MultiplicativeNode(100, 1),
-        MultiplicativeNode(100, 2),
-        MultiplicativeNode(100, 4),
-        MultiplicativeNode(100, 8),
-    ],
-    users=[
-        # user 1
-        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); stop=34.5),
-        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=6.015, stop=39.0),
-        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=12.03, stop=43.5),
-        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=18.045, stop=48.0),
-        user(job(0, 1, rand(1:2), 4.5, 0), 0.06, rand(1:2); start=22.56, stop=52.5),
-		user(job(0, 1, rand(1:2), 2.25, 0), 0.06, rand(1:2); start=43.5, stop=61.5),
-        user(job(0, 1, rand(1:2), 2.25, 0), 0.06, rand(1:2); start=50.25, stop=59.25),
-    ]
+function scenario6(;
+    max_load=3.5,
+    nodes=(4, 100),
+    rate=0.01,
+    j=job(0, 1, rand(1:4), 3.25, 0)
 )
+    _requests = Vector{KuMo.Request{typeof(j)}}()
+
+    L = prod(nodes)
+    r = rate
+    λ = max_load
+    n = nodes[1]
+    δ = j.duration
+    c = j.containers
+
+    π1 = λ / r
+    π2 = (2n - λ) / r
+
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
+        end
+    end
+
+    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
+
+    scenario(;
+        duration=1000,
+        nodes=[
+            MultiplicativeNode(100, 1),
+            MultiplicativeNode(100, 2),
+            MultiplicativeNode(100, 4),
+            MultiplicativeNode(100, 8),
+        ],
+        # nodes=(4, 100),
+        users=[
+            # user 1
+            user(KuMo.Requests(_requests), 1),
+        ]
+    )
+end
 
 # ╔═╡ 4fbcbb5d-f320-432f-b6df-df5c72bb10a5
 # ╠═╡ show_logs = false
@@ -269,6 +310,192 @@ begin
     );
 end
 
+# ╔═╡ 2d603282-70c8-4a36-ada3-2459a6877e88
+function scenario7(;
+    max_load=3.5,
+    nodes=(4, 100),
+    rate=0.01,
+    j=job(0, 1, rand(1:4), 3.25, 0)
+)
+    _requests = Vector{KuMo.Request{typeof(j)}}()
+
+    L = prod(nodes)
+    r = rate
+    λ = max_load
+    n = nodes[1]
+    δ = j.duration
+    c = j.containers
+
+    π1 = λ / r
+    π2 = (2n - λ) / r
+
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
+        end
+    end
+
+    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
+
+    scenario(;
+        duration=1000,
+        nodes=[
+            IdleStateNode(100, 1),
+            IdleStateNode(100, 25),
+            IdleStateNode(100, 50),
+            IdleStateNode(100, 75),
+        ],
+        # nodes=(4, 100),
+        users=[
+            # user 1
+            user(KuMo.Requests(_requests), 1),
+        ]
+    )
+end
+
+# ╔═╡ 2454e123-aedc-4b7f-871f-4707e7c76b5c
+# ╠═╡ show_logs = false
+# Simulation
+_, df7, _ = simulate(scenario7(), ShortestPath(); speed=0);
+
+# ╔═╡ 55ed496c-653c-412b-b321-d1b464fd1830
+# Line plot
+begin
+    p7_line = @df df7 plot(:instant, cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+end
+
+# ╔═╡ 6143e0be-5b00-4840-abf9-7d0bcbee1147
+# Area plot
+begin
+    p7_area = @df df7 areaplot(:instant, cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+end
+
+# ╔═╡ f62e4864-8690-411a-b1c0-0c5d42f73dc1
+function scenario8(;
+    max_load=3.50,
+    nodes=(4, 100),
+    rate=0.01,
+    j=job(0, 1, rand(1:4), 1, 0)
+)
+    _requests = Vector{KuMo.Request{typeof(j)}}()
+
+    L = prod(nodes)
+    r = rate
+    λ = max_load
+    n = nodes[1]
+    δ = j.duration
+    c = j.containers
+
+    π1 = λ / r
+    π2 = (2n - λ) / r
+
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
+        end
+    end
+
+    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
+
+    scenario(;
+        duration=1000,
+        nodes=(4, 100),
+        users=[
+            # user 1
+            user(KuMo.Requests(_requests), 1),
+        ]
+    )
+end
+
+# ╔═╡ 50b84495-921d-42c8-91fb-8b933cf3d7be
+# ╠═╡ show_logs = false
+# Simulation
+_, df8, _ = simulate(scenario8(), ShortestPath(); speed=0);
+
+# ╔═╡ 328644ab-5c20-4f99-8f2f-8734a1178489
+# Line plot
+begin
+    p8_line = @df df8 plot(:instant, cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+end
+
+# ╔═╡ 205e7e4b-493e-4bf1-bd2d-3eb2261d32bb
+# Area plot
+begin
+    p8_area = @df df8 areaplot(:instant, cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+end
+
+# ╔═╡ 69cda46a-380f-45c2-b5f8-a491f7d362d6
+function scenario9(;
+    max_load=3.50,
+    nodes=(4, 100),
+    rate=0.01,
+    j=job(0, 1, rand(1:4), .8, 0)
+)
+    _requests = Vector{KuMo.Request{typeof(j)}}()
+
+    L = prod(nodes)
+    r = rate
+    λ = max_load
+    n = nodes[1]
+    δ = j.duration
+    c = j.containers
+
+    π1 = λ / r
+    π2 = (2n - λ) / r
+
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
+        end
+    end
+
+    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
+
+    scenario(;
+        duration=1000,
+        nodes=(4, 100),
+        users=[
+            # user 1
+            user(KuMo.Requests(_requests), 1),
+        ]
+    )
+end
+
+# ╔═╡ e318bb27-bc9b-40c1-af63-9feccb5fcda7
+# ╠═╡ show_logs = false
+# Simulation
+_, df9, _ = simulate(scenario9(), ShortestPath(); speed=0);
+
+# ╔═╡ d6b85cad-cc45-4ab0-997e-772af10abafe
+# Line plot
+begin
+    p9_line = @df df9 plot(:instant, cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+end
+
+# ╔═╡ efedf3e9-76fe-4add-b0fa-f4db7a854178
+# Area plot
+begin
+    p9_area = @df df9 areaplot(:instant, cols(6:9),
+		legend=:topright, tex_output_standalone=true, xlabel="time", ylabel="load",
+		title="Resources allocations using basic pseudo-cost functions", w=1.25,
+    );
+end
+
 # ╔═╡ 73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 begin
 	# Save figures
@@ -284,6 +511,12 @@ begin
 	savefig(p5_area, "4nodes-low-duration_steadyload_area.pdf")
 	savefig(p6_line, "4nodes-low-duration_nonequalload_lines.pdf")
 	savefig(p6_area, "4nodes-low-duration_nonequalload_area.pdf")
+	savefig(p7_line, "4nodes-low-duration_idle_lines.pdf")
+	savefig(p7_area, "4nodes-low-duration_idle_area.pdf")
+	savefig(p8_line, "4nodes-1-duration_lines.pdf")
+	savefig(p8_area, "4nodes-1-duration_area.pdf")
+	savefig(p9_line, "4nodes-0.8-duration_lines.pdf")
+	savefig(p9_area, "4nodes-0.8-duration_area.pdf")
 end
 
 # ╔═╡ 101246ef-1753-4174-ab16-109b425adbec
@@ -297,8 +530,8 @@ square_full_load() = scenario(;
     duration=349,
     nodes=(4, 100),
     links=[
-    	(1, 2, 400.0), (2, 3, 400.0), (3, 4, 400.0), (4, 1, 400.0),
-        (2, 1, 400.0), (3, 2, 400.0), (4, 3, 400.0), (1, 4, 400.0),
+    	(1, 2, 200.0), (2, 3, 200.0), (3, 4, 200.0), (4, 1, 200.0),
+        (2, 1, 200.0), (3, 2, 200.0), (4, 3, 200.0), (1, 4, 200.0),
     ],
     users=1,
     job_distribution=Dict(
@@ -314,108 +547,188 @@ square_full_load() = scenario(;
 # ╔═╡ 9ba5c4d2-6197-46ab-a2b6-ff81dd5175d5
 # ╠═╡ show_logs = false
 # Simulation
-_, df7, _ = simulate(square_full_load(), ShortestPath(); speed=0);
+_, dfb1, _ = simulate(square_full_load(), ShortestPath(); speed=0);
 
 # ╔═╡ 23e7e6df-1a7a-4f59-8654-7dd73aa73939
 # ╠═╡ show_logs = false
 # Line plot
 begin
-    p3_1 = @df df7 plot(:instant,
+    pb_1_nodes = @df dfb1 plot(:instant,
         cols(6:9), tex_output_standalone=true, xlabel="time",
         ylabel="load", title="Resources allocations using basic pseudo-cost functions",
         w=1.25,
     );
-	p3_2 = @df df7 plot(:instant,
-        cols(10:17), tex_output_standalone=true, xlabel="time",
+	pb_1_links = @df dfb1 plot(:instant,
+        cols(10:13), tex_output_standalone=true, xlabel="time",
         ylabel="load",
         w=1.25,
 	);
-	plot(p3_1, p3_2, layout = grid(2,1))
+	pb_1_line = plot(pb_1_nodes, pb_1_links, layout = grid(2,1))
 end
 
 # ╔═╡ 52e4d1d9-e4fb-4fab-8425-252f17d11f2d
 # Area plot
 begin
-    p3_3 = @df df7 areaplot(:instant,
+    pb_1_area_nodes = @df dfb1 areaplot(:instant,
         cols(6:9), tex_output_standalone=true, xlabel="time",
         ylabel="load", title="Resources allocations using basic pseudo-cost functions",
         w=1.25,
     );
-	p3_4 = @df df7 areaplot(:instant,
+	pb_1_area_links = @df dfb1 areaplot(:instant,
         cols(10:17), tex_output_standalone=true, xlabel="time",
         ylabel="load",
         w=1.25,
 	);
-	plot(p3_3, p3_4, layout = grid(2,1))
+	pb_1_area = plot(pb_1_area_nodes, pb_1_area_links, layout = grid(2,1))
 end
 
-# ╔═╡ 8233eb08-88ed-4add-913c-beec05619f2b
+# ╔═╡ 3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
+function scenario_b2(;
+    max_load=3.50,
+    nodes=(4, 100),
+    rate=0.01,
+    j=job(0, 1, rand(1:4), 4, 0)
+)
+    _requests = Vector{KuMo.Request{typeof(j)}}()
+
+    L = prod(nodes)
+    r = rate
+    λ = max_load
+    n = nodes[1]
+    δ = j.duration
+    c = j.containers
+
+    π1 = λ / r
+    π2 = (2n - λ) / r
+
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(_requests, KuMo.Request(job(1., 1, rand(1:4), 3.25, 2.), t))
+        end
+    end
+
+    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
+
+    scenario(;
+        duration=1000,
+        nodes=[			
+            MultiplicativeNode(100, 1),
+            MultiplicativeNode(100, 2),
+            MultiplicativeNode(100, 4),
+            MultiplicativeNode(100, 8),
+		],
+        users=[
+            # user 1
+            user(KuMo.Requests(_requests), rand(1:4)),
+		],
+	    links=[
+	    	(1, 2, 200.0), (2, 3, 200.0), (3, 4, 200.0), (4, 1, 200.0),
+	        (2, 1, 200.0), (3, 2, 200.0), (4, 3, 200.0), (1, 4, 200.0),
+	    ],
+    )
+end
+
+# ╔═╡ 6e597df8-6b06-4ef8-8f9f-212f72022f48
+# ╠═╡ show_logs = false
+# Simulation
+_, dfb2, _ = simulate(scenario_b2(), ShortestPath(); speed=0);
+
+# ╔═╡ 3bd49fa3-9231-4160-bc70-bf91485a26c6
+# Line plot
+begin
+    pb_2_nodes = @df dfb2 plot(:instant,
+        cols(6:9), tex_output_standalone=true, xlabel="time",
+        ylabel="load", title="Resources allocations using basic pseudo-cost functions",
+        w=1.25,
+    );
+	pb_2_links = @df dfb2 plot(:instant,
+        cols(10:17), tex_output_standalone=true, xlabel="time",
+        ylabel="load",
+        w=1.25,
+	);
+	pb_2_line = plot(pb_2_nodes, pb_2_links, layout = grid(2,1))
+end
+
+# ╔═╡ 7c0bd323-1407-4c9d-afb6-1fabb616352c
+# Area plot
+begin
+    pb_2_area_nodes = @df dfb2 areaplot(:instant,
+        cols(6:9), tex_output_standalone=true, xlabel="time",
+        ylabel="load", title="Resources allocations using basic pseudo-cost functions",
+        w=1.25,
+    );
+	pb_2_area_links = @df dfb2 areaplot(:instant,
+        cols(10:17), tex_output_standalone=true, xlabel="time",
+        ylabel="load",
+        w=1.25,
+	);
+	pb_2_area = plot(pb_2_area_nodes, pb_2_area_links, layout = grid(2,1))
+end
+
+# ╔═╡ 8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
+begin
+	# Save figures
+	savefig(pb_1_line, "square_long-duration_line.pdf")
+	savefig(pb_1_area, "square_long-duration_area.pdf")
+	savefig(pb_2_line, "square_aperiodic_multiplicative_line.pdf")
+	savefig(pb_2_area, "square_aperiodic_multiplicative_area.pdf")
+end
+
+# ╔═╡ 21fc0470-2c99-45fb-a3d2-e9cd40b01835
 md"""
-## A basic scenario
-This is a 6 nodes scenario. 
+## Complex Scenarii
 """
 
-# ╔═╡ da7e3b03-7124-43e9-8f4c-b1c8ec2b4db6
-basic_scenario() = scenario(;
-    duration=100,
-    nodes=(6, 30),
-    links=[
-    	(1, 2, 1000.0), (2, 1, 1000.0),
-		(1, 3, 1000.0), (3, 1, 1000.0),
-		(2, 3, 1000.0), (3, 2, 1000.0),
-		(2, 4, 1000.0), (4, 2, 1000.0),
-		(3, 5, 1000.0), (5, 3, 1000.0),
-		(4, 5, 1000.0), (5, 4, 1000.0),
-		(4, 6, 1000.0), (6, 4, 1000.0),
-		(5, 6, 1000.0), (6, 5, 1000.0),
-    ],
-    users=12,
-    job_distribution = job_distributions(
-	    backend=60 => 20,
-	    container=3 => 1,
-	    data_locations=1:6,
-	    duration=10 => 5,
-	    frontend=30 => 10,
-	),
-    request_rate=1.0/10,
-)
+# ╔═╡ 22f9488e-73c4-4d0b-8d42-abd654b99795
+function scenario_c1()
+	j=job(0, 1, rand(1:4), 4, 0)
+    _requests = Vector{KuMo.Request{typeof(j)}}()
 
-# ╔═╡ 47696319-495c-45f0-ac02-77bc04560547
+    scenario(;
+        duration=50,
+        nodes=[
+			Node(1000),
+			Node(1000),
+			Node(100),
+			Node(100),
+		],
+        users=[
+			# user 1
+	        user(job(10, 1, 3, 4, 50), 1.0/100, 3;)
+			# user 2
+			user(job(50, 1, 1, 4, 10), 1.0/100, 1;)
+			# user 3
+			user(job(10, 1, 4, 4, 50), 1.0/100, 2;)
+			# user 4
+			user(job(10, 1, 2, 4, 10), 1.0/100, 4;)
+		],
+	    links=[
+	    	(1, 2, 200.0), (2, 3, 200.0), (3, 1, 200.0), (4, 1, 200.0),
+	        (2, 1, 200.0), (3, 2, 200.0), (1, 3, 200.0), (1, 4, 200.0),
+	    ],
+    )
+end
+
+# ╔═╡ 2a9aadf8-cbd3-43ab-b8a6-14025d551208
 # ╠═╡ show_logs = false
-# # Simulation
-# _, df4, _ = simulate(basic_scenario(), ShortestPath(); speed=0);
+# Simulation
+_, dfc1, _ = simulate(scenario_c1(), ShortestPath(); speed=0);
 
-# ╔═╡ c9ba01cd-4868-411e-9f67-4adcf3d3341d
-# # Line plot
-# begin
-#     p4_1 = @df df4 plot(:instant,
-#         cols(6:11), tex_output_standalone=true, xlabel="time",
-#         ylabel="load", title="Resources allocations using basic pseudo-cost functions",
-#         w=1.25,
-#     );
-# 	p4_2 = @df df4 plot(:instant,
-#         cols(12:27), tex_output_standalone=true, xlabel="time",
-#         ylabel="load",
-#         w=1.25,
-# 	);
-# 	plot(p4_1, p4_2, layout = grid(2,1))
-# end
-
-# ╔═╡ 05c04beb-454b-4f8d-b666-af2be214cc70
-# ╠═╡ show_logs = false
-# # Area plot
-# begin
-#     p4_3 = @df df4 areaplot(:instant,
-#         cols(6:11), tex_output_standalone=true, xlabel="time",
-#         ylabel="load", title="Resources allocations using basic pseudo-cost functions",
-#         w=1.25,
-#     );
-# 	p4_4 = @df df4 areaplot(:instant,
-#         cols(12:27), tex_output_standalone=true, xlabel="time",
-#         ylabel="load",
-# 	);
-# 	plot(p4_3, p4_4, layout = grid(2,1))
-# end
+# ╔═╡ 38e2b098-72d0-4b9c-ade7-c970a8fd1968
+# Line plot
+begin
+    pc_1_nodes = @df dfc1 plot(:instant,
+        cols(6:9), tex_output_standalone=true, xlabel="time",
+        ylabel="load", title="Resources allocations using basic pseudo-cost functions",
+        w=1.25,
+    );
+	pc_1_links = @df dfc1 plot(:instant,
+        cols(10:17), tex_output_standalone=true, xlabel="time",
+        ylabel="load",
+        w=1.25,
+	);
+	pc_1_line = plot(pc_1_nodes, pc_1_links, layout = grid(2,1))
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -430,7 +743,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-KuMo = "~0.1.18"
+KuMo = "~0.1.19"
 PGFPlotsX = "~1.5.0"
 Plots = "~1.30.0"
 StatsPlots = "~0.14.34"
@@ -442,7 +755,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "3840e9d444fb64ee6a604fed527efcc480aa9aec"
+project_hash = "54adcc28eaab1b61379bd2672c25579e885f8fc3"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -981,9 +1294,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "71375d6096a8bf22eb033db029114bbe3cd9834a"
+git-tree-sha1 = "07e6202ddc4701f648bc3cadfddb701802a8ccaf"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.18"
+version = "0.1.19"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1171,9 +1484,9 @@ version = "1.0.0"
 
 [[deps.NearestNeighbors]]
 deps = ["Distances", "StaticArrays"]
-git-tree-sha1 = "ded92de95031d4a8c61dfb6ba9adb6f1d8016ddd"
+git-tree-sha1 = "0e353ed734b1747fc20cd4cba0edd9ac027eff6a"
 uuid = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
-version = "0.4.10"
+version = "0.4.11"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
@@ -1237,9 +1550,9 @@ version = "8.44.0+0"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "3e32c8dbbbe1159a5057c80b8a463369a78dd8d8"
+git-tree-sha1 = "7f4869861f8dac4990d6808b66b57e5a425cfd99"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.12"
+version = "0.11.13"
 
 [[deps.PGFPlotsX]]
 deps = ["ArgCheck", "DataStructures", "Dates", "DefaultApplication", "DocStringExtensions", "MacroTools", "Parameters", "Requires", "Tables"]
@@ -1284,9 +1597,9 @@ version = "1.2.0"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "GeometryBasics", "JSON", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
-git-tree-sha1 = "0b727ac13565a2b665cc78db579e0093b869034e"
+git-tree-sha1 = "2402dffcbc5bb1631fb4f10cb5c3698acdce29ea"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.30.0"
+version = "1.30.1"
 
 [[deps.PooledArrays]]
 deps = ["DataAPI", "Future"]
@@ -1822,16 +2135,32 @@ version = "0.9.1+5"
 # ╠═4fbcbb5d-f320-432f-b6df-df5c72bb10a5
 # ╠═df94a5e9-565f-4737-a8c2-c7efecbce8ed
 # ╠═6da21214-5a5c-43fc-9ca3-9564ca67914e
+# ╠═2d603282-70c8-4a36-ada3-2459a6877e88
+# ╠═2454e123-aedc-4b7f-871f-4707e7c76b5c
+# ╠═55ed496c-653c-412b-b321-d1b464fd1830
+# ╠═6143e0be-5b00-4840-abf9-7d0bcbee1147
+# ╠═f62e4864-8690-411a-b1c0-0c5d42f73dc1
+# ╠═50b84495-921d-42c8-91fb-8b933cf3d7be
+# ╠═328644ab-5c20-4f99-8f2f-8734a1178489
+# ╠═205e7e4b-493e-4bf1-bd2d-3eb2261d32bb
+# ╠═69cda46a-380f-45c2-b5f8-a491f7d362d6
+# ╠═e318bb27-bc9b-40c1-af63-9feccb5fcda7
+# ╠═d6b85cad-cc45-4ab0-997e-772af10abafe
+# ╠═efedf3e9-76fe-4add-b0fa-f4db7a854178
 # ╠═73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 # ╟─101246ef-1753-4174-ab16-109b425adbec
 # ╠═1c7238b6-6a2c-4123-8f9b-061820e74c98
 # ╠═9ba5c4d2-6197-46ab-a2b6-ff81dd5175d5
 # ╠═23e7e6df-1a7a-4f59-8654-7dd73aa73939
 # ╠═52e4d1d9-e4fb-4fab-8425-252f17d11f2d
-# ╟─8233eb08-88ed-4add-913c-beec05619f2b
-# ╠═da7e3b03-7124-43e9-8f4c-b1c8ec2b4db6
-# ╠═47696319-495c-45f0-ac02-77bc04560547
-# ╠═c9ba01cd-4868-411e-9f67-4adcf3d3341d
-# ╠═05c04beb-454b-4f8d-b666-af2be214cc70
+# ╠═3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
+# ╠═6e597df8-6b06-4ef8-8f9f-212f72022f48
+# ╠═3bd49fa3-9231-4160-bc70-bf91485a26c6
+# ╠═7c0bd323-1407-4c9d-afb6-1fabb616352c
+# ╠═8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
+# ╟─21fc0470-2c99-45fb-a3d2-e9cd40b01835
+# ╠═22f9488e-73c4-4d0b-8d42-abd654b99795
+# ╠═2a9aadf8-cbd3-43ab-b8a6-14025d551208
+# ╠═38e2b098-72d0-4b9c-ade7-c970a8fd1968
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
