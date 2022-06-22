@@ -35,8 +35,8 @@ $p$ is the number of micro containers,
 $q$ is frontend communication with the user, 
 $r$ is backend communication with data objects (e.g., database), and
 $s$ is the number of time slots.
-The unit is one micro-container for $p$, 1Mbps for $q$ and $r$, and 1
-second for $s$.
+%%The unit is one micro-container for $p$, 1Mbps for $q$ and $r$, and 1
+%%second for $s$.
 For simplicity in the paper, we do not distinguish directions of
 communications for $q$ and $r$, and assume only one user and one data
 object per job.
@@ -229,9 +229,10 @@ Similarly, when the most expensive one among active resources becomes
 idle, the load of the remaining ones stay at the matching cost at
 $f(.5)$ for the deactivating one.
 
-The system could be stabilized at local minimum (e.g., cannot activate
-a resource with the minimum cost).
-However, our goal is not to achieve the theoretical optimum but to
+When the load of a resource fluctuates too rapidly,
+a smoothing filter such as an exponetially weighted moving average
+can be used to stabilize the behavior.
+Our goal is not to achieve the theoretical optimum but to
 enable loose automatic distributed load balancing.
 
 \subsection{Manipulating the Cost Function}
@@ -256,3 +257,23 @@ $f'(\rho) = f(\rho + \Delta)$.
 Similary, an {\bf economy service} can be made by raising the target
 load.
 
+\begin{figure}[tb]
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{lowering.pdf}
+    \vspace{-2.0ex}
+    \caption{Manipulating Cost Functions}
+    \label{fig:lowering}
+  \end{center}
+\end{figure}
+
+In Figure~\ref{fig:lowering}, 3 waves of jobs are generated between
+user~0 (at node~0) and object~0 (at node~3).
+The load of n2 and n3 are drawn as $x10$ to compare the quantity of n0
+and n1 because of the difference in their capacity.
+The first wave contains only data intensive jobs, and all jobs are
+assigned to the node that has the object (n3).
+The second and third waves contain only interactive jobs, and most of
+the jobs are assigned the node closest to the user (n0) but some
+overflowing jobs are assigned to n2.
+In the third wave, the cost function is manipulated to reduce the load
+of n0 by multiplying the cost function by 1.5.

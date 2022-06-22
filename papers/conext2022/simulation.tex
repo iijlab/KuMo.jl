@@ -1,14 +1,11 @@
 
-Simulation settings
+The simulation setting is shown in Figure~\ref{fig:topology-simple}.
 \begin{itemize}
-  \item		job: mean duration:10sec, mean 3 containers,
-        mean frontend 30 Mbps, mean backend 60 Mbps
-  \item		node: capacity 30 containers
-  \item		link: capacity 1000Mbps
-  \item		user: mean job request: 1/20 job/sec
-  \item		data: 1 data object/job (for simplicity)
-  \item		simulate: 100 users for 1000 sec on topology in Figure \ref{fig:topology-simple}.
-  \item		users and data objects are randomly assigned to nodes.
+  \item		job: mean duration:4sec, mean 1 unit,
+        frontend 1, backend 2 for data intensive job,
+        frontend 2, backend 1 for interactive job,
+  \item		node: capacity 100 for MDC, 1000 for DC
+  \item		link: capacity 200 for MDC-DC, 1000 for DC-DC
 \end{itemize}
 
 \begin{figure}[htb]
@@ -21,7 +18,6 @@ Simulation settings
 \end{figure}
 
 Simulation scenarios:
-
 \begin{enumerate}
   \item	{\bf node only:} 4 nodes without randomization to show how the
         cost function works
