@@ -19,7 +19,7 @@ struct Requests{J<:AbstractJob} <: AbstractRequests
 end
 
 function requests(pr::PeriodicRequests)
-    return map(t -> Request(pr.job, t), pr.start:pr.period:pr.stop)
+    return Requests(map(t -> Request(pr.job, t), pr.start:pr.period:pr.stop))
 end
 
 requests(r::Request) = Requests([r])
