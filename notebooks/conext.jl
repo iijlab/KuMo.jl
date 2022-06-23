@@ -432,35 +432,29 @@ end
 # ╔═╡ 21fc0470-2c99-45fb-a3d2-e9cd40b01835
 md"""
 ## Complex Scenarii
+
+![topology](./topology-simple.pdf)
 """
 
 # ╔═╡ 22f9488e-73c4-4d0b-8d42-abd654b99795
 function scenario_c1()
-	j1 = job(100, 5, 4, 3, 1)
-    π1 = 0.001
-    req1 = [Request(j1, t) for t in π1:π1:10.]
-    user1 = user(req1, 3)
+	j = job(2, 1, 4, 3, 1)
 
-	j2 = job(1, 1, 0, 4, 2)
-    π2 = 0.1
-    req2 = [Request(j2, t) for t in π2:π2:10.]
-    user2 = user(req2, 3)
+    _requests = Vector{KuMo.Request{typeof(j)}}()
 
-    _requests = Vector{KuMo.Request{typeof(j1)}}()
-
-    L = 1000
+    # L = 1000
     r = 0.01
-    λ = 1.
+    λ = 50
     n = 1
-    δ = j1.duration
-    c = j1.containers
+    δ = j.duration
+    # c = j.containers
 
     π1 = λ / r
     π2 = (2n - λ) / r
 
     for i in 0:π1+π2
         for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(j1, t))
+            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
         end
     end
 
@@ -475,8 +469,6 @@ function scenario_c1()
 		],
         users=[
             user(_requests, 1)
-            # user1,
-            # user2,
 		],
 	    links=[
 	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
@@ -488,6 +480,51 @@ end
 # ╔═╡ 2a9aadf8-cbd3-43ab-b8a6-14025d551208
 # ╠═╡ show_logs = false
 pc1, dfc1 = simulate_and_plot(scenario_c1(), ShortestPath()); pc1
+
+# ╔═╡ a61fb19f-3e94-4097-844f-72ec845d55b2
+function scenario_c2()
+	j = job(1, 1, 4, 3, 2)
+
+    _requests = Vector{KuMo.Request{typeof(j)}}()
+
+    # L = 1000
+    r = 0.01
+    λ = 50
+    n = 1
+    δ = j.duration
+    # c = j.containers
+
+    π1 = λ / r
+    π2 = (2n - λ) / r
+
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
+        end
+    end
+
+
+    scenario(;
+        duration=1000,
+        nodes=[
+			Node(100),
+			Node(100),
+			Node(1000),
+			Node(1000),
+		],
+        users=[
+            user(_requests, 1)
+		],
+	    links=[
+	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
+	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
+	    ],
+    )
+end
+
+# ╔═╡ ba99d317-87ae-4405-9237-f60748cec26f
+# ╠═╡ show_logs = false
+pc2, dfc2 = simulate_and_plot(scenario_c2(), ShortestPath()); pc2
 
 # ╔═╡ 92d177a0-3389-4da2-934c-a93d4311bd4a
 begin
@@ -1901,9 +1938,11 @@ version = "0.9.1+5"
 # ╠═3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
 # ╠═6e597df8-6b06-4ef8-8f9f-212f72022f48
 # ╠═8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
-# ╟─21fc0470-2c99-45fb-a3d2-e9cd40b01835
-# ╠═22f9488e-73c4-4d0b-8d42-abd654b99795
+# ╠═21fc0470-2c99-45fb-a3d2-e9cd40b01835
+# ╟─22f9488e-73c4-4d0b-8d42-abd654b99795
 # ╠═2a9aadf8-cbd3-43ab-b8a6-14025d551208
+# ╟─a61fb19f-3e94-4097-844f-72ec845d55b2
+# ╠═ba99d317-87ae-4405-9237-f60748cec26f
 # ╠═92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
