@@ -19,6 +19,10 @@ begin
 end;
   ╠═╡ =#
 
+# ╔═╡ 217a9755-f4d6-4b13-b47b-9ad08430cffd
+# Graphs related packages
+using Graphs, TikzGraphs, LaTeXStrings, TikzPictures
+
 # ╔═╡ d3221f99-adcc-457c-82f5-95aaa2a9e197
 md"""# Series of plots to illustrate the use of pseudo-cost functions
 
@@ -30,7 +34,7 @@ begin
 	c1 = ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1
 	c2 = ρ ->　ρ^2 / (1 - ρ) + 1
 	c3 = ρ ->　ρ^4.5 / (1 - ρ) + 1
-    plot_pc = plot([c1, c2, c3], 0:0.01:0.9, label = ["ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1" "ρ -> ρ^2 / (1 - ρ) + 1" "ρ -> ρ^4.5 / (1 - ρ) + 1"], legend=:topleft)
+    plot_pc = StatsPlots.plot([c1, c2, c3], 0:0.01:0.9, label = ["ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1" "ρ -> ρ^2 / (1 - ρ) + 1" "ρ -> ρ^4.5 / (1 - ρ) + 1"], legend=:topleft)
 	savefig(plot_pc, "pseudo_costs.pdf")
 	plot_pc
 end
@@ -432,12 +436,31 @@ end
 # ╔═╡ 21fc0470-2c99-45fb-a3d2-e9cd40b01835
 md"""
 ## Complex Scenarii
-
-![topology](./topology-simple.pdf)
 """
+
+# ╔═╡ dbd801ce-d8fe-4d68-9493-088295b4f663
+function complex_network()
+	g = Graph(4)
+	add_edge!(g, 1, 3)
+	add_edge!(g, 2, 3)
+	add_edge!(g, 3, 4)
+	add_edge!(g, 2, 4)
+	p = TikzGraphs.plot(
+		g,
+		Layouts.Spring(),
+		[L"v_1", L"v_2", L"v_3", L"v_4"],
+		node_style="draw, rounded corners, fill=blue!10",
+		node_styles=Dict(1=>"fill=green!10",2=>"fill=green!10"),
+		edge_labels=Dict((1,3)=>"200", (2,3)=>"200", (3,4)=>"1000", (2,4)=>"200"),
+		edge_styles=Dict((3,4)=>"blue"),
+		options="scale=2",
+	)
+	return p
+end
 
 # ╔═╡ 22f9488e-73c4-4d0b-8d42-abd654b99795
 function scenario_c1()
+	# backend - containers - data_center - duration - frontend
 	j = job(2, 1, 4, 3, 1)
 
     _requests = Vector{KuMo.Request{typeof(j)}}()
@@ -477,12 +500,16 @@ function scenario_c1()
     )
 end
 
+# ╔═╡ 4541deee-dfa5-462c-a797-b221637baf64
+complex_network()
+
 # ╔═╡ 2a9aadf8-cbd3-43ab-b8a6-14025d551208
 # ╠═╡ show_logs = false
 pc1, dfc1 = simulate_and_plot(scenario_c1(), ShortestPath()); pc1
 
 # ╔═╡ a61fb19f-3e94-4097-844f-72ec845d55b2
 function scenario_c2()
+	# backend - containers - data_center - duration - frontend
 	j = job(1, 1, 4, 3, 2)
 
     _requests = Vector{KuMo.Request{typeof(j)}}()
@@ -522,16 +549,77 @@ function scenario_c2()
     )
 end
 
+# ╔═╡ 6cc00479-e1d3-4b88-a0b6-28a50d12d610
+complex_network()
+
 # ╔═╡ ba99d317-87ae-4405-9237-f60748cec26f
 # ╠═╡ show_logs = false
 pc2, dfc2 = simulate_and_plot(scenario_c2(), ShortestPath()); pc2
 
+# ╔═╡ fda02e26-8425-4ceb-93e5-7101b7acb8be
+complex_network()
+
+# ╔═╡ b8b4ebbe-0443-4471-b062-4605e4504702
+function scenario_c3()
+	# backend - containers - data_center - duration - frontend
+	j1 = job(1, 3, 4, 4, 2)
+	j2 = job(2, 3, 3, 4, 1)
+
+    reqs1 = Vector{KuMo.Request{typeof(j1)}}()
+    reqs2 = Vector{KuMo.Request{typeof(j2)}}()
+
+    # L = 1000
+    r = 0.01
+    λ = 1
+    n = 1
+    δ = j1.duration
+    # c = j.containers
+
+    π1 = λ / r
+    π2 = (2n - λ) / r
+
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(reqs1, KuMo.Request(j1, t))
+            i ≤ π1 && push!(reqs2, KuMo.Request(j2, t))
+        end
+    end
+
+
+    scenario(;
+        duration=1000,
+        nodes=[
+			Node(100),
+			Node(100),
+			Node(1000),
+			Node(1000),
+		],
+        users=[
+            user(reqs1, 1),
+            user(reqs2, 2),
+			
+		],
+	    links=[
+	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
+	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
+	    ],
+    )
+end
+
+# ╔═╡ 13e635db-a044-4c30-8643-8a0d34880488
+# ╠═╡ show_logs = false
+pc3, dfc3 = simulate_and_plot(scenario_c3(), ShortestPath()); pc3
+
 # ╔═╡ 92d177a0-3389-4da2-934c-a93d4311bd4a
+# ╠═╡ show_logs = false
 begin
 	figures_c = [
 		pc1 => "complex1.pdf",
+		pc2 => "complex2.pdf",
+		pc3 => "complex3.pdf",
 	]
 	foreach(p -> savefig(p.first, p.second), figures_c)
+	TikzPictures.save(PDF("complex_network"), complex_network())
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -539,16 +627,24 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 KuMo = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 PGFPlotsX = "8314cec4-20b6-5062-9cdb-752b83310925"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
+TikzGraphs = "b4f28e30-c73f-5eaf-a395-8a9db949a742"
+TikzPictures = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
 
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
+Graphs = "~1.7.1"
 KuMo = "~0.1.22"
+LaTeXStrings = "~1.3.0"
 PGFPlotsX = "~1.5.0"
 StatsPlots = "~0.14.34"
+TikzGraphs = "~1.4.0"
+TikzPictures = "~3.4.2"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -557,7 +653,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "49efa6821053d486fb9261755c62b7d2e39a9908"
+project_hash = "8a8c6e5561038e2f2682edefb49d2fab96ee73e8"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1207,6 +1303,12 @@ version = "2.36.0+0"
 deps = ["Libdl", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
+[[deps.LittleCMS_jll]]
+deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pkg"]
+git-tree-sha1 = "110897e7db2d6836be22c18bffd9422218ee6284"
+uuid = "d3a379c0-f9a3-5b72-a4c0-6bf4d2e8af0f"
+version = "2.12.0+0"
+
 [[deps.LogExpFunctions]]
 deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
 git-tree-sha1 = "09e4b894ce6a976c354a69041a04748180d43637"
@@ -1316,6 +1418,12 @@ deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
 version = "0.3.20+0"
 
+[[deps.OpenJpeg_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Libtiff_jll", "LittleCMS_jll", "Pkg", "libpng_jll"]
+git-tree-sha1 = "76374b6e7f632c130e78100b166e5a48464256f8"
+uuid = "643b3616-a352-519d-856d-80112ee9badc"
+version = "2.4.0+0"
+
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
@@ -1408,6 +1516,12 @@ deps = ["DataAPI", "Future"]
 git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
 uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
 version = "1.4.2"
+
+[[deps.Poppler_jll]]
+deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "OpenJpeg_jll", "Pkg", "libpng_jll"]
+git-tree-sha1 = "e11443687ac151ac6ef6699eb75f964bed8e1faa"
+uuid = "9c32591e-4766-534b-9725-b71a8799265b"
+version = "0.87.0+2"
 
 [[deps.Preferences]]
 deps = ["TOML"]
@@ -1627,6 +1741,12 @@ deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 version = "1.10.0"
 
+[[deps.Tectonic]]
+deps = ["Pkg"]
+git-tree-sha1 = "0b3881685ddb3ab066159b2ce294dc54fcf3b9ee"
+uuid = "9ac5f52a-99c6-489f-af81-462ef484790f"
+version = "0.8.0"
+
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "1feb45f88d133a655e001435632f019a9a1bcdb6"
@@ -1636,6 +1756,18 @@ version = "0.1.1"
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[deps.TikzGraphs]]
+deps = ["Graphs", "LaTeXStrings", "TikzPictures"]
+git-tree-sha1 = "e8f41ed9a2cabf6699d9906c195bab1f773d4ca7"
+uuid = "b4f28e30-c73f-5eaf-a395-8a9db949a742"
+version = "1.4.0"
+
+[[deps.TikzPictures]]
+deps = ["LaTeXStrings", "Poppler_jll", "Requires", "Tectonic"]
+git-tree-sha1 = "4e75374d207fefb21105074100034236fceed7cb"
+uuid = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
+version = "3.4.2"
 
 [[deps.TranscodingStreams]]
 deps = ["Random", "Test"]
@@ -1913,6 +2045,7 @@ version = "0.9.1+5"
 # ╠═61189540-e578-11ec-3030-c3ebb611c28b
 # ╠═21639215-1463-46ff-80a0-f1f2028c7558
 # ╠═bc72d307-12f7-47c6-b90a-062814186978
+# ╠═217a9755-f4d6-4b13-b47b-9ad08430cffd
 # ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
 # ╠═698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═12169dd2-6ea2-43a3-b6fd-94d55e23a568
@@ -1938,11 +2071,17 @@ version = "0.9.1+5"
 # ╠═3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
 # ╠═6e597df8-6b06-4ef8-8f9f-212f72022f48
 # ╠═8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
-# ╠═21fc0470-2c99-45fb-a3d2-e9cd40b01835
-# ╟─22f9488e-73c4-4d0b-8d42-abd654b99795
+# ╟─21fc0470-2c99-45fb-a3d2-e9cd40b01835
+# ╟─dbd801ce-d8fe-4d68-9493-088295b4f663
+# ╠═22f9488e-73c4-4d0b-8d42-abd654b99795
+# ╟─4541deee-dfa5-462c-a797-b221637baf64
 # ╠═2a9aadf8-cbd3-43ab-b8a6-14025d551208
-# ╟─a61fb19f-3e94-4097-844f-72ec845d55b2
+# ╠═a61fb19f-3e94-4097-844f-72ec845d55b2
+# ╟─6cc00479-e1d3-4b88-a0b6-28a50d12d610
 # ╠═ba99d317-87ae-4405-9237-f60748cec26f
+# ╟─fda02e26-8425-4ceb-93e5-7101b7acb8be
+# ╠═b8b4ebbe-0443-4471-b062-4605e4504702
+# ╠═13e635db-a044-4c30-8643-8a0d34880488
 # ╠═92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
