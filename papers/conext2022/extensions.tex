@@ -22,15 +22,13 @@ cost information.
 A path selection mechanism is also needed when assigning a job,
 probably using SRv6 or other source routing mechanism.
 
-There exists a rich area for further research.
-\noindent
+There exists a rich area for further research:
 {\bf How to tune the cost function:}  It may not be straightforward
 to obtain expected results by tuning the cost function, as it may
 induce side effects.
 It would be interesting to apply reinforcement learning to cost
 tuning.
 
-\noindent
 {\bf Hierarchical Configurations:} It would be better to use
 hierarchical configurations for scalability and for management
 purposes.
@@ -38,7 +36,6 @@ For example, a distributed datacenter model can consist of
 the inter-DC layer with DC-level resources and the intra-DC layer
 with rack-level resources.
 
-\noindent
 {\bf Inter-cloud:}
 The proposed system was originally designed mainly for a single
 administrative domain.
@@ -47,23 +44,20 @@ model in which different cloud systems are federated.
 The mechanism of the idle resource pooling allows utilizing external
 clouds when only needed.
 
-\noindent
 {\bf Crowdsourcing resource supply:}
 It would be possible to crowdsource the role of resource providers. 
 Then, we need a monetary charging, authentication and authorization
 mechanisms to add externally provided resources to the resource pool.
 
-\noindent
 {\bf Data Migration:}
 The location of data is critical for the pseudo cost so that data
 placement would play an important role for cloud morphing. 
 A possible approach is to migrate data at coarser timescale, based
 on usage history.
 Another possibility is design a new distributed storage system
-suitable to the cloud morphing model in which (cached) data can be
+suitable for the cloud morphing model in which (cached) data can be
 easily moved.
 
-\noindent
 {\bf L2 Paths:}
 idle-resource pooling is not used for network links in this paper but
 it is possible to use it for dynamically creating Layer 2 paths (e.g.,

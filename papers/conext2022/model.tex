@@ -1,15 +1,14 @@
-\subsection{Job Assignment}
 
 \begin{figure}[tb]
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{system.pdf}
     \vspace{-2.0ex}
-    \caption{System model}
+    \caption{Simple system model}
     \label{fig:system}
   \end{center}
 \end{figure}
 
-A simple system configuration with 2 data centers and 2
+A simple system configuration with 2 datacenters and 2
 micro-datacenters is shown in Figure~\ref{fig:system}.
 When a user requests a service to a nearby service allocation server,
 the service server instantiates the requested service into a series of
@@ -18,7 +17,7 @@ The server finds the required resources for each job,
 identifies the locations of the user and the required data object,
 asks available resources (or their proxies) for the current costs,
 and assigns the job to the node with the lowest pseudo cost.
-The area for cost inquiry could be within proximity to the path
+The area for cost inquiry could be within proximity along the path
 between the user and the data object.
 
 The load of a resource can be measured in a number of ways.  Most
@@ -29,8 +28,10 @@ On the other hand, if each allocation is not small enough both in size
 and in duration, the loads may not converge as expected.
 That is, microservice is the enabler for this approach.
 
-We use a simple micro job model that defines the required resources
-for a micro-job as $J(p, q, r, s)$ where 
+\subsection{Job Assignment}
+
+In this paper, we use a simple micro job model that defines the
+required resources for a micro-job as $J(p, q, r, s)$ where 
 $p$ is the number of micro containers, 
 $q$ is frontend communication with the user, 
 $r$ is backend communication with data objects (e.g., database), and
@@ -44,7 +45,8 @@ object per job.
 A job can be optionally associated with weights for the cost
 calculation with $p$, $q$, and $r$: e.g., an interactive job may raise
 the weight for the frontend communication to place the job close to
-the user.
+the user. In this manner, cloud service providers can speficy which
+type of resoures have a priority for a specific service.
 
 To instantiate a micro-job requested from a user, the service
 server finds the best node to allocate the required resource
@@ -147,25 +149,15 @@ The behavior of idle-resource pooling by the convex cost function is
 illustrated by the following examples in Figure~\ref{fig:4node} and
 Figure~\ref{fig:4node-ratio}.
 
-\begin{figure*}[tb]
-  \begin{minipage}{1.0\columnwidth}
+\begin{figure}[tb]
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{4node.pdf}
     \vspace{-2.0ex}
-    \caption{load distribution among 4 equivalent cost nodes}
+    \caption{Load distribution: 4 equivalent cost nodes}
     \label{fig:4node}
   \end{center}
-  \end{minipage}
   \hspace{0.8\columnsep}
-  \begin{minipage}{1.0\columnwidth}
-  \begin{center}
-    \includegraphics[width=1.0\columnwidth]{4node-ratio.pdf}
-    \vspace{-2.0ex}
-    \caption{load distribution among 4 proportional cost nodes}
-    \label{fig:4node-ratio}
-  \end{center}
-  \end{minipage}
-\end{figure*}
+\end{figure}
 
 Assume a pool of 4 equivalent resources with the standard convex
 cost function.
@@ -210,6 +202,15 @@ the load of each active resource stay at around $\rho = .5$.
 In short, when all resources are equal, the system tries to maintain
 the load of active resources in the {\em working load range}
 $[.5, .75]$, while keeping idle resources as much as possible.
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{4node-ratio.pdf}
+    \vspace{-2.0ex}
+    \caption{Load distribution: 4 proportional cost nodes}
+    \label{fig:4node-ratio}
+  \end{center}
+\end{figure}
 
 When resources are not equal, the behavior becomes more complex, but
 the underlying mechanisms are the same.
@@ -272,19 +273,40 @@ load.
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{lowering.pdf}
     \vspace{-2.0ex}
-    \caption{Data intensive and interactive jobs}
+    \caption{lowering load, interactve jobs vs. data intensive jobs}
     \label{fig:lowering}
   \end{center}
 \end{figure}
 
 In Figure~\ref{fig:lowering}, 3 waves of jobs are generated between
 user~0 (at node~0) and object~0 (at node~3).
-The load of n2 and n3 are drawn as $x10$ to compare the quantity of n0
-and n1 because of the difference in their capacity.
-The first wave contains only data intensive jobs, and all jobs are
-assigned to the node that has the object (n3).
-The second and third waves contain only interactive jobs, and most of
+For the total load in the bottom plot, the load of n2 and n3 are
+normalized to match the quantity of n0 and n1 because of the
+difference in their capacity.
+The first and second waves contain only interactive jobs, and most of
 the jobs are assigned to the node closest to the user (n0) but some
 overflowing jobs are assigned to n2.
-In the third wave, the cost function of n0 is manipulated to reduce
-the load by multiplying the cost function by 1.5.a
+In the second wave, the cost function of n0 is manipulated to reduce
+the load by multiplying the cost function by 1.5.
+The third wave contains only data intensive jobs, and all jobs are
+assigned to the node that has the object (n3).
+
+A more complex scenario is shown in Figure~\ref{fig:mixed}.
+user0: cycle: 180  peak:1.2 interactve:data-intensive=
+user1: cycle: 135  peak:1.0 
+after time 540 (5th wave for user1), user1 load x 2.0, 
+after time 675 (6th wave for user1), user1 load x 10.
+before, time 540, interactive jobs are assigned closer to the user,
+and data intensive jobs are assigned closer to the data.
+For the 6th wave, n1 saturates, then assigned to n2 but the link to n2
+saturates, and the rest assigned to n3.
+
+\begin{figure}[tb]
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{simu2.pdf}
+    \vspace{-2.0ex}
+    \caption{mixed scenario}
+    \label{fig:mixed}
+  \end{center}
+\end{figure}
+
