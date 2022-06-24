@@ -23,6 +23,10 @@ end;
 # Graphs related packages
 using Graphs, TikzGraphs, LaTeXStrings, TikzPictures
 
+# ╔═╡ a575616a-81d4-4829-ae89-41eee625ad9b
+# Stats related packages
+using Distributions
+
 # ╔═╡ d3221f99-adcc-457c-82f5-95aaa2a9e197
 md"""# Series of plots to illustrate the use of pseudo-cost functions
 
@@ -610,6 +614,353 @@ end
 # ╠═╡ show_logs = false
 pc3, dfc3 = simulate_and_plot(scenario_c3(), ShortestPath()); pc3
 
+# ╔═╡ b4730f03-6d61-45cb-8a8b-27372b087ddc
+complex_network()
+
+# ╔═╡ 244b96f0-9e91-4d5e-9da3-094e9215f475
+function scenario_c4()
+	scenario(;
+        duration=10,
+        nodes=[
+			Node(100),
+			Node(100),
+			Node(1000),
+			Node(1000),
+		],
+        links=[
+	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
+	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
+        ],
+        users=100,
+        job_distribution=Dict(
+            :backend => 1:10,
+            :container => 1:3,
+            :data_location => 3:4,
+            :duration => 1:5,
+            :frontend => 1:2,
+        ),
+        request_rate=0.5
+    )
+end
+
+# ╔═╡ 5a0dad14-0f30-4623-9e6e-4053ca818606
+# ╠═╡ show_logs = false
+pc4, dfc4 = simulate_and_plot(scenario_c4(), ShortestPath()); pc4
+
+# ╔═╡ 22f080a3-eb4b-4c02-88e4-d301f4b97a85
+CSV.write("complex4.csv", dfc4);
+
+# ╔═╡ c0b1feb5-7aec-4310-8c55-c2350ce005f8
+vcat(rand(2), rand(3))
+
+# ╔═╡ ec276414-bd4e-4536-9307-ce773d49306e
+function scenario_c5()
+	duration = 100
+	
+	local_dc = 9:16
+	large_dc = 17:18
+	all_dc = 9:18
+
+	users_loc = 1:8
+
+	spike(j, t, intensity) = fill(Request(j, t), (intensity,))
+	
+	function smooth(j, δ, π1, π2)
+		reqs = Vector{KuMo.Request{typeof(j)}}()
+		for i in 0:π1+π2
+	        for t in i:δ:π1+π2-i
+	            i ≤ π1 && push!(reqs, KuMo.Request(j, t))
+	        end
+	    end
+		return reqs
+	end
+
+	function steady(j, δ, π1, π2, intensity)
+		reqs = Vector{KuMo.Request{typeof(j)}}()
+		for t in 0:δ:π1+π2
+			foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
+	    end
+		return reqs
+	end
+
+	interactive() = job(1, 5, rand(all_dc), 10, 2)
+	data_intensive() = job(5, 10, rand(all_dc), 10, 1)
+
+	users = Vector{KuMo.User}()
+	for i in 1:2:24
+		reqs = Vector{Request{<:KuMo.AbstractJob}}()
+		rang = sort!(rand(0:duration, 2))
+		bounds = rang[1]:rang[2]
+		types = Set()
+		for _ in 1:(i % 8 + 1)
+			j = rand([interactive, data_intensive])()
+			push!(types, typeof(j))
+			kind = rand([:spike, :smooth, :steady])
+			if kind == :spike
+				t = Float64(rand(bounds))
+				intensity = rand(1:100)
+				req = spike(j, t, intensity)
+				reqs = vcat(reqs, req)
+			elseif kind == :smooth
+				inners = sort!(rand(bounds, 2))
+				π1, π2 = inners[1], inners[2]
+				req = smooth(j, j.duration, π1, π2)
+				reqs = vcat(reqs, req)
+			else
+				inners = sort!(rand(bounds, 2))
+				π1, π2 = inners[1], inners[2]				
+				intensity = rand(1:10)
+				req = steady(j, j.duration, π1, π2, intensity)
+				reqs = vcat(reqs, req)
+			end
+		end
+		UT = Union{collect(types)...}
+		R = Vector{Request{UT}}()
+		foreach(r -> push!(R, r), reqs)
+		u = user(requests(R), i % 8 + 1)
+		push!(users, u)		
+	end
+
+	scenario(;
+        duration,
+        nodes=[
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(5000),
+			Node(5000),
+		],
+        links=[
+			# MDC <-> DC
+	    	(1, 9, 500.0),
+	    	(2, 10, 500.0),
+	    	(3, 11, 500.0),
+	    	(4, 12, 500.0),
+	    	(5, 13, 500.0),
+	    	(6, 14, 500.0),
+	    	(7, 15, 500.0),
+	    	(8, 16, 500.0),
+			(9, 1, 500.0),
+			(10, 2, 500.0),
+			(11, 3, 500.0),
+			(12, 4, 500.0),
+			(13, 5, 500.0),
+			(14, 6, 500.0),
+			(15, 7, 500.0),
+			(16, 8, 500.0),
+			# DC <-> DC
+	    	(10, 9, 1000.0), (9, 10, 1000.0),
+	    	(11, 10, 1000.0), (10, 11, 1000.0),
+	    	(12, 11, 1000.0), (11, 12, 1000.0),
+	    	(13, 12, 1000.0), (12, 13, 1000.0),
+	    	(14, 13, 1000.0), (13, 14, 1000.0),
+	    	(15, 14, 1000.0), (14, 15, 1000.0),
+	    	(16, 15, 1000.0), (15, 16, 1000.0),
+	    	(9, 16, 1000.0), (16, 9, 1000.0),
+			# LargeDC <-> DC			
+	    	(10, 17, 2000.0), (17, 10, 2000.0),
+	    	(12, 17, 2000.0), (17, 12, 2000.0),
+	    	(14, 17, 2000.0), (17, 14, 2000.0),
+	    	(16, 17, 2000.0), (17, 16, 2000.0),
+	    	(10, 18, 2000.0), (18, 10, 2000.0),
+	    	(12, 18, 2000.0), (18, 12, 2000.0),
+	    	(14, 18, 2000.0), (18, 14, 2000.0),
+	    	(16, 18, 2000.0), (18, 16, 2000.0),
+			# LargeDC <-> DC			
+	    	(17, 18, 10000.0), (18, 17, 10000.0),		
+        ],
+        users = users,
+    )
+end
+
+# ╔═╡ 4873983b-17e6-4889-8954-4989cc3923f5
+# ╠═╡ show_logs = false
+begin
+	s = scenario_c5()
+	
+	g = KuMo.graph(s.topology, ShortestPath())[1]
+	
+	capacities = Dict(filter(p -> p.first[1] < p.first[2], [p.first => Int(p.second.capacity) for p in pairs(s.topology.links)]))
+	
+	t = TikzGraphs.plot(
+		g,
+		Layouts.SpringElectrical(charge=20000),
+		# Layouts.Spring(dist=10),
+		node_style="draw, rounded corners, fill=blue!10",
+		node_styles=Dict(
+			1=>"fill=green!10",
+			2=>"fill=green!10",
+			3=>"fill=green!10",
+			4=>"fill=green!10",
+			5=>"fill=green!10",
+			6=>"fill=green!10",
+			7=>"fill=green!10",
+			8=>"fill=green!10",
+			17=>"fill=red!10",
+			18=>"fill=red!10",
+		),
+		# edge_labels=capacities,
+		# edge_styles=Dict((3,4)=>"blue"),
+		options="scale=.1",
+	)
+	TikzPictures.save(PDF("3levelsnetwork"), t)
+	t
+end
+
+# ╔═╡ dfc5b22a-5989-4912-a18b-719803ddcbd4
+# ╠═╡ show_logs = false
+pc5, dfc5 = simulate_and_plot(scenario_c5(), ShortestPath()); pc5
+
+# ╔═╡ e23ae61e-f755-4cfc-8a57-b4cba9e47534
+function scenario_c6()
+	duration = 100
+	
+	local_dc = 9:16
+	large_dc = 17:18
+	all_dc = 9:18
+
+	users_loc = 1:8
+
+	spike(j, t, intensity) = fill(Request(j, t), (intensity,))
+	
+	function smooth(j, δ, π1, π2)
+		reqs = Vector{KuMo.Request{typeof(j)}}()
+		for i in 0:π1+π2
+	        for t in i:δ:π1+π2-i
+	            i ≤ π1 && push!(reqs, KuMo.Request(j, t))
+	        end
+	    end
+		return reqs
+	end
+
+	function steady(j, δ, π1, π2, intensity)
+		reqs = Vector{KuMo.Request{typeof(j)}}()
+		for t in 0:δ:π1+π2
+			foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
+	    end
+		return reqs
+	end
+
+	interactive() = job(1, 5, rand(all_dc), 10, 2)
+	data_intensive() = job(5, 10, rand(all_dc), 10, 1)
+
+	users = Vector{KuMo.User}()
+	for i in 1:8
+		reqs = Vector{Request{<:KuMo.AbstractJob}}()
+		rang = sort!(rand(0:duration, 2))
+		bounds = rang[1]:rang[2]
+		types = Set()
+		for _ in 1:(i % 8 + 1)
+			j = rand([interactive, data_intensive])()
+			push!(types, typeof(j))
+			kind = rand([:spike, :smooth, :steady])
+			if kind == :spike
+				t = Float64(rand(bounds))
+				intensity = rand(1:100)
+				req = spike(j, t, intensity)
+				reqs = vcat(reqs, req)
+			elseif kind == :smooth
+				inners = sort!(rand(bounds, 2))
+				π1, π2 = inners[1], inners[2]
+				req = smooth(j, j.duration, π1, π2)
+				reqs = vcat(reqs, req)
+			else
+				inners = sort!(rand(bounds, 2))
+				π1, π2 = inners[1], inners[2]				
+				intensity = rand(1:10)
+				req = steady(j, j.duration, π1, π2, intensity)
+				reqs = vcat(reqs, req)
+			end
+		end
+		UT = Union{collect(types)...}
+		R = Vector{Request{UT}}()
+		foreach(r -> push!(R, r), reqs)
+		u = user(requests(R), i % 8 + 1)
+		push!(users, u)		
+	end
+
+	scenario(;
+        duration,
+        nodes=[
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(5000),
+			Node(5000),
+		],
+        links=[
+			# MDC <-> DC
+	    	(1, 9, 500.0),
+	    	(2, 10, 500.0),
+	    	(3, 11, 500.0),
+	    	(4, 12, 500.0),
+	    	(5, 13, 500.0),
+	    	(6, 14, 500.0),
+	    	(7, 15, 500.0),
+	    	(8, 16, 500.0),
+			(9, 1, 500.0),
+			(10, 2, 500.0),
+			(11, 3, 500.0),
+			(12, 4, 500.0),
+			(13, 5, 500.0),
+			(14, 6, 500.0),
+			(15, 7, 500.0),
+			(16, 8, 500.0),
+			# DC <-> DC
+	    	(10, 9, 1000.0), (9, 10, 1000.0),
+	    	(11, 10, 1000.0), (10, 11, 1000.0),
+	    	(12, 11, 1000.0), (11, 12, 1000.0),
+	    	(13, 12, 1000.0), (12, 13, 1000.0),
+	    	(14, 13, 1000.0), (13, 14, 1000.0),
+	    	(15, 14, 1000.0), (14, 15, 1000.0),
+	    	(16, 15, 1000.0), (15, 16, 1000.0),
+	    	(9, 16, 1000.0), (16, 9, 1000.0),
+			# LargeDC <-> DC			
+	    	(10, 17, 2000.0), (17, 10, 2000.0),
+	    	(12, 17, 2000.0), (17, 12, 2000.0),
+	    	(14, 17, 2000.0), (17, 14, 2000.0),
+	    	(16, 17, 2000.0), (17, 16, 2000.0),
+	    	(10, 18, 2000.0), (18, 10, 2000.0),
+	    	(12, 18, 2000.0), (18, 12, 2000.0),
+	    	(14, 18, 2000.0), (18, 14, 2000.0),
+	    	(16, 18, 2000.0), (18, 16, 2000.0),
+			# LargeDC <-> DC			
+	    	(17, 18, 10000.0), (18, 17, 10000.0),		
+        ],
+        users = users,
+    )
+end
+
+# ╔═╡ f3e65a88-87f1-4619-87f6-d196dfd96305
+# ╠═╡ show_logs = false
+pc6, dfc6 = simulate_and_plot(scenario_c6(), ShortestPath()); pc6
+
 # ╔═╡ 92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╠═╡ show_logs = false
 begin
@@ -617,6 +968,9 @@ begin
 		pc1 => "complex1.pdf",
 		pc2 => "complex2.pdf",
 		pc3 => "complex3.pdf",
+		pc4 => "complex4.pdf",
+		pc5 => "complex5.pdf",
+		pc6 => "complex6.pdf",
 	]
 	foreach(p -> savefig(p.first, p.second), figures_c)
 	TikzPictures.save(PDF("complex_network"), complex_network())
@@ -627,6 +981,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 KuMo = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
@@ -638,6 +993,7 @@ TikzPictures = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
+Distributions = "~0.25.62"
 Graphs = "~1.7.1"
 KuMo = "~0.1.22"
 LaTeXStrings = "~1.3.0"
@@ -653,7 +1009,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "8a8c6e5561038e2f2682edefb49d2fab96ee73e8"
+project_hash = "eaeb1aed74bb23702d8927de28fd646ce1652d7f"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -2042,46 +2398,57 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╟─d3221f99-adcc-457c-82f5-95aaa2a9e197
-# ╠═61189540-e578-11ec-3030-c3ebb611c28b
-# ╠═21639215-1463-46ff-80a0-f1f2028c7558
-# ╠═bc72d307-12f7-47c6-b90a-062814186978
+# ╟─61189540-e578-11ec-3030-c3ebb611c28b
+# ╟─21639215-1463-46ff-80a0-f1f2028c7558
+# ╟─bc72d307-12f7-47c6-b90a-062814186978
 # ╠═217a9755-f4d6-4b13-b47b-9ad08430cffd
+# ╠═a575616a-81d4-4829-ae89-41eee625ad9b
 # ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
-# ╠═698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
-# ╠═12169dd2-6ea2-43a3-b6fd-94d55e23a568
+# ╟─698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
+# ╟─12169dd2-6ea2-43a3-b6fd-94d55e23a568
 # ╠═d3da1adc-91a8-4a97-bb23-586582a31ad7
-# ╠═c1a3e0fe-c63d-41eb-9ef4-6a9c68246dc0
+# ╟─c1a3e0fe-c63d-41eb-9ef4-6a9c68246dc0
 # ╠═015b87d8-c652-41ea-8bd8-0634383afea9
-# ╠═cd893c83-7f8d-486e-af73-e411e154e631
+# ╟─cd893c83-7f8d-486e-af73-e411e154e631
 # ╠═63f15cd5-fb1b-4f74-a287-8e2265ad5d9e
-# ╠═e2144b8b-6b09-4f99-8bf3-819d0a7704f1
+# ╟─e2144b8b-6b09-4f99-8bf3-819d0a7704f1
 # ╠═83f8c3e1-9a29-4e86-9125-ace58b0ad794
-# ╠═971d2a6e-72bb-4875-aee7-aeab10878dec
+# ╟─971d2a6e-72bb-4875-aee7-aeab10878dec
 # ╠═4fbcbb5d-f320-432f-b6df-df5c72bb10a5
-# ╠═2d603282-70c8-4a36-ada3-2459a6877e88
+# ╟─2d603282-70c8-4a36-ada3-2459a6877e88
 # ╠═2454e123-aedc-4b7f-871f-4707e7c76b5c
-# ╠═f62e4864-8690-411a-b1c0-0c5d42f73dc1
+# ╟─f62e4864-8690-411a-b1c0-0c5d42f73dc1
 # ╠═50b84495-921d-42c8-91fb-8b933cf3d7be
-# ╠═69cda46a-380f-45c2-b5f8-a491f7d362d6
+# ╟─69cda46a-380f-45c2-b5f8-a491f7d362d6
 # ╠═e318bb27-bc9b-40c1-af63-9feccb5fcda7
-# ╠═73ab86d3-7ab6-4288-a1d0-ca30432da9fc
+# ╟─73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 # ╟─101246ef-1753-4174-ab16-109b425adbec
-# ╠═1c7238b6-6a2c-4123-8f9b-061820e74c98
+# ╟─1c7238b6-6a2c-4123-8f9b-061820e74c98
 # ╠═9ba5c4d2-6197-46ab-a2b6-ff81dd5175d5
-# ╠═3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
+# ╟─3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
 # ╠═6e597df8-6b06-4ef8-8f9f-212f72022f48
-# ╠═8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
+# ╟─8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
 # ╟─21fc0470-2c99-45fb-a3d2-e9cd40b01835
-# ╟─dbd801ce-d8fe-4d68-9493-088295b4f663
-# ╠═22f9488e-73c4-4d0b-8d42-abd654b99795
+# ╠═dbd801ce-d8fe-4d68-9493-088295b4f663
+# ╟─22f9488e-73c4-4d0b-8d42-abd654b99795
 # ╟─4541deee-dfa5-462c-a797-b221637baf64
 # ╠═2a9aadf8-cbd3-43ab-b8a6-14025d551208
-# ╠═a61fb19f-3e94-4097-844f-72ec845d55b2
+# ╟─a61fb19f-3e94-4097-844f-72ec845d55b2
 # ╟─6cc00479-e1d3-4b88-a0b6-28a50d12d610
 # ╠═ba99d317-87ae-4405-9237-f60748cec26f
 # ╟─fda02e26-8425-4ceb-93e5-7101b7acb8be
 # ╠═b8b4ebbe-0443-4471-b062-4605e4504702
 # ╠═13e635db-a044-4c30-8643-8a0d34880488
+# ╟─b4730f03-6d61-45cb-8a8b-27372b087ddc
+# ╠═244b96f0-9e91-4d5e-9da3-094e9215f475
+# ╠═5a0dad14-0f30-4623-9e6e-4053ca818606
+# ╠═22f080a3-eb4b-4c02-88e4-d301f4b97a85
+# ╠═c0b1feb5-7aec-4310-8c55-c2350ce005f8
+# ╠═ec276414-bd4e-4536-9307-ce773d49306e
+# ╟─4873983b-17e6-4889-8954-4989cc3923f5
+# ╠═dfc5b22a-5989-4912-a18b-719803ddcbd4
+# ╠═e23ae61e-f755-4cfc-8a57-b4cba9e47534
+# ╠═f3e65a88-87f1-4619-87f6-d196dfd96305
 # ╠═92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
