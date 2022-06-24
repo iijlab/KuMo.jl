@@ -1,4 +1,9 @@
 
+We have develop a simple simulation tool to evaluate the model
+that is publicly available from (URL removed for blind-review).
+
+\subsection{Simulation settings}
+
 The simulation setting is shown in Figure~\ref{fig:topology-simple}.
 \begin{itemize}
   \item		job: mean duration:4sec, mean 1 unit,
@@ -13,6 +18,7 @@ The simulation setting is shown in Figure~\ref{fig:topology-simple}.
     \includegraphics[width=7.5cm,clip]{topology-simple.pdf}
     \vspace{-2.0ex}
     \caption{simple simulation topology}
+    \Description{Simulation topology with 2 datacenters and 2 micro datacenters.}
     \label{fig:topology-simple}
   \end{center}
 \end{figure}
@@ -35,3 +41,52 @@ Simulation scenarios:
   \item {\bf premium service:} 4 nodes with 3 standard and 1 premium services.
   \item	{\bf complex?:} realistic scenario
 \end{enumerate}
+
+\subsection{Basic Behaviors}
+
+\begin{figure}[tb]
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{lowering.pdf}
+    \vspace{-2.0ex}
+    \caption{lowering load, interactve jobs vs. data intensive jobs}
+    \Description{Simulation results with basic behaviors.}
+    \label{fig:lowering}
+  \end{center}
+\end{figure}
+
+We use 3 types of time-series plots: one for the load of each node
+(computing resource), another for the load of each link, and the last
+one to show the total active jobs normalized to MDC's capacity.
+
+The effects of manipulating the cost function and the job
+specification is shown in Figure~\ref{fig:lowering}.
+A series of jobs are generated between a user at MDC0 and an object at DC3.
+The first and second waves contain only interactive jobs, and most of
+the jobs are assigned to the node closest to the user (MDC0) but some
+overflowing jobs are assigned to DC2.
+In the second wave, the cost function of MDC0 is manipulated to reduce
+the load by multiplying the cost function by 1.5.
+The third wave contains only data intensive jobs, and all jobs are
+assigned to the node that has the object (DC3).
+
+\subsection{Mixed Behaviors}
+
+A more complex scenario is shown in Figure~\ref{fig:mixed}.
+user0: cycle: 180  peak:1.2 interactve:data-intensive=1:2.
+user1: cycle: 135  peak:1.0  interactve:data-intensive=1:3.
+after time 540 (5th wave for user1), user1 load x 2.0, 
+after time 675 (6th wave for user1), user1 load x 10.
+before, time 540, interactive jobs are assigned closer to the user,
+and data intensive jobs are assigned closer to the data.
+For the 6th wave, n1 saturates, then assigned to n2 but the link to n2
+saturates, and the rest assigned to n3.
+
+\begin{figure}[tb]
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{simu2.pdf}
+    \vspace{-2.0ex}
+    \caption{mixed scenario}
+    \Description{Simulation results with mixed scenario.}
+    \label{fig:mixed}
+  \end{center}
+\end{figure}

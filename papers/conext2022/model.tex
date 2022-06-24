@@ -4,46 +4,52 @@
     \includegraphics[width=1.0\columnwidth]{system.pdf}
     \vspace{-2.0ex}
     \caption{Simple system model}
+    \Description{A simple system model with 2 datacenters and 2 micro datacenters.}
     \label{fig:system}
   \end{center}
 \end{figure}
 
-A simple system configuration with 2 datacenters and 2
-micro-datacenters is shown in Figure~\ref{fig:system}.
+Our resource management model is explained using a simple system
+configuration with 2 datacenters and 2 micro-datacenters is shown in
+Figure~\ref{fig:system}.
 When a user requests a service to a nearby service allocation server,
 the service server instantiates the requested service into a series of
 microservice jobs.
 The server finds the required resources for each job,
 identifies the locations of the user and the required data object,
 asks available resources (or their proxies) for the current costs,
-and assigns the job to the node with the lowest pseudo cost.
+and assigns the job to the node that minimizes the total cost for the
+job.
 The area for cost inquiry could be within proximity along the path
 between the user and the data object.
 
 The load of a resource can be measured in a number of ways.  Most
 resources have some form of load report functions built-in.
+When the load of a resource fluctuates too rapidly,
+a smoothing filter such as an exponentially weighted moving average
+can be used to stabilize the behavior.
 A load value does not need to be precise, and a rough approximation is
 enough for loose resource management.
-On the other hand, if each allocation is not small enough both in size
-and in duration, the loads may not converge as expected.
-That is, microservice is the enabler for this approach.
+Still, if each allocation is not small enough both in size and in
+duration, the loads may not converge as expected.
+Therefore, microservice is the enabler for this approach.
 
 \subsection{Job Assignment}
 
-In this paper, we use a simple micro job model that defines the
+In this paper, we use a simple micro-job model that defines the
 required resources for a micro-job as $J(p, q, r, s)$ where 
-$p$ is the number of micro containers, 
+$p$ is the number of micro containers for computation, 
 $q$ is frontend communication with the user, 
 $r$ is backend communication with data objects (e.g., database), and
 $s$ is the number of time slots.
 %%The unit is one micro-container for $p$, 1Mbps for $q$ and $r$, and 1
 %%second for $s$.
-For simplicity in the paper, we do not distinguish directions of
+For simplicity, we do not distinguish directions of
 communications for $q$ and $r$, and assume only one user and one data
-object per job.
+object per job in this paper.
 
 A job can be optionally associated with weights for the cost
-calculation with $p$, $q$, and $r$: e.g., an interactive job may raise
+calculation on $p$, $q$, and $r$: e.g., an interactive job may raise
 the weight for the frontend communication to place the job close to
 the user. In this manner, cloud service providers can speficy which
 type of resoures have a priority for a specific service.
@@ -67,7 +73,8 @@ between $m$ and $o$.
 $f(\rho)$ is the cost function of a resource load, and $path(m,i)$ is a set
 of links from $m$ to $i$ (e.g., the shortest path weighted by cost).
 
-To assign Job $j$, the server simply finds the lowest cost node $i$:
+To assign Job $j$, the server simply finds the node that minimizes the
+cost:
 \begin{equation*}
 	argmin_{i} \: E(j, i)
 \end{equation*}
@@ -118,6 +125,8 @@ the cost functions in Sec.~\ref{sec:variation}.
     \includegraphics[width=1.0\columnwidth]{costfunc.pdf}
     \vspace{-2.0ex}
     \caption{Standard cost functions}
+    \Description{The standard convex cost function and standard
+      monotonic cost function.}
     \label{fig:std_costfunc}
   \end{center}
 \end{figure}
@@ -154,6 +163,7 @@ Figure~\ref{fig:4node-ratio}.
     \includegraphics[width=1.0\columnwidth]{4node.pdf}
     \vspace{-2.0ex}
     \caption{Load distribution: 4 equivalent cost nodes}
+    \Description{Simulation results with 4 nodes with the same cost function.}
     \label{fig:4node}
   \end{center}
   \hspace{0.8\columnsep}
@@ -208,6 +218,7 @@ $[.5, .75]$, while keeping idle resources as much as possible.
     \includegraphics[width=1.0\columnwidth]{4node-ratio.pdf}
     \vspace{-2.0ex}
     \caption{Load distribution: 4 proportional cost nodes}
+    \Description{Simulation results with 4 nodes with proportional cost functions.}
     \label{fig:4node-ratio}
   \end{center}
 \end{figure}
@@ -230,12 +241,8 @@ Similarly, when the most expensive one among active resources becomes
 idle, the load of the remaining ones stay at the matching cost at
 $f(.5)$ for the deactivating one.
 
-When the load of a resource fluctuates too rapidly,
-a smoothing filter such as an exponentially weighted moving average
-can be used to stabilize the behavior.
-
-Note that our goal is not to achieve the theoretical optimum but to
-enable loose automatic distributed load balancing.
+%%Note that our goal is not to achieve the theoretical optimum but to
+%%enable loose automatic distributed load balancing.
 
 \subsection{Manipulating the Cost Function}
 \label{sec:variation}
@@ -244,69 +251,34 @@ The utilization of a resource can be manipulated by modifying the cost
 function of the resource as shown in Figure~\ref{fig:costfunc3}.
 
 One can {\bf lower or raise the utilization} of a resource by raising or
-lowering the cost.
+lowering the cost, which will be the most common manipulation.
 To make the cost $n$ times more expensive, $f'(\rho) = n f(\rho)$.
 For minor adjustment, one can use an additive form,
 $f'(\rho) = f(\rho) + \Delta$.
 
-The {\bf idle-state can be made stickier} by raising the cost at $\rho = 0$:
+To make {\bf idle-resource pooling more aggressive},
+one can raise the cost at $\rho = 0$:
 e.g., to raise the cost at $\rho = 0$ by a factor of $n$,
 $f'(\rho) = n (2\rho - 1)^{2}/(1 - \rho^{n}) + 1$.
 
-A {\bf premium service} can be realized by lowering the target load so
-that premium jobs are always assigned to lightly loaded resources, 
+A {\bf premium service} can be realized by shifting the cost fuction
+to the left so as to have premium jobs being assigned to less loaded
+resources, 
 $f'(\rho) = f(\rho + \Delta)$.
-Similarly, an {\bf economy service} can be made by raising the target
-load.
+Similarly, an {\bf economy service} that allows to be assigned to more
+loaded resources can be made by shifting the cost function to the
+right.  It could be appealing to allow multiple classes using the same
+resource pool with a single shift parameter.
 
 \begin{figure}[tb]
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{costfunc3.pdf}
     \vspace{-2.0ex}
     \caption{Manipulating convex cost functions}
+    \Description{Variations of manipulated cost functions are shown.}
     \label{fig:costfunc3}
   \end{center}
 \end{figure}
 
 
-\begin{figure}[tb]
-  \begin{center}
-    \includegraphics[width=1.0\columnwidth]{lowering.pdf}
-    \vspace{-2.0ex}
-    \caption{lowering load, interactve jobs vs. data intensive jobs}
-    \label{fig:lowering}
-  \end{center}
-\end{figure}
-
-In Figure~\ref{fig:lowering}, 3 waves of jobs are generated between
-user~0 (at node~0) and object~0 (at node~3).
-For the total load in the bottom plot, the load of n2 and n3 are
-normalized to match the quantity of n0 and n1 because of the
-difference in their capacity.
-The first and second waves contain only interactive jobs, and most of
-the jobs are assigned to the node closest to the user (n0) but some
-overflowing jobs are assigned to n2.
-In the second wave, the cost function of n0 is manipulated to reduce
-the load by multiplying the cost function by 1.5.
-The third wave contains only data intensive jobs, and all jobs are
-assigned to the node that has the object (n3).
-
-A more complex scenario is shown in Figure~\ref{fig:mixed}.
-user0: cycle: 180  peak:1.2 interactve:data-intensive=
-user1: cycle: 135  peak:1.0 
-after time 540 (5th wave for user1), user1 load x 2.0, 
-after time 675 (6th wave for user1), user1 load x 10.
-before, time 540, interactive jobs are assigned closer to the user,
-and data intensive jobs are assigned closer to the data.
-For the 6th wave, n1 saturates, then assigned to n2 but the link to n2
-saturates, and the rest assigned to n3.
-
-\begin{figure}[tb]
-  \begin{center}
-    \includegraphics[width=1.0\columnwidth]{simu2.pdf}
-    \vspace{-2.0ex}
-    \caption{mixed scenario}
-    \label{fig:mixed}
-  \end{center}
-\end{figure}
 

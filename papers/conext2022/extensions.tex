@@ -23,45 +23,44 @@ A path selection mechanism is also needed when assigning a job,
 probably using SRv6 or other source routing mechanism.
 
 There exists a rich area for further research:
-{\bf How to tune the cost function:}  It may not be straightforward
-to obtain expected results by tuning the cost function, as it may
-induce side effects.
+One topic is {\bf auto-tuning of the cost functions}.
+It may not be straightforward to obtain expected results by tuning the
+convex cost function due to the interactions between load-balancing
+and idle-resource pooling.
 It would be interesting to apply reinforcement learning to cost
 tuning.
 
-{\bf Hierarchical Configurations:} It would be better to use
-hierarchical configurations for scalability and for management
-purposes.
+Another topic is {\bf hierarchical configurations}.
+It would be better to use hierarchical configurations for scalability
+and for management purposes.
 For example, a distributed datacenter model can consist of
 the inter-DC layer with DC-level resources and the intra-DC layer
 with rack-level resources.
 
-{\bf Inter-cloud:}
 The proposed system was originally designed mainly for a single
 administrative domain.
-The hierarchical model, however, naturally extends to an inter-cloud
-model in which different cloud systems are federated.
+The hierarchical model, however, naturally extends to
+an {\bf inter-cloud model} in which different cloud systems are
+federated.
 The mechanism of the idle resource pooling allows utilizing external
 clouds when only needed.
 
-{\bf Crowdsourcing resource supply:}
-It would be possible to crowdsource the role of resource providers. 
+It would be possible to {\bf crowdsource the resource supply}. 
 Then, we need a monetary charging, authentication and authorization
 mechanisms to add externally provided resources to the resource pool.
 
-{\bf Data Migration:}
-The location of data is critical for the pseudo cost so that data
-placement would play an important role for cloud morphing. 
+The location of data is critical for the pseudo cost so that
+{\bf data placement} would play an important role for cloud morphing. 
 A possible approach is to migrate data at coarser timescale, based
 on usage history.
 Another possibility is design a new distributed storage system
 suitable for the cloud morphing model in which (cached) data can be
 easily moved.
 
-{\bf L2 Paths:}
-idle-resource pooling is not used for network links in this paper but
-it is possible to use it for dynamically creating Layer 2 paths (e.g.,
-lightpath switching over WDM networks).
+Idle-resource pooling is not used for network links in this paper but
+it is possible to use it for dynamically creating {\bf Layer 2 paths}
+(e.g., lightpath switching over WDM networks).
 
-Our simulation tool is publicly available from (URL removed for
-review).
+We believe that future distributed heterogeneous clouds need a new
+paradigm for resource management, and hope this work will stimulate
+other research in the field.
