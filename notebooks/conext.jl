@@ -961,6 +961,183 @@ end
 # ╠═╡ show_logs = false
 pc6, dfc6 = simulate_and_plot(scenario_c6(), ShortestPath()); pc6
 
+# ╔═╡ 46e86b8e-2fba-4f16-bc71-91e1c05b00fd
+function scenario_c7()
+	duration = 100
+	
+	local_dc = 9:16
+	large_dc = 17:18
+	all_dc = 9:18
+
+	users_loc = 1:8
+
+	spike(j, t, intensity) = fill(Request(j, t), (intensity,))
+	
+	function smooth(j, δ, π1, π2)
+		reqs = Vector{KuMo.Request{typeof(j)}}()
+		for i in 0:π2-π1
+	        for t in π1+i:δ:π2-i
+	            i ≤ π1 && push!(reqs, KuMo.Request(j, t))
+	        end
+	    end
+		return reqs
+	end
+
+	function steady(j, δ, π1, π2, intensity)
+		reqs = Vector{KuMo.Request{typeof(j)}}()
+		for t in π1:δ:π2
+			foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
+	    end
+		return reqs
+	end
+
+	interactive() = job(1, 5, rand(all_dc), 10, 2)
+	data_intensive() = job(5, 10, rand(local_dc), 10, 1)
+
+	# users = Vector{KuMo.User}()
+	# for i in 1:8
+	# 	reqs = Vector{Request{<:KuMo.AbstractJob}}()
+	# 	rang = sort!(rand(0:duration, 2))
+	# 	bounds = rang[1]:rang[2]
+	# 	types = Set()
+	# 	for _ in 1:(i % 8 + 1)
+	# 		j = rand([interactive, data_intensive])()
+	# 		push!(types, typeof(j))
+	# 		kind = rand([:spike, :smooth, :steady])
+	# 		if kind == :spike
+	# 			t = Float64(rand(bounds))
+	# 			intensity = rand(1:100)
+	# 			req = spike(j, t, intensity)
+	# 			reqs = vcat(reqs, req)
+	# 		elseif kind == :smooth
+	# 			inners = sort!(rand(bounds, 2))
+	# 			π1, π2 = inners[1], inners[2]
+	# 			req = smooth(j, j.duration, π1, π2)
+	# 			reqs = vcat(reqs, req)
+	# 		else
+	# 			inners = sort!(rand(bounds, 2))
+	# 			π1, π2 = inners[1], inners[2]				
+	# 			intensity = rand(1:10)
+	# 			req = steady(j, j.duration, π1, π2, intensity)
+	# 			reqs = vcat(reqs, req)
+	# 		end
+	# 	end
+	# 	UT = Union{collect(types)...}
+	# 	R = Vector{Request{UT}}()
+	# 	foreach(r -> push!(R, r), reqs)
+	# 	u = user(requests(R), i % 8 + 1)
+	# 	push!(users, u)		
+	# end
+
+	jobs = [data_intensive() for _ in 1:25]
+	types = Set()
+	reqs = Vector()
+	for j in jobs
+		push!(types, typeof(j))
+		reqs = vcat(reqs, steady(j, j.duration, 1, 150, 15))
+	end
+	UT = Union{collect(types)...}
+	R = Vector{Request{UT}}()
+	foreach(r -> push!(R, r), reqs)
+	user1 = user(requests(R), 1)
+
+	jobs = [data_intensive() for _ in 1:25]
+	types = Set()
+	reqs = Vector()
+	for j in jobs
+		push!(types, typeof(j))
+		reqs = vcat(reqs, steady(j, j.duration, 51, 100, 15))
+	end
+	UT = Union{collect(types)...}
+	R = Vector{Request{UT}}()
+	foreach(r -> push!(R, r), reqs)
+	user2 = user(requests(R), 2)
+
+	jobs = [data_intensive() for _ in 1:25]
+	types = Set()
+	reqs = Vector()
+	for j in jobs
+		push!(types, typeof(j))
+		reqs = vcat(reqs, steady(j, j.duration, 101, 150, 15))
+	end
+	UT = Union{collect(types)...}
+	R = Vector{Request{UT}}()
+	foreach(r -> push!(R, r), reqs)
+	user3 = user(requests(R), 3)
+	
+	scenario(;
+        duration,
+        nodes=[
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(5000),
+			Node(5000),
+		],
+        links=[
+			# MDC <-> DC
+	    	(1, 9, 500.0),
+	    	(2, 10, 500.0),
+	    	(3, 11, 500.0),
+	    	(4, 12, 500.0),
+	    	(5, 13, 500.0),
+	    	(6, 14, 500.0),
+	    	(7, 15, 500.0),
+	    	(8, 16, 500.0),
+			(9, 1, 500.0),
+			(10, 2, 500.0),
+			(11, 3, 500.0),
+			(12, 4, 500.0),
+			(13, 5, 500.0),
+			(14, 6, 500.0),
+			(15, 7, 500.0),
+			(16, 8, 500.0),
+			# DC <-> DC
+	    	(10, 9, 1000.0), (9, 10, 1000.0),
+	    	(11, 10, 1000.0), (10, 11, 1000.0),
+	    	(12, 11, 1000.0), (11, 12, 1000.0),
+	    	(13, 12, 1000.0), (12, 13, 1000.0),
+	    	(14, 13, 1000.0), (13, 14, 1000.0),
+	    	(15, 14, 1000.0), (14, 15, 1000.0),
+	    	(16, 15, 1000.0), (15, 16, 1000.0),
+	    	(9, 16, 1000.0), (16, 9, 1000.0),
+			# LargeDC <-> DC			
+	    	(10, 17, 2000.0), (17, 10, 2000.0),
+	    	(12, 17, 2000.0), (17, 12, 2000.0),
+	    	(14, 17, 2000.0), (17, 14, 2000.0),
+	    	(16, 17, 2000.0), (17, 16, 2000.0),
+	    	(10, 18, 2000.0), (18, 10, 2000.0),
+	    	(12, 18, 2000.0), (18, 12, 2000.0),
+	    	(14, 18, 2000.0), (18, 14, 2000.0),
+	    	(16, 18, 2000.0), (18, 16, 2000.0),
+			# LargeDC <-> DC			
+	    	(17, 18, 10000.0), (18, 17, 10000.0),		
+        ],
+        users = [
+			user1,
+			user2,
+			user3,
+		],
+    )
+end
+
+# ╔═╡ 545262b9-fc38-4ea6-b3a6-90e8b96584a3
+# ╠═╡ show_logs = false
+pc7, dfc7 = simulate_and_plot(scenario_c7(), ShortestPath(); plot_type = :plot); pc7
+
 # ╔═╡ 92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╠═╡ show_logs = false
 begin
@@ -2449,6 +2626,8 @@ version = "0.9.1+5"
 # ╠═dfc5b22a-5989-4912-a18b-719803ddcbd4
 # ╠═e23ae61e-f755-4cfc-8a57-b4cba9e47534
 # ╠═f3e65a88-87f1-4619-87f6-d196dfd96305
+# ╠═46e86b8e-2fba-4f16-bc71-91e1c05b00fd
+# ╠═545262b9-fc38-4ea6-b3a6-90e8b96584a3
 # ╠═92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
