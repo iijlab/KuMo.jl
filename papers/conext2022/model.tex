@@ -10,7 +10,7 @@
 \end{figure}
 
 Our resource management model is explained using a simple system
-configuration with 2 datacenters and 2 micro-datacenters is shown in
+configuration with 2 datacenters and 2 micro-datacenters shown in
 Figure~\ref{fig:system}.
 When a user requests a service to a nearby service allocation server,
 the service server instantiates the requested service into a series of
@@ -44,6 +44,10 @@ $r$ is backend communication with data objects (e.g., database), and
 $s$ is the number of time slots.
 %%The unit is one micro-container for $p$, 1Mbps for $q$ and $r$, and 1
 %%second for $s$.
+The communication costs $q$ and $r$ are also a function of distance so
+that an interactive job with $q \gg r$ will be placed close to the
+user and a data-intensive jobs with $q \ll r$ will be placed close to
+the data.
 For simplicity, we do not distinguish directions of
 communications for $q$ and $r$, and assume only one user and one data
 object per job in this paper.
@@ -52,7 +56,8 @@ A job can be optionally associated with weights for the cost
 calculation on $p$, $q$, and $r$: e.g., an interactive job may raise
 the weight for the frontend communication to place the job close to
 the user. In this manner, cloud service providers can speficy which
-type of resoures have a priority for a specific service.
+type of resoures have a priority for a specific service without
+overclaiming required resources.
 
 To instantiate a micro-job requested from a user, the service
 server finds the best node to allocate the required resource
@@ -99,7 +104,7 @@ capacity.
 Another key idea is {\em idle-resource pooling} that tries to put resources
 into idle state when possible for energy saving.
 We proposed a convex cost function that enables idle-resource pooling
-by modified congestion pricing.
+as part of the congestion pricing mechanism.
 
 A pseudo cost function in our model maps the load of a resource
 $\rho \in [0, 1]$ to the corresponding cost.
@@ -137,7 +142,7 @@ The standard convex cost function is defined as:
 \end{equation*}
 This function has the properties:
 $min\: f(\rho) = f(.5) = 1$, and $f(0) = f(.75) = 2$.
-The cost grows rapidly when $\rho \ge .75$.
+The cost grows rapidly when $\rho > .75$.
 The system automatically tries to keep $\rho \le .75$,
 aiming at $\rho = .5$.
 
@@ -228,6 +233,8 @@ the underlying mechanisms are the same.
 Let's take a look at a case of 4 resources with the cost ratio $1:2:4:8$,
 that is $8 f_{r_{0}} = 4 f_{r_{1}} = 2 f_{r_{2}} = f_{r_{3}}$ in
 Figure~\ref{fig:4node-ratio}.
+Here, we focus on the interaction between $r_{0}$ and $r_{1}$ since
+the other interactions are similar.
 To activate $r_{1}$, the load of $r_{0}$ goes up to $.84$ to satisfy:
 $f_{r_{1}}(0) = 4 = f_{r_{0}}(.84)$.
 When $r_{1}$ is moving towards idle after time 550, the load
@@ -267,7 +274,7 @@ resources,
 $f'(\rho) = f(\rho + \Delta)$.
 Similarly, an {\bf economy service} that allows to be assigned to more
 loaded resources can be made by shifting the cost function to the
-right.  It could be appealing to allow multiple classes using the same
+right.  It could be appealing to enable multiple classes using the same
 resource pool with a single shift parameter.
 
 \begin{figure}[tb]
