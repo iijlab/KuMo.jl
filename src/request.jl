@@ -37,3 +37,23 @@ function requests(requests_lst...)
     foreach(r -> push!(reqs.requests, r), Iterators.flatten(requests_lst))
     return reqs
 end
+
+spike(j, t, intensity) = fill(Request(j, t), (intensity,))
+
+function smooth(j, δ, π1, π2)
+    reqs = Vector{KuMo.Request{typeof(j)}}()
+    for i in 0:π2-π1
+        for t in π1+i:δ:π2-i
+            i ≤ π1 && push!(reqs, KuMo.Request(j, t))
+        end
+    end
+    return reqs
+end
+
+function steady(j, δ, π1, π2, intensity)
+    reqs = Vector{KuMo.Request{typeof(j)}}()
+    for t in π1:δ:π2
+        foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
+    end
+    return reqs
+end

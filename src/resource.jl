@@ -67,3 +67,7 @@ struct FreeLink <: AbstractLink end
 capacity(::FreeLink) = Inf
 
 pseudo_cost(::FreeLink, x...) = 0.0
+
+struct ConvexLink <: KuMo.AbstractLink
+	capacity::Float64
+end
