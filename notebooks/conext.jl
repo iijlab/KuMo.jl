@@ -984,8 +984,8 @@ function scenario_c7()
 	end
 	j = data_intensive()
 	push!(types, typeof(j))
-	reqs = vcat(reqs, Request(j, 200.))
-	reqs = vcat(reqs, Request(j, 1000.))
+	# reqs = vcat(reqs, Request(j, 200.))
+	# reqs = vcat(reqs, Request(j, 1000.))
 	reqs = vcat(reqs, spike(j, 250., 1000))
 	UT = Union{collect(types)...}
 	R = Vector{Request{UT}}()
@@ -1271,6 +1271,22 @@ pc8_links_areas = plot_links(dfc8; kind = :areaplot)
 # ╔═╡ fb370e9f-65c3-44e9-b30e-3efd778b345a
 pc8_links_lines = plot_links(dfc8; kind = :plot)
 
+# ╔═╡ 53ef9168-042d-48b5-bcda-61b77db1000c
+# ╠═╡ show_logs = false
+pc9, dfc9 = simulate_and_plot(s9, ShortestPath()); pc9
+
+# ╔═╡ a1047cd7-5683-4d37-91db-daec3ee7ddb4
+pc9_nodes_areas = plot_nodes(dfc9; kind = :areaplot)
+
+# ╔═╡ dc9885c4-f003-4f25-ab30-0cccbb855f9f
+pc9_nodes_lines = plot_nodes(dfc9; kind = :plot)
+
+# ╔═╡ 8140f3c6-b711-469b-9d71-33fcb9361e91
+pc9_links_areas = plot_links(dfc9; kind = :areaplot)
+
+# ╔═╡ 722eb58c-aa69-4371-b737-fcead002aa51
+pc9_links_lines = plot_links(dfc9; kind = :plot)
+
 # ╔═╡ 92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╠═╡ show_logs = false
 begin
@@ -1291,12 +1307,18 @@ begin
 		pc8_nodes_areas => "complex8_nodes_areas.pdf",
 		pc8_links_lines => "complex8_links_lines.pdf",
 		pc8_links_areas => "complex8_links_areas.pdf",
+		pc9 => "complex9.pdf",
+		pc9_nodes_lines => "complex9_nodes_lines.pdf",
+		pc9_nodes_areas => "complex9_nodes_areas.pdf",
+		pc9_links_lines => "complex9_links_lines.pdf",
+		pc9_links_areas => "complex9_links_areas.pdf",
 	]
 	foreach(p -> savefig(p.first, p.second), figures_c)
 	TikzPictures.save(PDF("complex_network"), complex_network())
 	CSV.write("complex7.csv", dfc7)
 	CSV.write("complex8.csv", dfc8)
-end
+	CSV.write("complex9.csv", dfc9)
+end;
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1317,7 +1339,7 @@ CSV = "~0.10.4"
 DataFrames = "~1.3.4"
 Distributions = "~0.25.62"
 Graphs = "~1.7.1"
-KuMo = "~0.1.22"
+KuMo = "~0.1.23"
 LaTeXStrings = "~1.3.0"
 PGFPlotsX = "~1.5.0"
 StatsPlots = "~0.14.34"
@@ -1331,7 +1353,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "eaeb1aed74bb23702d8927de28fd646ce1652d7f"
+project_hash = "15cf7b4145ecc6ab180ec05023b3b88f075a2780"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1446,9 +1468,9 @@ version = "0.7.0"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "Random"]
-git-tree-sha1 = "7297381ccb5df764549818d9a7d57e45f1057d30"
+git-tree-sha1 = "1fd869cc3875b57347f7027521f561cf46d1fcd8"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.18.0"
+version = "3.19.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -1870,9 +1892,9 @@ version = "0.6.3"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PrettyTables", "ProgressMeter", "Random", "RecipesBase", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "69a6023ac214876c8eebf70a3f40e5859f440e4e"
+git-tree-sha1 = "a3f1ffc56b90b29481d8582dd0b3ec6e3ced63da"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.22"
+version = "0.1.23"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2109,9 +2131,9 @@ version = "0.8.1+0"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "ab05aa4cc89736e95915b01e7279e61b1bfe33b8"
+git-tree-sha1 = "9a36165cf84cff35851809a40a928e1103702013"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "1.1.14+0"
+version = "1.1.16+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -2138,9 +2160,9 @@ version = "8.44.0+0"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "7f4869861f8dac4990d6808b66b57e5a425cfd99"
+git-tree-sha1 = "ca433b9e2f5ca3a0ce6702a032fce95a3b6e1e48"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.13"
+version = "0.11.14"
 
 [[deps.PGFPlotsX]]
 deps = ["ArgCheck", "DataStructures", "Dates", "DefaultApplication", "DocStringExtensions", "MacroTools", "Parameters", "Requires", "Tables"]
@@ -2179,15 +2201,15 @@ version = "3.0.0"
 
 [[deps.PlotUtils]]
 deps = ["ColorSchemes", "Colors", "Dates", "Printf", "Random", "Reexport", "Statistics"]
-git-tree-sha1 = "bb16469fd5224100e422f0b027d26c5a25de1200"
+git-tree-sha1 = "9888e59493658e476d3073f1ce24348bdc086660"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
-version = "1.2.0"
+version = "1.3.0"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "GeometryBasics", "JSON", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
-git-tree-sha1 = "d0a61518267b44a70427c0b690b5e993a4f5fe01"
+git-tree-sha1 = "93e82cebd5b25eb33068570e3f63a86be16955be"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.30.2"
+version = "1.31.1"
 
 [[deps.PooledArrays]]
 deps = ["DataAPI", "Future"]
@@ -2348,10 +2370,15 @@ uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "2.1.6"
 
 [[deps.StaticArrays]]
-deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "2bbd9f2e40afd197a1379aef05e0d85dba649951"
+deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
+git-tree-sha1 = "9f8a5dc5944dc7fbbe6eb4180660935653b0a9d9"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.4.7"
+version = "1.5.0"
+
+[[deps.StaticArraysCore]]
+git-tree-sha1 = "6edcea211d224fa551ec8a85debdc6d732f155dc"
+uuid = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
+version = "1.0.0"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -2383,9 +2410,9 @@ version = "0.14.34"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
-git-tree-sha1 = "9abba8f8fb8458e9adf07c8a2377a070674a24f1"
+git-tree-sha1 = "ec47fb6069c57f1cee2f67541bf8f23415146de7"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.6.8"
+version = "0.6.11"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -2720,7 +2747,7 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╟─d3221f99-adcc-457c-82f5-95aaa2a9e197
-# ╟─61189540-e578-11ec-3030-c3ebb611c28b
+# ╠═61189540-e578-11ec-3030-c3ebb611c28b
 # ╟─21639215-1463-46ff-80a0-f1f2028c7558
 # ╟─bc72d307-12f7-47c6-b90a-062814186978
 # ╠═217a9755-f4d6-4b13-b47b-9ad08430cffd
@@ -2783,6 +2810,11 @@ version = "0.9.1+5"
 # ╠═8881283e-93a8-4aa0-b0cf-39bf501b5847
 # ╠═ceef39d0-185e-496f-a2c1-9bffd3c1f619
 # ╠═fb370e9f-65c3-44e9-b30e-3efd778b345a
+# ╠═53ef9168-042d-48b5-bcda-61b77db1000c
+# ╠═a1047cd7-5683-4d37-91db-daec3ee7ddb4
+# ╠═dc9885c4-f003-4f25-ab30-0cccbb855f9f
+# ╠═8140f3c6-b711-469b-9d71-33fcb9361e91
+# ╠═722eb58c-aa69-4371-b737-fcead002aa51
 # ╠═92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
