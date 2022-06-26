@@ -37,6 +37,9 @@ export requests
 export scenario
 export simulate
 export simulate_and_plot
+export smooth
+export spike
+export steady
 export user
 
 export MinCostFlow
@@ -48,6 +51,7 @@ export Requests
 
 export Link
 export FreeLink
+export ConvexLink
 
 export Node
 export PremiumNode

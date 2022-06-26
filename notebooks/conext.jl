@@ -971,101 +971,60 @@ function scenario_c7()
 
 	users_loc = 1:8
 
-	spike(j, t, intensity) = fill(Request(j, t), (intensity,))
-	
-	function smooth(j, δ, π1, π2)
-		reqs = Vector{KuMo.Request{typeof(j)}}()
-		for i in 0:π2-π1
-	        for t in π1+i:δ:π2-i
-	            i ≤ π1 && push!(reqs, KuMo.Request(j, t))
-	        end
-	    end
-		return reqs
-	end
-
-	function steady(j, δ, π1, π2, intensity)
-		reqs = Vector{KuMo.Request{typeof(j)}}()
-		for t in π1:δ:π2
-			foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
-	    end
-		return reqs
-	end
-
 	interactive() = job(1, 5, rand(all_dc), 10, 2)
 	data_intensive() = job(5, 10, rand(local_dc), 10, 1)
 
-	# users = Vector{KuMo.User}()
-	# for i in 1:8
-	# 	reqs = Vector{Request{<:KuMo.AbstractJob}}()
-	# 	rang = sort!(rand(0:duration, 2))
-	# 	bounds = rang[1]:rang[2]
-	# 	types = Set()
-	# 	for _ in 1:(i % 8 + 1)
-	# 		j = rand([interactive, data_intensive])()
-	# 		push!(types, typeof(j))
-	# 		kind = rand([:spike, :smooth, :steady])
-	# 		if kind == :spike
-	# 			t = Float64(rand(bounds))
-	# 			intensity = rand(1:100)
-	# 			req = spike(j, t, intensity)
-	# 			reqs = vcat(reqs, req)
-	# 		elseif kind == :smooth
-	# 			inners = sort!(rand(bounds, 2))
-	# 			π1, π2 = inners[1], inners[2]
-	# 			req = smooth(j, j.duration, π1, π2)
-	# 			reqs = vcat(reqs, req)
-	# 		else
-	# 			inners = sort!(rand(bounds, 2))
-	# 			π1, π2 = inners[1], inners[2]				
-	# 			intensity = rand(1:10)
-	# 			req = steady(j, j.duration, π1, π2, intensity)
-	# 			reqs = vcat(reqs, req)
-	# 		end
-	# 	end
-	# 	UT = Union{collect(types)...}
-	# 	R = Vector{Request{UT}}()
-	# 	foreach(r -> push!(R, r), reqs)
-	# 	u = user(requests(R), i % 8 + 1)
-	# 	push!(users, u)		
-	# end
-
-	jobs = [data_intensive() for _ in 1:25]
+	jobs = [data_intensive() for _ in 1:23]
 	types = Set()
 	reqs = Vector()
 	for j in jobs
 		push!(types, typeof(j))
 		reqs = vcat(reqs, steady(j, j.duration, 1, 150, 15))
+		reqs = vcat(reqs, steady(j, j.duration, 201, 800, 15))
 	end
+	j = data_intensive()
+	push!(types, typeof(j))
+	reqs = vcat(reqs, Request(j, 200.))
+	reqs = vcat(reqs, Request(j, 1000.))
+	reqs = vcat(reqs, spike(j, 250., 1000))
 	UT = Union{collect(types)...}
 	R = Vector{Request{UT}}()
 	foreach(r -> push!(R, r), reqs)
 	user1 = user(requests(R), 1)
 
-	jobs = [data_intensive() for _ in 1:25]
+	jobs = [data_intensive() for _ in 1:23]
 	types = Set()
 	reqs = Vector()
 	for j in jobs
 		push!(types, typeof(j))
-		reqs = vcat(reqs, steady(j, j.duration, 51, 100, 15))
+		reqs = vcat(reqs, steady(j, j.duration, 51, 150, 15))
+		reqs = vcat(reqs, steady(j, j.duration, 401, 800, 15))
 	end
+	j = data_intensive()
+	push!(types, typeof(j))
+	reqs = vcat(reqs, spike(j, 450., 1000))
 	UT = Union{collect(types)...}
 	R = Vector{Request{UT}}()
 	foreach(r -> push!(R, r), reqs)
 	user2 = user(requests(R), 2)
 
-	jobs = [data_intensive() for _ in 1:25]
+	jobs = [data_intensive() for _ in 1:23]
 	types = Set()
 	reqs = Vector()
 	for j in jobs
 		push!(types, typeof(j))
 		reqs = vcat(reqs, steady(j, j.duration, 101, 150, 15))
+		reqs = vcat(reqs, steady(j, j.duration, 601, 800, 15))
 	end
+	j = data_intensive()
+	push!(types, typeof(j))
+	reqs = vcat(reqs, spike(j, 650., 1000))
 	UT = Union{collect(types)...}
 	R = Vector{Request{UT}}()
 	foreach(r -> push!(R, r), reqs)
 	user3 = user(requests(R), 3)
 	
-	scenario(;
+	s1 = scenario(;
         duration,
         nodes=[
 			Node(100),
@@ -1132,11 +1091,185 @@ function scenario_c7()
 			user3,
 		],
     )
+
+	s2 = scenario(;
+        duration,
+        nodes=[
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(5000),
+			Node(5000),
+		],
+        links=(
+			ConvexLink,
+			[
+				# MDC <-> DC
+		    	(1, 9, 500.0),
+		    	(2, 10, 500.0),
+		    	(3, 11, 500.0),
+		    	(4, 12, 500.0),
+		    	(5, 13, 500.0),
+		    	(6, 14, 500.0),
+		    	(7, 15, 500.0),
+		    	(8, 16, 500.0),
+				(9, 1, 500.0),
+				(10, 2, 500.0),
+				(11, 3, 500.0),
+				(12, 4, 500.0),
+				(13, 5, 500.0),
+				(14, 6, 500.0),
+				(15, 7, 500.0),
+				(16, 8, 500.0),
+				# DC <-> DC
+		    	(10, 9, 1000.0), (9, 10, 1000.0),
+		    	(11, 10, 1000.0), (10, 11, 1000.0),
+		    	(12, 11, 1000.0), (11, 12, 1000.0),
+		    	(13, 12, 1000.0), (12, 13, 1000.0),
+		    	(14, 13, 1000.0), (13, 14, 1000.0),
+		    	(15, 14, 1000.0), (14, 15, 1000.0),
+		    	(16, 15, 1000.0), (15, 16, 1000.0),
+		    	(9, 16, 1000.0), (16, 9, 1000.0),
+				# LargeDC <-> DC			
+		    	(10, 17, 5000.0), (17, 10, 5000.0),
+		    	(12, 17, 5000.0), (17, 12, 5000.0),
+		    	(14, 17, 5000.0), (17, 14, 5000.0),
+		    	(16, 17, 5000.0), (17, 16, 5000.0),
+		    	(10, 18, 5000.0), (18, 10, 5000.0),
+		    	(12, 18, 5000.0), (18, 12, 5000.0),
+		    	(14, 18, 5000.0), (18, 14, 5000.0),
+		    	(16, 18, 5000.0), (18, 16, 5000.0),
+				# LargeDC <-> DC			
+		    	(17, 18, 10000.0), (18, 17, 10000.0),		
+	        ]
+		),
+        users = [
+			user1,
+			user2,
+			user3,
+		],
+    )
+
+		s3 = scenario(;
+        duration,
+        nodes=[
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(5000),
+			EqualLoadBalancingNode(5000),
+		],
+        links=(
+			ConvexLink,
+			[
+				# MDC <-> DC
+		    	(1, 9, 500.0),
+		    	(2, 10, 500.0),
+		    	(3, 11, 500.0),
+		    	(4, 12, 500.0),
+		    	(5, 13, 500.0),
+		    	(6, 14, 500.0),
+		    	(7, 15, 500.0),
+		    	(8, 16, 500.0),
+				(9, 1, 500.0),
+				(10, 2, 500.0),
+				(11, 3, 500.0),
+				(12, 4, 500.0),
+				(13, 5, 500.0),
+				(14, 6, 500.0),
+				(15, 7, 500.0),
+				(16, 8, 500.0),
+				# DC <-> DC
+		    	(10, 9, 1000.0), (9, 10, 1000.0),
+		    	(11, 10, 1000.0), (10, 11, 1000.0),
+		    	(12, 11, 1000.0), (11, 12, 1000.0),
+		    	(13, 12, 1000.0), (12, 13, 1000.0),
+		    	(14, 13, 1000.0), (13, 14, 1000.0),
+		    	(15, 14, 1000.0), (14, 15, 1000.0),
+		    	(16, 15, 1000.0), (15, 16, 1000.0),
+		    	(9, 16, 1000.0), (16, 9, 1000.0),
+				# LargeDC <-> DC			
+		    	(10, 17, 5000.0), (17, 10, 5000.0),
+		    	(12, 17, 5000.0), (17, 12, 5000.0),
+		    	(14, 17, 5000.0), (17, 14, 5000.0),
+		    	(16, 17, 5000.0), (17, 16, 5000.0),
+		    	(10, 18, 5000.0), (18, 10, 5000.0),
+		    	(12, 18, 5000.0), (18, 12, 5000.0),
+		    	(14, 18, 5000.0), (18, 14, 5000.0),
+		    	(16, 18, 5000.0), (18, 16, 5000.0),
+				# LargeDC <-> DC			
+		    	(17, 18, 10000.0), (18, 17, 10000.0),		
+	        ]
+		),
+        users = [
+			user1,
+			user2,
+			user3,
+		],
+    )
+	return s1, s2, s3
 end
+
+# ╔═╡ c633899f-5719-44c8-ba8f-a71cdb2c3ab2
+s7, s8, s9 = scenario_c7();
 
 # ╔═╡ 545262b9-fc38-4ea6-b3a6-90e8b96584a3
 # ╠═╡ show_logs = false
-pc7, dfc7 = simulate_and_plot(scenario_c7(), ShortestPath(); plot_type = :plot); pc7
+pc7, dfc7 = simulate_and_plot(s7, ShortestPath()); pc7
+
+# ╔═╡ dbbcc0fe-7019-4d40-b477-3ba76b687cb6
+pc7_nodes_areas = plot_nodes(dfc7; kind = :areaplot)
+
+# ╔═╡ 29294762-c083-4461-a3cf-0789972b97a8
+pc7_nodes_lines = plot_nodes(dfc7; kind = :plot)
+
+# ╔═╡ 91f5a063-d799-46c6-888e-7112f80435e9
+pc7_links_areas = plot_links(dfc7; kind = :areaplot)
+
+# ╔═╡ 083b99e2-cafb-465c-9da1-c4c325ff6038
+pc7_links_lines = plot_links(dfc7; kind = :plot)
+
+# ╔═╡ 4aac2e0b-2b6c-4845-a7a9-92ef60f5a0ba
+# ╠═╡ show_logs = false
+pc8, dfc8 = simulate_and_plot(s8, ShortestPath()); pc8
+
+# ╔═╡ 640e31ac-f2a3-4036-a064-618e840dc009
+pc8_nodes_areas = plot_nodes(dfc8; kind = :areaplot)
+
+# ╔═╡ 8881283e-93a8-4aa0-b0cf-39bf501b5847
+pc8_nodes_lines = plot_nodes(dfc8; kind = :plot)
+
+# ╔═╡ ceef39d0-185e-496f-a2c1-9bffd3c1f619
+pc8_links_areas = plot_links(dfc8; kind = :areaplot)
+
+# ╔═╡ fb370e9f-65c3-44e9-b30e-3efd778b345a
+pc8_links_lines = plot_links(dfc8; kind = :plot)
 
 # ╔═╡ 92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╠═╡ show_logs = false
@@ -1148,9 +1281,21 @@ begin
 		pc4 => "complex4.pdf",
 		pc5 => "complex5.pdf",
 		pc6 => "complex6.pdf",
+		pc7 => "complex7.pdf",
+		pc7_nodes_lines => "complex7_nodes_lines.pdf",
+		pc7_nodes_areas => "complex7_nodes_areas.pdf",
+		pc7_links_lines => "complex7_links_lines.pdf",
+		pc7_links_areas => "complex7_links_areas.pdf",
+		pc8 => "complex8.pdf",
+		pc8_nodes_lines => "complex8_nodes_lines.pdf",
+		pc8_nodes_areas => "complex8_nodes_areas.pdf",
+		pc8_links_lines => "complex8_links_lines.pdf",
+		pc8_links_areas => "complex8_links_areas.pdf",
 	]
 	foreach(p -> savefig(p.first, p.second), figures_c)
 	TikzPictures.save(PDF("complex_network"), complex_network())
+	CSV.write("complex7.csv", dfc7)
+	CSV.write("complex8.csv", dfc8)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2602,7 +2747,7 @@ version = "0.9.1+5"
 # ╟─101246ef-1753-4174-ab16-109b425adbec
 # ╟─1c7238b6-6a2c-4123-8f9b-061820e74c98
 # ╠═9ba5c4d2-6197-46ab-a2b6-ff81dd5175d5
-# ╟─3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
+# ╠═3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
 # ╠═6e597df8-6b06-4ef8-8f9f-212f72022f48
 # ╟─8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
 # ╟─21fc0470-2c99-45fb-a3d2-e9cd40b01835
@@ -2627,7 +2772,17 @@ version = "0.9.1+5"
 # ╠═e23ae61e-f755-4cfc-8a57-b4cba9e47534
 # ╠═f3e65a88-87f1-4619-87f6-d196dfd96305
 # ╠═46e86b8e-2fba-4f16-bc71-91e1c05b00fd
+# ╠═c633899f-5719-44c8-ba8f-a71cdb2c3ab2
 # ╠═545262b9-fc38-4ea6-b3a6-90e8b96584a3
+# ╠═dbbcc0fe-7019-4d40-b477-3ba76b687cb6
+# ╠═29294762-c083-4461-a3cf-0789972b97a8
+# ╠═91f5a063-d799-46c6-888e-7112f80435e9
+# ╠═083b99e2-cafb-465c-9da1-c4c325ff6038
+# ╠═4aac2e0b-2b6c-4845-a7a9-92ef60f5a0ba
+# ╠═640e31ac-f2a3-4036-a064-618e840dc009
+# ╠═8881283e-93a8-4aa0-b0cf-39bf501b5847
+# ╠═ceef39d0-185e-496f-a2c1-9bffd3c1f619
+# ╠═fb370e9f-65c3-44e9-b30e-3efd778b345a
 # ╠═92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
