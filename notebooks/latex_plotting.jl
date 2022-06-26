@@ -4,1347 +4,92 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 61189540-e578-11ec-3030-c3ebb611c28b
-# Packages requirement (only KuMo.jl is private and restricted to IIJ lab members)
-using KuMo, DataFrames, StatsPlots, CSV
+# ╔═╡ a541b95e-015c-425f-b9dc-5b438ae47b54
+using DataFrames, CSV, StatsPlots, PGFPlotsX
 
-# ╔═╡ bc72d307-12f7-47c6-b90a-062814186978
-# ╠═╡ disabled = true
-#=╠═╡
+# ╔═╡ 84343c60-f599-11ec-2565-611ee3fe8319
+md"""
+## LaTeX plotting
+"""
+
+# ╔═╡ 0bab852c-51b5-4669-92fc-52aadf2ca7cb
 # (Optional) Set the plotting and TeX engines
 begin
-	using PGFPlotsX
 	pgfplotsx()
 	latexengine!(PGFPlotsX.LUALATEX)
 end;
-  ╠═╡ =#
 
-# ╔═╡ 217a9755-f4d6-4b13-b47b-9ad08430cffd
-# Graphs related packages
-using Graphs, TikzGraphs, LaTeXStrings, TikzPictures
-
-# ╔═╡ a575616a-81d4-4829-ae89-41eee625ad9b
-# Stats related packages
-using Distributions
-
-# ╔═╡ d3221f99-adcc-457c-82f5-95aaa2a9e197
-md"""# Series of plots to illustrate the use of pseudo-cost functions
-
-The package `KuMo.jl` is used both as an interface and a simulator of scenarii. Several algorithms can be used to evaluate the cost of allocating a task in a network.
-"""
-
-# ╔═╡ 21639215-1463-46ff-80a0-f1f2028c7558
-begin
-	c1 = ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1
-	c2 = ρ ->　ρ^2 / (1 - ρ) + 1
-	c3 = ρ ->　ρ^4.5 / (1 - ρ) + 1
-    plot_pc = StatsPlots.plot([c1, c2, c3], 0:0.01:0.9, label = ["ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1" "ρ -> ρ^2 / (1 - ρ) + 1" "ρ -> ρ^4.5 / (1 - ρ) + 1"], legend=:topleft)
-	savefig(plot_pc, "pseudo_costs.pdf")
-	plot_pc
-end
-
-# ╔═╡ 6eff9ab6-620a-4a31-833d-8b8ec2b399a6
-md"""
-## Nodes-only scenarii
-
-To illustrate the intended behaviour of pseudo-cost functions without the impact of a network infrastructure, we consider complete networks with free links (no cost).
-This is done automatically in `KuMo.jl` by not providing any link.
-
-A basic four-nodes scenario reaching full load is provided as `SCENARII[:four_nodes]`. We define another four-nodes scenario with total load of 3.5 (87.5%) in the next section.
-
-The first scenario is plotted with the number of the resources load snapshot to illustrate how such a network would behave if loaded exactly to the max. Such a situation is unlikely to happen in practice.
-Plots after that takes the time of allocation/deallocation as parameter.
-"""
-
-# ╔═╡ 698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
-# ╠═╡ show_logs = false
-pa1, dfa1 = simulate_and_plot(SCENARII[:four_nodes], ShortestPath()); pa1
-
-# ╔═╡ 12169dd2-6ea2-43a3-b6fd-94d55e23a568
-# Load of 87.5% (long duration, low request rate)
-scenario2() = scenario(;
-    duration=349,
-    nodes=(4, 100),
-    users=1,
-    job_distribution=Dict(
-        :backend => 0:0,
-        :container => 1:1,
-        :data_location => 1:4,
-        :duration => 400:400,
-        :frontend => 0:0,
-    ),
-    request_rate=1.0
-)
-
-# ╔═╡ d3da1adc-91a8-4a97-bb23-586582a31ad7
-# ╠═╡ show_logs = false
-pa2, dfa2 = simulate_and_plot(scenario2(), ShortestPath()); pa2
-
-# ╔═╡ c1a3e0fe-c63d-41eb-9ef4-6a9c68246dc0
-# Load of 87.5% (small duration, high request rate)
-scenario3() = scenario(;
-    duration=10,
-    nodes=(4, 32),
-    users=[
-		user(job(0, 1, rand(1:4), 1, 0), 1.0/50, rand(1:4); start=4.01, stop=6.)
-        user(job(0, 1, rand(1:4), 1, 0), 1.0/50, rand(1:4);)
-	]
-)
-
-# ╔═╡ 015b87d8-c652-41ea-8bd8-0634383afea9
-# ╠═╡ show_logs = false
-pa3, dfa3 = simulate_and_plot(scenario3(), ShortestPath()); pa3
-
-# ╔═╡ cd893c83-7f8d-486e-af73-e411e154e631
-# Load of 87.5% (small duration, high request rate, more users)
-scenario4() = scenario(;
-    duration=10,
-    nodes=(4, 32),
-    users=[
-		# user 1
-        user(job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4);)
-		# user 2
-		user(job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4); stop=12.)
-		# user 3
-		user(job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4); start=2.01, stop=5.)
-		# user 4
-		user(job(0, 1, rand(1:4), 1, 0), 1.0/75, rand(1:4); start=7.01, stop=9.)
-	]
-)
-
-# ╔═╡ 63f15cd5-fb1b-4f74-a287-8e2265ad5d9e
-# ╠═╡ show_logs = false
-pa4, dfa4 = simulate_and_plot(scenario4(), ShortestPath()); pa4
-
-# ╔═╡ e2144b8b-6b09-4f99-8bf3-819d0a7704f1
-function scenario5(;
-    max_load=3.50,
-    nodes=(4, 100),
-    rate=0.01,
-    j=job(0, 1, rand(1:4), 3.25, 0)
-)
-    _requests = Vector{KuMo.Request{typeof(j)}}()
-
-    L = prod(nodes)
-    r = rate
-    λ = max_load
-    n = nodes[1]
-    δ = j.duration
-    c = j.containers
-
-    π1 = λ / r
-    π2 = (2n - λ) / r
-
-    for i in 0:π1+π2
-        for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
-        end
+# ╔═╡ f5255e2d-3ac4-4314-991c-353b03661f97
+function marks(df)
+    a, b, c, d = 6, 0, 0, 0
+    b0 = findfirst(map(x -> occursin("(", x), names(df)))
+    if b0 === nothing
+        b = length(names(df))
+        c = nothing
+        d = nothing
+    else
+        b = b0 - 1
+        c = b0
+        d = length(names(df))
     end
-
-    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
-
-    scenario(;
-        duration=1000,
-        nodes=(4, 100),
-        users=[
-            # user 1
-            user(KuMo.Requests(_requests), 1),
-        ]
-    )
+    return a, b, c, d
 end
 
-# ╔═╡ 83f8c3e1-9a29-4e86-9125-ace58b0ad794
-# ╠═╡ show_logs = false
-pa5, dfa5 = simulate_and_plot(scenario5(), ShortestPath()); pa5
+# ╔═╡ f52182e9-ee38-46ea-b52b-174dfbebdb3d
+df7 = DataFrame(CSV.File("../data/complex7.csv"));
 
-# ╔═╡ 971d2a6e-72bb-4875-aee7-aeab10878dec
-function scenario6(;
-    max_load=3.5,
-    nodes=(4, 100),
-    rate=0.01,
-    j=job(0, 1, rand(1:4), 3.25, 0)
-)
-    _requests = Vector{KuMo.Request{typeof(j)}}()
+# ╔═╡ 6f289b53-6850-4625-80e2-8d21c9331f16
+a7, b7, c7, d7 = marks(df7)
 
-    L = prod(nodes)
-    r = rate
-    λ = max_load
-    n = nodes[1]
-    δ = j.duration
-    c = j.containers
-
-    π1 = λ / r
-    π2 = (2n - λ) / r
-
-    for i in 0:π1+π2
-        for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
-        end
-    end
-
-    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
-
-    scenario(;
-        duration=1000,
-        nodes=[
-            MultiplicativeNode(100, 1),
-            MultiplicativeNode(100, 2),
-            MultiplicativeNode(100, 4),
-            MultiplicativeNode(100, 8),
-        ],
-        # nodes=(4, 100),
-        users=[
-            # user 1
-            user(KuMo.Requests(_requests), 1),
-        ]
-    )
-end
-
-# ╔═╡ 4fbcbb5d-f320-432f-b6df-df5c72bb10a5
-# ╠═╡ show_logs = false
-pa6, dfa6 = simulate_and_plot(scenario6(), ShortestPath()); pa6
-
-# ╔═╡ 2d603282-70c8-4a36-ada3-2459a6877e88
-function scenario7(;
-    max_load=3.5,
-    nodes=(4, 100),
-    rate=0.01,
-    j=job(0, 1, rand(1:4), 3.25, 0)
-)
-    _requests = Vector{KuMo.Request{typeof(j)}}()
-
-    L = prod(nodes)
-    r = rate
-    λ = max_load
-    n = nodes[1]
-    δ = j.duration
-    c = j.containers
-
-    π1 = λ / r
-    π2 = (2n - λ) / r
-
-    for i in 0:π1+π2
-        for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
-        end
-    end
-
-    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
-
-    scenario(;
-        duration=1000,
-        nodes=[
-            IdleStateNode(100, 1),
-            IdleStateNode(100, 25),
-            IdleStateNode(100, 50),
-            IdleStateNode(100, 75),
-        ],
-        # nodes=(4, 100),
-        users=[
-            # user 1
-            user(KuMo.Requests(_requests), 1),
-        ]
-    )
-end
-
-# ╔═╡ 2454e123-aedc-4b7f-871f-4707e7c76b5c
-# ╠═╡ show_logs = false
-pa7, dfa7 = simulate_and_plot(scenario7(), ShortestPath()); pa7
-
-# ╔═╡ f62e4864-8690-411a-b1c0-0c5d42f73dc1
-function scenario8(;
-    max_load=3.50,
-    nodes=(4, 100),
-    rate=0.01,
-    j=job(0, 1, rand(1:4), 1, 0)
-)
-    _requests = Vector{KuMo.Request{typeof(j)}}()
-
-    L = prod(nodes)
-    r = rate
-    λ = max_load
-    n = nodes[1]
-    δ = j.duration
-    c = j.containers
-
-    π1 = λ / r
-    π2 = (2n - λ) / r
-
-    for i in 0:π1+π2
-        for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
-        end
-    end
-
-    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
-
-    scenario(;
-        duration=1000,
-        nodes=(4, 100),
-        users=[
-            # user 1
-            user(KuMo.Requests(_requests), 1),
-        ]
-    )
-end
-
-# ╔═╡ 50b84495-921d-42c8-91fb-8b933cf3d7be
-# ╠═╡ show_logs = false
-pa8, dfa8 = simulate_and_plot(scenario8(), ShortestPath()); pa8
-
-# ╔═╡ 69cda46a-380f-45c2-b5f8-a491f7d362d6
-function scenario9(;
-    max_load=3.50,
-    nodes=(4, 100),
-    rate=0.01,
-    j=job(0, 1, rand(1:4), .8, 0)
-)
-    _requests = Vector{KuMo.Request{typeof(j)}}()
-
-    L = prod(nodes)
-    r = rate
-    λ = max_load
-    n = nodes[1]
-    δ = j.duration
-    c = j.containers
-
-    π1 = λ / r
-    π2 = (2n - λ) / r
-
-    for i in 0:π1+π2
-        for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
-        end
-    end
-
-    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
-
-    scenario(;
-        duration=1000,
-        nodes=(4, 100),
-        users=[
-            # user 1
-            user(KuMo.Requests(_requests), 1),
-        ]
-    )
-end
-
-# ╔═╡ e318bb27-bc9b-40c1-af63-9feccb5fcda7
-# ╠═╡ show_logs = false
-pa9, dfa9 = simulate_and_plot(scenario9(), ShortestPath()); pa9
-
-# ╔═╡ 73ab86d3-7ab6-4288-a1d0-ca30432da9fc
-begin
-	figures_a = [
-		pa1 => "nodes-only-saturated-load.pdf",
-		pa2 => "4nodes-high-duration.pdf",
-		pa3 => "4nodes-low-duration.pdf",
-		pa4 => "4nodes-low-duration_4users.pdf",
-		pa5 => "4nodes-low-duration_steadyload.pdf",
-		pa6 => "4nodes-low-duration_nonequalload.pdf",
-		pa7 => "4nodes-low-duration_idle.pdf",
-		pa8 => "4nodes-1-duration.pdf",
-		pa9 => "4nodes-0.8-duration.pdf",
-	]
-	foreach(p -> savefig(p.first, p.second), figures_a)
-end
-
-# ╔═╡ 101246ef-1753-4174-ab16-109b425adbec
-md"""
-## Square networks scenarii
-We consider an infrastructure connected as a square `(a <-> b <-> c <-> d <-> a)`.
-"""
-
-# ╔═╡ 1c7238b6-6a2c-4123-8f9b-061820e74c98
-square_full_load() = scenario(;
-    duration=349,
-    nodes=(4, 100),
-    links=[
-    	(1, 2, 200.0), (2, 3, 200.0), (3, 4, 200.0), (4, 1, 200.0),
-        (2, 1, 200.0), (3, 2, 200.0), (4, 3, 200.0), (1, 4, 200.0),
-    ],
-    users=1,
-    job_distribution=Dict(
-    	:backend => 2:2,
-        :container => 1:1,
-        :data_location => 1:4,
-        :duration => 400:400,
-        :frontend => 1:1,
-    ),
-    request_rate=1.0
+# ╔═╡ dd9b24f7-be87-47e9-8073-241c7ad28be1
+p7 = @df df7 areaplot(:instant,
+    cols(a7:b7), xlabel="time", seriestype = :steppre,
+    ylabel="active jobs",
+    w=0.01, tex_output_standalone = true,
 )
 
-# ╔═╡ 9ba5c4d2-6197-46ab-a2b6-ff81dd5175d5
-# ╠═╡ show_logs = false
-pb1, dfb1 = simulate_and_plot(square_full_load(), ShortestPath()); pb1
+# ╔═╡ d6107ea8-9918-4f6b-b32d-fceb3fa68efd
+savefig(p7, "../papers/conext2022/complex-convex-monotonic.tikz")
 
-# ╔═╡ 3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
-function scenario_b2(;
-    max_load=3.50,
-    nodes=(4, 100),
-    rate=0.01,
-    j=job(0, 1, rand(1:4), 4, 0)
+# ╔═╡ fb6fbf5d-7e4d-4d6c-a986-a82f62f047d2
+df8 = DataFrame(CSV.File("../data/complex8.csv"));
+
+# ╔═╡ d6eb8aeb-8ac5-41e0-aa1e-e2c76f165522
+p8 = @df df8 areaplot(:instant,
+    cols(a7:b7), xlabel="time", seriestype = :steppre,
+    ylabel="active jobs",
+    w=0.01, tex_output_standalone = true,
 )
-    _requests = Vector{KuMo.Request{typeof(j)}}()
 
-    L = prod(nodes)
-    r = rate
-    λ = max_load
-    n = nodes[1]
-    δ = j.duration
-    c = j.containers
+# ╔═╡ 7032272d-efa9-41ff-8e88-0515c486a8b8
+savefig(p8, "../papers/conext2022/complex-full-convex.tikz")
 
-    π1 = λ / r
-    π2 = (2n - λ) / r
+# ╔═╡ 9cb29a08-9f35-4f1b-b8b8-85fff8442256
+df9 = DataFrame(CSV.File("../data/complex9.csv"));
 
-    for i in 0:π1+π2
-        for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(job(1., 1, rand(1:4), 3.25, 2.), t))
-        end
-    end
+# ╔═╡ c6b156da-f0ab-4941-9bbc-a0f7ca204120
+p9 = @df df9 areaplot(:instant,
+    cols(a7:b7), xlabel="time", seriestype = :steppre,
+    ylabel="active jobs",
+    w=0.01, tex_output_standalone = true,
+)
 
-    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
-
-    scenario(;
-        duration=1000,
-        nodes=[			
-            MultiplicativeNode(100, 1),
-            MultiplicativeNode(100, 2),
-            MultiplicativeNode(100, 4),
-            MultiplicativeNode(100, 8),
-		],
-        users=[
-            # user 1
-            user(KuMo.Requests(_requests), rand(1:4)),
-		],
-	    links=[
-	    	(1, 2, 200.0), (2, 3, 200.0), (3, 4, 200.0), (4, 1, 200.0),
-	        (2, 1, 200.0), (3, 2, 200.0), (4, 3, 200.0), (1, 4, 200.0),
-	    ],
-    )
-end
-
-# ╔═╡ 6e597df8-6b06-4ef8-8f9f-212f72022f48
-# ╠═╡ show_logs = false
-pb2, dfb2 = simulate_and_plot(scenario_b2(), ShortestPath()); pb2
-
-# ╔═╡ 8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
-begin
-	figures_b = [
-		pb1 => "square_long-duration.pdf",
-		pb2 => "square_aperiodic_multiplicative.pdf",
-	]
-	foreach(p -> savefig(p.first, p.second), figures_b)
-end
-
-# ╔═╡ 21fc0470-2c99-45fb-a3d2-e9cd40b01835
-md"""
-## Complex Scenarii
-"""
-
-# ╔═╡ dbd801ce-d8fe-4d68-9493-088295b4f663
-function complex_network()
-	g = Graph(4)
-	add_edge!(g, 1, 3)
-	add_edge!(g, 2, 3)
-	add_edge!(g, 3, 4)
-	add_edge!(g, 2, 4)
-	p = TikzGraphs.plot(
-		g,
-		Layouts.Spring(),
-		[L"v_1", L"v_2", L"v_3", L"v_4"],
-		node_style="draw, rounded corners, fill=blue!10",
-		node_styles=Dict(1=>"fill=green!10",2=>"fill=green!10"),
-		edge_labels=Dict((1,3)=>"200", (2,3)=>"200", (3,4)=>"1000", (2,4)=>"200"),
-		edge_styles=Dict((3,4)=>"blue"),
-		options="scale=2",
-	)
-	return p
-end
-
-# ╔═╡ 22f9488e-73c4-4d0b-8d42-abd654b99795
-function scenario_c1()
-	# backend - containers - data_center - duration - frontend
-	j = job(2, 1, 4, 3, 1)
-
-    _requests = Vector{KuMo.Request{typeof(j)}}()
-
-    # L = 1000
-    r = 0.01
-    λ = 50
-    n = 1
-    δ = j.duration
-    # c = j.containers
-
-    π1 = λ / r
-    π2 = (2n - λ) / r
-
-    for i in 0:π1+π2
-        for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
-        end
-    end
-
-
-    scenario(;
-        duration=1000,
-        nodes=[
-			Node(100),
-			Node(100),
-			Node(1000),
-			Node(1000),
-		],
-        users=[
-            user(_requests, 1)
-		],
-	    links=[
-	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
-	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
-	    ],
-    )
-end
-
-# ╔═╡ 4541deee-dfa5-462c-a797-b221637baf64
-complex_network()
-
-# ╔═╡ 2a9aadf8-cbd3-43ab-b8a6-14025d551208
-# ╠═╡ show_logs = false
-pc1, dfc1 = simulate_and_plot(scenario_c1(), ShortestPath()); pc1
-
-# ╔═╡ a61fb19f-3e94-4097-844f-72ec845d55b2
-function scenario_c2()
-	# backend - containers - data_center - duration - frontend
-	j = job(1, 1, 4, 3, 2)
-
-    _requests = Vector{KuMo.Request{typeof(j)}}()
-
-    # L = 1000
-    r = 0.01
-    λ = 50
-    n = 1
-    δ = j.duration
-    # c = j.containers
-
-    π1 = λ / r
-    π2 = (2n - λ) / r
-
-    for i in 0:π1+π2
-        for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
-        end
-    end
-
-
-    scenario(;
-        duration=1000,
-        nodes=[
-			Node(100),
-			Node(100),
-			Node(1000),
-			Node(1000),
-		],
-        users=[
-            user(_requests, 1)
-		],
-	    links=[
-	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
-	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
-	    ],
-    )
-end
-
-# ╔═╡ 6cc00479-e1d3-4b88-a0b6-28a50d12d610
-complex_network()
-
-# ╔═╡ ba99d317-87ae-4405-9237-f60748cec26f
-# ╠═╡ show_logs = false
-pc2, dfc2 = simulate_and_plot(scenario_c2(), ShortestPath()); pc2
-
-# ╔═╡ fda02e26-8425-4ceb-93e5-7101b7acb8be
-complex_network()
-
-# ╔═╡ b8b4ebbe-0443-4471-b062-4605e4504702
-function scenario_c3()
-	# backend - containers - data_center - duration - frontend
-	j1 = job(1, 3, 4, 4, 2)
-	j2 = job(2, 3, 3, 4, 1)
-
-    reqs1 = Vector{KuMo.Request{typeof(j1)}}()
-    reqs2 = Vector{KuMo.Request{typeof(j2)}}()
-
-    # L = 1000
-    r = 0.01
-    λ = 1
-    n = 1
-    δ = j1.duration
-    # c = j.containers
-
-    π1 = λ / r
-    π2 = (2n - λ) / r
-
-    for i in 0:π1+π2
-        for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(reqs1, KuMo.Request(j1, t))
-            i ≤ π1 && push!(reqs2, KuMo.Request(j2, t))
-        end
-    end
-
-
-    scenario(;
-        duration=1000,
-        nodes=[
-			Node(100),
-			Node(100),
-			Node(1000),
-			Node(1000),
-		],
-        users=[
-            user(reqs1, 1),
-            user(reqs2, 2),
-			
-		],
-	    links=[
-	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
-	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
-	    ],
-    )
-end
-
-# ╔═╡ 13e635db-a044-4c30-8643-8a0d34880488
-# ╠═╡ show_logs = false
-pc3, dfc3 = simulate_and_plot(scenario_c3(), ShortestPath()); pc3
-
-# ╔═╡ b4730f03-6d61-45cb-8a8b-27372b087ddc
-complex_network()
-
-# ╔═╡ 244b96f0-9e91-4d5e-9da3-094e9215f475
-function scenario_c4()
-	scenario(;
-        duration=10,
-        nodes=[
-			Node(100),
-			Node(100),
-			Node(1000),
-			Node(1000),
-		],
-        links=[
-	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
-	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
-        ],
-        users=100,
-        job_distribution=Dict(
-            :backend => 1:10,
-            :container => 1:3,
-            :data_location => 3:4,
-            :duration => 1:5,
-            :frontend => 1:2,
-        ),
-        request_rate=0.5
-    )
-end
-
-# ╔═╡ 5a0dad14-0f30-4623-9e6e-4053ca818606
-# ╠═╡ show_logs = false
-pc4, dfc4 = simulate_and_plot(scenario_c4(), ShortestPath()); pc4
-
-# ╔═╡ 22f080a3-eb4b-4c02-88e4-d301f4b97a85
-CSV.write("complex4.csv", dfc4);
-
-# ╔═╡ c0b1feb5-7aec-4310-8c55-c2350ce005f8
-vcat(rand(2), rand(3))
-
-# ╔═╡ ec276414-bd4e-4536-9307-ce773d49306e
-function scenario_c5()
-	duration = 100
-	
-	local_dc = 9:16
-	large_dc = 17:18
-	all_dc = 9:18
-
-	users_loc = 1:8
-
-	spike(j, t, intensity) = fill(Request(j, t), (intensity,))
-	
-	function smooth(j, δ, π1, π2)
-		reqs = Vector{KuMo.Request{typeof(j)}}()
-		for i in 0:π1+π2
-	        for t in i:δ:π1+π2-i
-	            i ≤ π1 && push!(reqs, KuMo.Request(j, t))
-	        end
-	    end
-		return reqs
-	end
-
-	function steady(j, δ, π1, π2, intensity)
-		reqs = Vector{KuMo.Request{typeof(j)}}()
-		for t in 0:δ:π1+π2
-			foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
-	    end
-		return reqs
-	end
-
-	interactive() = job(1, 5, rand(all_dc), 10, 2)
-	data_intensive() = job(5, 10, rand(all_dc), 10, 1)
-
-	users = Vector{KuMo.User}()
-	for i in 1:2:24
-		reqs = Vector{Request{<:KuMo.AbstractJob}}()
-		rang = sort!(rand(0:duration, 2))
-		bounds = rang[1]:rang[2]
-		types = Set()
-		for _ in 1:(i % 8 + 1)
-			j = rand([interactive, data_intensive])()
-			push!(types, typeof(j))
-			kind = rand([:spike, :smooth, :steady])
-			if kind == :spike
-				t = Float64(rand(bounds))
-				intensity = rand(1:100)
-				req = spike(j, t, intensity)
-				reqs = vcat(reqs, req)
-			elseif kind == :smooth
-				inners = sort!(rand(bounds, 2))
-				π1, π2 = inners[1], inners[2]
-				req = smooth(j, j.duration, π1, π2)
-				reqs = vcat(reqs, req)
-			else
-				inners = sort!(rand(bounds, 2))
-				π1, π2 = inners[1], inners[2]				
-				intensity = rand(1:10)
-				req = steady(j, j.duration, π1, π2, intensity)
-				reqs = vcat(reqs, req)
-			end
-		end
-		UT = Union{collect(types)...}
-		R = Vector{Request{UT}}()
-		foreach(r -> push!(R, r), reqs)
-		u = user(requests(R), i % 8 + 1)
-		push!(users, u)		
-	end
-
-	scenario(;
-        duration,
-        nodes=[
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(5000),
-			Node(5000),
-		],
-        links=[
-			# MDC <-> DC
-	    	(1, 9, 500.0),
-	    	(2, 10, 500.0),
-	    	(3, 11, 500.0),
-	    	(4, 12, 500.0),
-	    	(5, 13, 500.0),
-	    	(6, 14, 500.0),
-	    	(7, 15, 500.0),
-	    	(8, 16, 500.0),
-			(9, 1, 500.0),
-			(10, 2, 500.0),
-			(11, 3, 500.0),
-			(12, 4, 500.0),
-			(13, 5, 500.0),
-			(14, 6, 500.0),
-			(15, 7, 500.0),
-			(16, 8, 500.0),
-			# DC <-> DC
-	    	(10, 9, 1000.0), (9, 10, 1000.0),
-	    	(11, 10, 1000.0), (10, 11, 1000.0),
-	    	(12, 11, 1000.0), (11, 12, 1000.0),
-	    	(13, 12, 1000.0), (12, 13, 1000.0),
-	    	(14, 13, 1000.0), (13, 14, 1000.0),
-	    	(15, 14, 1000.0), (14, 15, 1000.0),
-	    	(16, 15, 1000.0), (15, 16, 1000.0),
-	    	(9, 16, 1000.0), (16, 9, 1000.0),
-			# LargeDC <-> DC			
-	    	(10, 17, 2000.0), (17, 10, 2000.0),
-	    	(12, 17, 2000.0), (17, 12, 2000.0),
-	    	(14, 17, 2000.0), (17, 14, 2000.0),
-	    	(16, 17, 2000.0), (17, 16, 2000.0),
-	    	(10, 18, 2000.0), (18, 10, 2000.0),
-	    	(12, 18, 2000.0), (18, 12, 2000.0),
-	    	(14, 18, 2000.0), (18, 14, 2000.0),
-	    	(16, 18, 2000.0), (18, 16, 2000.0),
-			# LargeDC <-> DC			
-	    	(17, 18, 10000.0), (18, 17, 10000.0),		
-        ],
-        users = users,
-    )
-end
-
-# ╔═╡ 4873983b-17e6-4889-8954-4989cc3923f5
-# ╠═╡ show_logs = false
-begin
-	s = scenario_c5()
-	
-	g = KuMo.graph(s.topology, ShortestPath())[1]
-	
-	capacities = Dict(filter(p -> p.first[1] < p.first[2], [p.first => Int(p.second.capacity) for p in pairs(s.topology.links)]))
-	
-	t = TikzGraphs.plot(
-		g,
-		Layouts.SpringElectrical(charge=20000),
-		# Layouts.Spring(dist=10),
-		node_style="draw, rounded corners, fill=blue!10",
-		node_styles=Dict(
-			1=>"fill=green!10",
-			2=>"fill=green!10",
-			3=>"fill=green!10",
-			4=>"fill=green!10",
-			5=>"fill=green!10",
-			6=>"fill=green!10",
-			7=>"fill=green!10",
-			8=>"fill=green!10",
-			17=>"fill=red!10",
-			18=>"fill=red!10",
-		),
-		# edge_labels=capacities,
-		# edge_styles=Dict((3,4)=>"blue"),
-		options="scale=.1",
-	)
-	TikzPictures.save(PDF("3levelsnetwork"), t)
-	t
-end
-
-# ╔═╡ dfc5b22a-5989-4912-a18b-719803ddcbd4
-# ╠═╡ show_logs = false
-pc5, dfc5 = simulate_and_plot(scenario_c5(), ShortestPath()); pc5
-
-# ╔═╡ e23ae61e-f755-4cfc-8a57-b4cba9e47534
-function scenario_c6()
-	duration = 100
-	
-	local_dc = 9:16
-	large_dc = 17:18
-	all_dc = 9:18
-
-	users_loc = 1:8
-
-	spike(j, t, intensity) = fill(Request(j, t), (intensity,))
-	
-	function smooth(j, δ, π1, π2)
-		reqs = Vector{KuMo.Request{typeof(j)}}()
-		for i in 0:π1+π2
-	        for t in i:δ:π1+π2-i
-	            i ≤ π1 && push!(reqs, KuMo.Request(j, t))
-	        end
-	    end
-		return reqs
-	end
-
-	function steady(j, δ, π1, π2, intensity)
-		reqs = Vector{KuMo.Request{typeof(j)}}()
-		for t in 0:δ:π1+π2
-			foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
-	    end
-		return reqs
-	end
-
-	interactive() = job(1, 5, rand(all_dc), 10, 2)
-	data_intensive() = job(5, 10, rand(all_dc), 10, 1)
-
-	users = Vector{KuMo.User}()
-	for i in 1:8
-		reqs = Vector{Request{<:KuMo.AbstractJob}}()
-		rang = sort!(rand(0:duration, 2))
-		bounds = rang[1]:rang[2]
-		types = Set()
-		for _ in 1:(i % 8 + 1)
-			j = rand([interactive, data_intensive])()
-			push!(types, typeof(j))
-			kind = rand([:spike, :smooth, :steady])
-			if kind == :spike
-				t = Float64(rand(bounds))
-				intensity = rand(1:100)
-				req = spike(j, t, intensity)
-				reqs = vcat(reqs, req)
-			elseif kind == :smooth
-				inners = sort!(rand(bounds, 2))
-				π1, π2 = inners[1], inners[2]
-				req = smooth(j, j.duration, π1, π2)
-				reqs = vcat(reqs, req)
-			else
-				inners = sort!(rand(bounds, 2))
-				π1, π2 = inners[1], inners[2]				
-				intensity = rand(1:10)
-				req = steady(j, j.duration, π1, π2, intensity)
-				reqs = vcat(reqs, req)
-			end
-		end
-		UT = Union{collect(types)...}
-		R = Vector{Request{UT}}()
-		foreach(r -> push!(R, r), reqs)
-		u = user(requests(R), i % 8 + 1)
-		push!(users, u)		
-	end
-
-	scenario(;
-        duration,
-        nodes=[
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(5000),
-			Node(5000),
-		],
-        links=[
-			# MDC <-> DC
-	    	(1, 9, 500.0),
-	    	(2, 10, 500.0),
-	    	(3, 11, 500.0),
-	    	(4, 12, 500.0),
-	    	(5, 13, 500.0),
-	    	(6, 14, 500.0),
-	    	(7, 15, 500.0),
-	    	(8, 16, 500.0),
-			(9, 1, 500.0),
-			(10, 2, 500.0),
-			(11, 3, 500.0),
-			(12, 4, 500.0),
-			(13, 5, 500.0),
-			(14, 6, 500.0),
-			(15, 7, 500.0),
-			(16, 8, 500.0),
-			# DC <-> DC
-	    	(10, 9, 1000.0), (9, 10, 1000.0),
-	    	(11, 10, 1000.0), (10, 11, 1000.0),
-	    	(12, 11, 1000.0), (11, 12, 1000.0),
-	    	(13, 12, 1000.0), (12, 13, 1000.0),
-	    	(14, 13, 1000.0), (13, 14, 1000.0),
-	    	(15, 14, 1000.0), (14, 15, 1000.0),
-	    	(16, 15, 1000.0), (15, 16, 1000.0),
-	    	(9, 16, 1000.0), (16, 9, 1000.0),
-			# LargeDC <-> DC			
-	    	(10, 17, 2000.0), (17, 10, 2000.0),
-	    	(12, 17, 2000.0), (17, 12, 2000.0),
-	    	(14, 17, 2000.0), (17, 14, 2000.0),
-	    	(16, 17, 2000.0), (17, 16, 2000.0),
-	    	(10, 18, 2000.0), (18, 10, 2000.0),
-	    	(12, 18, 2000.0), (18, 12, 2000.0),
-	    	(14, 18, 2000.0), (18, 14, 2000.0),
-	    	(16, 18, 2000.0), (18, 16, 2000.0),
-			# LargeDC <-> DC			
-	    	(17, 18, 10000.0), (18, 17, 10000.0),		
-        ],
-        users = users,
-    )
-end
-
-# ╔═╡ f3e65a88-87f1-4619-87f6-d196dfd96305
-# ╠═╡ show_logs = false
-pc6, dfc6 = simulate_and_plot(scenario_c6(), ShortestPath()); pc6
-
-# ╔═╡ 46e86b8e-2fba-4f16-bc71-91e1c05b00fd
-function scenario_c7()
-	duration = 100
-	
-	local_dc = 9:16
-	large_dc = 17:18
-	all_dc = 9:18
-
-	users_loc = 1:8
-
-	interactive() = job(1, 5, rand(all_dc), 5, 2)
-	data_intensive() = job(5, 10, rand(local_dc), 5, 1)
-
-	jobs = [data_intensive() for _ in 1:23]
-	types = Set()
-	reqs = Vector()
-	for j in jobs
-		push!(types, typeof(j))
-		reqs = vcat(reqs, steady(j, j.duration, 1, 150, 15))
-		reqs = vcat(reqs, steady(j, j.duration, 201, 800, 15))
-	end
-	j = data_intensive()
-	push!(types, typeof(j))
-	# reqs = vcat(reqs, Request(j, 200.))
-	# reqs = vcat(reqs, Request(j, 1000.))
-	reqs = vcat(reqs, spike(j, 250., 1000))
-	UT = Union{collect(types)...}
-	R = Vector{Request{UT}}()
-	foreach(r -> push!(R, r), reqs)
-	user1 = user(requests(R), 1)
-
-	jobs = [data_intensive() for _ in 1:23]
-	types = Set()
-	reqs = Vector()
-	for j in jobs
-		push!(types, typeof(j))
-		reqs = vcat(reqs, steady(j, j.duration, 51, 150, 15))
-		reqs = vcat(reqs, steady(j, j.duration, 401, 800, 15))
-	end
-	j = data_intensive()
-	push!(types, typeof(j))
-	reqs = vcat(reqs, spike(j, 450., 1000))
-	UT = Union{collect(types)...}
-	R = Vector{Request{UT}}()
-	foreach(r -> push!(R, r), reqs)
-	user2 = user(requests(R), 2)
-
-	jobs = [data_intensive() for _ in 1:23]
-	types = Set()
-	reqs = Vector()
-	for j in jobs
-		push!(types, typeof(j))
-		reqs = vcat(reqs, steady(j, j.duration, 101, 150, 15))
-		reqs = vcat(reqs, steady(j, j.duration, 601, 800, 15))
-	end
-	j = data_intensive()
-	push!(types, typeof(j))
-	reqs = vcat(reqs, spike(j, 650., 1000))
-	UT = Union{collect(types)...}
-	R = Vector{Request{UT}}()
-	foreach(r -> push!(R, r), reqs)
-	user3 = user(requests(R), 3)
-	
-	s1 = scenario(;
-        duration,
-        nodes=[
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(5000),
-			Node(5000),
-		],
-        links=[
-			# MDC <-> DC
-	    	(1, 9, 500.0),
-	    	(2, 10, 500.0),
-	    	(3, 11, 500.0),
-	    	(4, 12, 500.0),
-	    	(5, 13, 500.0),
-	    	(6, 14, 500.0),
-	    	(7, 15, 500.0),
-	    	(8, 16, 500.0),
-			(9, 1, 500.0),
-			(10, 2, 500.0),
-			(11, 3, 500.0),
-			(12, 4, 500.0),
-			(13, 5, 500.0),
-			(14, 6, 500.0),
-			(15, 7, 500.0),
-			(16, 8, 500.0),
-			# DC <-> DC
-	    	(10, 9, 1000.0), (9, 10, 1000.0),
-	    	(11, 10, 1000.0), (10, 11, 1000.0),
-	    	(12, 11, 1000.0), (11, 12, 1000.0),
-	    	(13, 12, 1000.0), (12, 13, 1000.0),
-	    	(14, 13, 1000.0), (13, 14, 1000.0),
-	    	(15, 14, 1000.0), (14, 15, 1000.0),
-	    	(16, 15, 1000.0), (15, 16, 1000.0),
-	    	(9, 16, 1000.0), (16, 9, 1000.0),
-			# LargeDC <-> DC			
-	    	(10, 17, 2000.0), (17, 10, 2000.0),
-	    	(12, 17, 2000.0), (17, 12, 2000.0),
-	    	(14, 17, 2000.0), (17, 14, 2000.0),
-	    	(16, 17, 2000.0), (17, 16, 2000.0),
-	    	(10, 18, 2000.0), (18, 10, 2000.0),
-	    	(12, 18, 2000.0), (18, 12, 2000.0),
-	    	(14, 18, 2000.0), (18, 14, 2000.0),
-	    	(16, 18, 2000.0), (18, 16, 2000.0),
-			# LargeDC <-> DC			
-	    	(17, 18, 10000.0), (18, 17, 10000.0),		
-        ],
-        users = [
-			user1,
-			user2,
-			user3,
-		],
-    )
-
-	s2 = scenario(;
-        duration,
-        nodes=[
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(5000),
-			Node(5000),
-		],
-        links=(
-			ConvexLink,
-			[
-				# MDC <-> DC
-		    	(1, 9, 500.0),
-		    	(2, 10, 500.0),
-		    	(3, 11, 500.0),
-		    	(4, 12, 500.0),
-		    	(5, 13, 500.0),
-		    	(6, 14, 500.0),
-		    	(7, 15, 500.0),
-		    	(8, 16, 500.0),
-				(9, 1, 500.0),
-				(10, 2, 500.0),
-				(11, 3, 500.0),
-				(12, 4, 500.0),
-				(13, 5, 500.0),
-				(14, 6, 500.0),
-				(15, 7, 500.0),
-				(16, 8, 500.0),
-				# DC <-> DC
-		    	(10, 9, 1000.0), (9, 10, 1000.0),
-		    	(11, 10, 1000.0), (10, 11, 1000.0),
-		    	(12, 11, 1000.0), (11, 12, 1000.0),
-		    	(13, 12, 1000.0), (12, 13, 1000.0),
-		    	(14, 13, 1000.0), (13, 14, 1000.0),
-		    	(15, 14, 1000.0), (14, 15, 1000.0),
-		    	(16, 15, 1000.0), (15, 16, 1000.0),
-		    	(9, 16, 1000.0), (16, 9, 1000.0),
-				# LargeDC <-> DC			
-		    	(10, 17, 5000.0), (17, 10, 5000.0),
-		    	(12, 17, 5000.0), (17, 12, 5000.0),
-		    	(14, 17, 5000.0), (17, 14, 5000.0),
-		    	(16, 17, 5000.0), (17, 16, 5000.0),
-		    	(10, 18, 5000.0), (18, 10, 5000.0),
-		    	(12, 18, 5000.0), (18, 12, 5000.0),
-		    	(14, 18, 5000.0), (18, 14, 5000.0),
-		    	(16, 18, 5000.0), (18, 16, 5000.0),
-				# LargeDC <-> DC			
-		    	(17, 18, 10000.0), (18, 17, 10000.0),		
-	        ]
-		),
-        users = [
-			user1,
-			user2,
-			user3,
-		],
-    )
-
-		s3 = scenario(;
-        duration,
-        nodes=[
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(5000),
-			EqualLoadBalancingNode(5000),
-		],
-        links=(
-			ConvexLink,
-			[
-				# MDC <-> DC
-		    	(1, 9, 500.0),
-		    	(2, 10, 500.0),
-		    	(3, 11, 500.0),
-		    	(4, 12, 500.0),
-		    	(5, 13, 500.0),
-		    	(6, 14, 500.0),
-		    	(7, 15, 500.0),
-		    	(8, 16, 500.0),
-				(9, 1, 500.0),
-				(10, 2, 500.0),
-				(11, 3, 500.0),
-				(12, 4, 500.0),
-				(13, 5, 500.0),
-				(14, 6, 500.0),
-				(15, 7, 500.0),
-				(16, 8, 500.0),
-				# DC <-> DC
-		    	(10, 9, 1000.0), (9, 10, 1000.0),
-		    	(11, 10, 1000.0), (10, 11, 1000.0),
-		    	(12, 11, 1000.0), (11, 12, 1000.0),
-		    	(13, 12, 1000.0), (12, 13, 1000.0),
-		    	(14, 13, 1000.0), (13, 14, 1000.0),
-		    	(15, 14, 1000.0), (14, 15, 1000.0),
-		    	(16, 15, 1000.0), (15, 16, 1000.0),
-		    	(9, 16, 1000.0), (16, 9, 1000.0),
-				# LargeDC <-> DC			
-		    	(10, 17, 5000.0), (17, 10, 5000.0),
-		    	(12, 17, 5000.0), (17, 12, 5000.0),
-		    	(14, 17, 5000.0), (17, 14, 5000.0),
-		    	(16, 17, 5000.0), (17, 16, 5000.0),
-		    	(10, 18, 5000.0), (18, 10, 5000.0),
-		    	(12, 18, 5000.0), (18, 12, 5000.0),
-		    	(14, 18, 5000.0), (18, 14, 5000.0),
-		    	(16, 18, 5000.0), (18, 16, 5000.0),
-				# LargeDC <-> DC			
-		    	(17, 18, 10000.0), (18, 17, 10000.0),		
-	        ]
-		),
-        users = [
-			user1,
-			user2,
-			user3,
-		],
-    )
-	return s1, s2, s3
-end
-
-# ╔═╡ c633899f-5719-44c8-ba8f-a71cdb2c3ab2
-s7, s8, s9 = scenario_c7();
-
-# ╔═╡ 545262b9-fc38-4ea6-b3a6-90e8b96584a3
-# ╠═╡ show_logs = false
-pc7, dfc7 = simulate_and_plot(s7, ShortestPath()); pc7
-
-# ╔═╡ dbbcc0fe-7019-4d40-b477-3ba76b687cb6
-pc7_nodes_areas = plot_nodes(dfc7; kind = :areaplot)
-
-# ╔═╡ 29294762-c083-4461-a3cf-0789972b97a8
-pc7_nodes_lines = plot_nodes(dfc7; kind = :plot)
-
-# ╔═╡ 91f5a063-d799-46c6-888e-7112f80435e9
-pc7_links_areas = plot_links(dfc7; kind = :areaplot)
-
-# ╔═╡ 083b99e2-cafb-465c-9da1-c4c325ff6038
-pc7_links_lines = plot_links(dfc7; kind = :plot)
-
-# ╔═╡ 4aac2e0b-2b6c-4845-a7a9-92ef60f5a0ba
-# ╠═╡ show_logs = false
-pc8, dfc8 = simulate_and_plot(s8, ShortestPath()); pc8
-
-# ╔═╡ 640e31ac-f2a3-4036-a064-618e840dc009
-pc8_nodes_areas = plot_nodes(dfc8; kind = :areaplot)
-
-# ╔═╡ 8881283e-93a8-4aa0-b0cf-39bf501b5847
-pc8_nodes_lines = plot_nodes(dfc8; kind = :plot)
-
-# ╔═╡ ceef39d0-185e-496f-a2c1-9bffd3c1f619
-pc8_links_areas = plot_links(dfc8; kind = :areaplot)
-
-# ╔═╡ fb370e9f-65c3-44e9-b30e-3efd778b345a
-pc8_links_lines = plot_links(dfc8; kind = :plot)
-
-# ╔═╡ 53ef9168-042d-48b5-bcda-61b77db1000c
-# ╠═╡ show_logs = false
-pc9, dfc9 = simulate_and_plot(s9, ShortestPath()); pc9
-
-# ╔═╡ a1047cd7-5683-4d37-91db-daec3ee7ddb4
-pc9_nodes_areas = plot_nodes(dfc9; kind = :areaplot)
-
-# ╔═╡ dc9885c4-f003-4f25-ab30-0cccbb855f9f
-pc9_nodes_lines = plot_nodes(dfc9; kind = :plot)
-
-# ╔═╡ 8140f3c6-b711-469b-9d71-33fcb9361e91
-pc9_links_areas = plot_links(dfc9; kind = :areaplot)
-
-# ╔═╡ 722eb58c-aa69-4371-b737-fcead002aa51
-pc9_links_lines = plot_links(dfc9; kind = :plot)
-
-# ╔═╡ 92d177a0-3389-4da2-934c-a93d4311bd4a
-# ╠═╡ show_logs = false
-begin
-	figures_c = [
-		pc1 => "complex1.pdf",
-		pc2 => "complex2.pdf",
-		pc3 => "complex3.pdf",
-		pc4 => "complex4.pdf",
-		pc5 => "complex5.pdf",
-		pc6 => "complex6.pdf",
-		pc7 => "complex7.pdf",
-		pc7_nodes_lines => "complex7_nodes_lines.pdf",
-		pc7_nodes_areas => "complex7_nodes_areas.pdf",
-		pc7_links_lines => "complex7_links_lines.pdf",
-		pc7_links_areas => "complex7_links_areas.pdf",
-		pc8 => "complex8.pdf",
-		pc8_nodes_lines => "complex8_nodes_lines.pdf",
-		pc8_nodes_areas => "complex8_nodes_areas.pdf",
-		pc8_links_lines => "complex8_links_lines.pdf",
-		pc8_links_areas => "complex8_links_areas.pdf",
-		pc9 => "complex9.pdf",
-		pc9_nodes_lines => "complex9_nodes_lines.pdf",
-		pc9_nodes_areas => "complex9_nodes_areas.pdf",
-		pc9_links_lines => "complex9_links_lines.pdf",
-		pc9_links_areas => "complex9_links_areas.pdf",
-	]
-	foreach(p -> savefig(p.first, p.second), figures_c)
-	TikzPictures.save(PDF("complex_network"), complex_network())
-	CSV.write("complex7.csv", dfc7)
-	CSV.write("complex8.csv", dfc8)
-	CSV.write("complex9.csv", dfc9)
-end;
+# ╔═╡ e4b96828-7ebb-4094-8a0d-b046bb388b6c
+savefig(p9, "../papers/conext2022/complex-full-monotonic.tikz")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
-Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
-KuMo = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 PGFPlotsX = "8314cec4-20b6-5062-9cdb-752b83310925"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
-TikzGraphs = "b4f28e30-c73f-5eaf-a395-8a9db949a742"
-TikzPictures = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
 
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
-Distributions = "~0.25.62"
-Graphs = "~1.7.1"
-KuMo = "~0.1.24"
-LaTeXStrings = "~1.3.0"
 PGFPlotsX = "~1.5.0"
 StatsPlots = "~0.14.34"
-TikzGraphs = "~1.4.0"
-TikzPictures = "~3.4.2"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -1353,7 +98,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "7be72885afadd3b2486664d1984a0ffed204cc46"
+project_hash = "22f78d32da712402e21c0c41487f323bd68dba46"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1375,12 +120,6 @@ version = "2.3.0"
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 version = "1.1.1"
-
-[[deps.ArnoldiMethod]]
-deps = ["LinearAlgebra", "Random", "StaticArrays"]
-git-tree-sha1 = "62e51b39331de8911e4a7ff6f5aaf38a5f4cc0ae"
-uuid = "ec485272-7323-5ecc-a04f-4719b315124d"
-version = "0.2.0"
 
 [[deps.Arpack]]
 deps = ["Arpack_jll", "Libdl", "LinearAlgebra", "Logging"]
@@ -1405,12 +144,6 @@ version = "1.0.1"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
-
-[[deps.BenchmarkTools]]
-deps = ["JSON", "Logging", "Printf", "Profile", "Statistics", "UUIDs"]
-git-tree-sha1 = "4c10eee4af024676200bc7752e536f858c6b8f93"
-uuid = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-version = "1.3.1"
 
 [[deps.Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1454,12 +187,6 @@ git-tree-sha1 = "75479b7df4167267d75294d14b58244695beb2ac"
 uuid = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
 version = "0.14.2"
 
-[[deps.CodecBzip2]]
-deps = ["Bzip2_jll", "Libdl", "TranscodingStreams"]
-git-tree-sha1 = "2e62a725210ce3c3c2e1a3080190e7ca491f18d7"
-uuid = "523fee87-0ab8-5b00-afb7-3ecf72e48cfd"
-version = "0.7.2"
-
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
 git-tree-sha1 = "ded953804d019afa9a3f98981d99b33e3db7b6da"
@@ -1489,12 +216,6 @@ deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
 git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.8"
-
-[[deps.CommonSubexpressions]]
-deps = ["MacroTools", "Test"]
-git-tree-sha1 = "7b8a93dba8af7e3b42fecabf646260105ac373f7"
-uuid = "bbf7d656-a473-5ed7-a52c-81e309532950"
-version = "0.3.0"
 
 [[deps.Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
@@ -1566,24 +287,6 @@ git-tree-sha1 = "80c3e8639e3353e5d2912fb3a1916b8455e2494b"
 uuid = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
 version = "0.4.0"
 
-[[deps.Dictionaries]]
-deps = ["Indexing", "Random"]
-git-tree-sha1 = "7669d53b75e9f9e2fa32d5215cb2af348b2c13e2"
-uuid = "85a47980-9c8c-11e8-2b9f-f7ca1fa99fb4"
-version = "0.3.21"
-
-[[deps.DiffResults]]
-deps = ["StaticArrays"]
-git-tree-sha1 = "c18e98cba888c6c25d1c3b048e4b3380ca956805"
-uuid = "163ba53b-c6d8-5494-b064-1a9d43ac40c5"
-version = "1.0.3"
-
-[[deps.DiffRules]]
-deps = ["IrrationalConstants", "LogExpFunctions", "NaNMath", "Random", "SpecialFunctions"]
-git-tree-sha1 = "28d605d9a0ac17118fe2c5e9ce0fbb76c3ceb120"
-uuid = "b552c78f-8df3-52c6-915a-8e097449b14b"
-version = "1.11.0"
-
 [[deps.Distances]]
 deps = ["LinearAlgebra", "SparseArrays", "Statistics", "StatsAPI"]
 git-tree-sha1 = "3258d0659f812acde79e8a74b11f17ac06d0ca04"
@@ -1610,12 +313,6 @@ version = "0.8.6"
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 version = "1.6.0"
-
-[[deps.DrWatson]]
-deps = ["Dates", "FileIO", "JLD2", "LibGit2", "MacroTools", "Pkg", "Random", "Requires", "Scratch", "UnPack"]
-git-tree-sha1 = "67e9001646db6e45006643bf37716ecd831d37d2"
-uuid = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
-version = "2.9.1"
 
 [[deps.DualNumbers]]
 deps = ["Calculus", "NaNMath", "SpecialFunctions"]
@@ -1659,12 +356,6 @@ git-tree-sha1 = "c6033cc3892d0ef5bb9cd29b7f2f0331ea5184ea"
 uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
 version = "3.3.10+0"
 
-[[deps.FileIO]]
-deps = ["Pkg", "Requires", "UUIDs"]
-git-tree-sha1 = "9267e5f50b0e12fdfd5a2455534345c4cf2c7f7a"
-uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
-version = "1.14.0"
-
 [[deps.FilePathsBase]]
 deps = ["Compat", "Dates", "Mmap", "Printf", "Test", "UUIDs"]
 git-tree-sha1 = "129b104185df66e408edd6625d480b7f9e9823a0"
@@ -1697,12 +388,6 @@ deps = ["Printf"]
 git-tree-sha1 = "8339d61043228fdd3eb658d86c926cb282ae72a8"
 uuid = "59287772-0a20-5a39-b81b-1366585eb4c0"
 version = "0.4.2"
-
-[[deps.ForwardDiff]]
-deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "LinearAlgebra", "LogExpFunctions", "NaNMath", "Preferences", "Printf", "Random", "SpecialFunctions", "StaticArrays"]
-git-tree-sha1 = "2f18915445b248731ec5db4e4a17e451020bf21e"
-uuid = "f6369f11-7733-5829-9624-2563aa707210"
-version = "0.10.30"
 
 [[deps.FreeType2_jll]]
 deps = ["Artifacts", "Bzip2_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
@@ -1762,12 +447,6 @@ git-tree-sha1 = "344bf40dcab1073aca04aa0df4fb092f920e4011"
 uuid = "3b182d85-2403-5c21-9c21-1e1f0cc25472"
 version = "1.3.14+0"
 
-[[deps.Graphs]]
-deps = ["ArnoldiMethod", "Compat", "DataStructures", "Distributed", "Inflate", "LinearAlgebra", "Random", "SharedArrays", "SimpleTraits", "SparseArrays", "Statistics"]
-git-tree-sha1 = "db5c7e27c0d46fd824d470a3c32a4fc6c935fa96"
-uuid = "86223c79-3864-5bf0-83f7-82e725a168b6"
-version = "1.7.1"
-
 [[deps.Grisu]]
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
@@ -1790,16 +469,6 @@ deps = ["DualNumbers", "LinearAlgebra", "SpecialFunctions", "Test"]
 git-tree-sha1 = "cb7099a0109939f16a4d3b572ba8396b1f6c7c31"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.10"
-
-[[deps.Indexing]]
-git-tree-sha1 = "ce1566720fd6b19ff3411404d4b977acd4814f9f"
-uuid = "313cdc1a-70c2-5d6a-ae34-0150d3930a38"
-version = "1.1.1"
-
-[[deps.Inflate]]
-git-tree-sha1 = "f5fc07d4e706b84f72d54eedcc1c13d92fb0871c"
-uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
-version = "0.1.2"
 
 [[deps.IniFile]]
 git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
@@ -1854,12 +523,6 @@ git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
 
-[[deps.JLD2]]
-deps = ["FileIO", "MacroTools", "Mmap", "OrderedCollections", "Pkg", "Printf", "Reexport", "TranscodingStreams", "UUIDs"]
-git-tree-sha1 = "81b9477b49402b47fbe7f7ae0b252077f53e4a08"
-uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
-version = "0.4.22"
-
 [[deps.JLLWrappers]]
 deps = ["Preferences"]
 git-tree-sha1 = "abc9885a7ca2052a736a600f7fa66209f96506e1"
@@ -1878,23 +541,11 @@ git-tree-sha1 = "b53380851c6e6664204efb2e62cd24fa5c47e4ba"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
 version = "2.1.2+0"
 
-[[deps.JuMP]]
-deps = ["Calculus", "DataStructures", "ForwardDiff", "LinearAlgebra", "MathOptInterface", "MutableArithmetics", "NaNMath", "OrderedCollections", "Printf", "SparseArrays", "SpecialFunctions"]
-git-tree-sha1 = "534adddf607222b34a0a9bba812248a487ab22b7"
-uuid = "4076af6c-e467-56ae-b986-b466b2749572"
-version = "1.1.1"
-
 [[deps.KernelDensity]]
 deps = ["Distributions", "DocStringExtensions", "FFTW", "Interpolations", "StatsBase"]
 git-tree-sha1 = "591e8dc09ad18386189610acafb970032c519707"
 uuid = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
 version = "0.6.3"
-
-[[deps.KuMo]]
-deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PrettyTables", "ProgressMeter", "Random", "RecipesBase", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "eca3ad688b77dacc3cde5274fa39fbee33909890"
-uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.24"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2003,12 +654,6 @@ version = "2.36.0+0"
 deps = ["Libdl", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
-[[deps.LittleCMS_jll]]
-deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pkg"]
-git-tree-sha1 = "110897e7db2d6836be22c18bffd9422218ee6284"
-uuid = "d3a379c0-f9a3-5b72-a4c0-6bf4d2e8af0f"
-version = "2.12.0+0"
-
 [[deps.LogExpFunctions]]
 deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
 git-tree-sha1 = "09e4b894ce6a976c354a69041a04748180d43637"
@@ -2033,12 +678,6 @@ version = "0.5.9"
 [[deps.Markdown]]
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
-
-[[deps.MathOptInterface]]
-deps = ["BenchmarkTools", "CodecBzip2", "CodecZlib", "DataStructures", "ForwardDiff", "JSON", "LinearAlgebra", "MutableArithmetics", "NaNMath", "OrderedCollections", "Printf", "SparseArrays", "SpecialFunctions", "Test", "Unicode"]
-git-tree-sha1 = "c167b0d6d165ce49f35fbe2ee1aea8844e7c7cea"
-uuid = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
-version = "1.4.0"
 
 [[deps.MbedTLS]]
 deps = ["Dates", "MbedTLS_jll", "Random", "Sockets"]
@@ -2070,16 +709,10 @@ uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
 version = "2022.2.1"
 
 [[deps.MultivariateStats]]
-deps = ["Arpack", "LinearAlgebra", "SparseArrays", "Statistics", "StatsAPI", "StatsBase"]
-git-tree-sha1 = "7008a3412d823e29d370ddc77411d593bd8a3d03"
+deps = ["Arpack", "LinearAlgebra", "SparseArrays", "Statistics", "StatsBase"]
+git-tree-sha1 = "6d019f5a0465522bbfdd68ecfad7f86b535d6935"
 uuid = "6f286f6a-111f-5878-ab1e-185364afe411"
-version = "0.9.1"
-
-[[deps.MutableArithmetics]]
-deps = ["LinearAlgebra", "SparseArrays", "Test"]
-git-tree-sha1 = "4e675d6e9ec02061800d6cfb695812becbd03cdf"
-uuid = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
-version = "1.0.4"
+version = "0.9.0"
 
 [[deps.NaNMath]]
 git-tree-sha1 = "737a5957f387b17e74d4ad2f440eb330b39a62c5"
@@ -2117,12 +750,6 @@ version = "1.3.5+1"
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
 version = "0.3.20+0"
-
-[[deps.OpenJpeg_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Libtiff_jll", "LittleCMS_jll", "Pkg", "libpng_jll"]
-git-tree-sha1 = "76374b6e7f632c130e78100b166e5a48464256f8"
-uuid = "643b3616-a352-519d-856d-80112ee9badc"
-version = "2.4.0+0"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -2217,12 +844,6 @@ git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
 uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
 version = "1.4.2"
 
-[[deps.Poppler_jll]]
-deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "OpenJpeg_jll", "Pkg", "libpng_jll"]
-git-tree-sha1 = "e11443687ac151ac6ef6699eb75f964bed8e1faa"
-uuid = "9c32591e-4766-534b-9725-b71a8799265b"
-version = "0.87.0+2"
-
 [[deps.Preferences]]
 deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
@@ -2238,16 +859,6 @@ version = "1.3.1"
 [[deps.Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
-
-[[deps.Profile]]
-deps = ["Printf"]
-uuid = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
-
-[[deps.ProgressMeter]]
-deps = ["Distributed", "Printf"]
-git-tree-sha1 = "d7a7aef8f8f2d537104f170139553b14dfe39fe9"
-uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
-version = "1.7.2"
 
 [[deps.Qt5Base_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "OpenSSL_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libxcb_jll", "Xorg_xcb_util_image_jll", "Xorg_xcb_util_keysyms_jll", "Xorg_xcb_util_renderutil_jll", "Xorg_xcb_util_wm_jll", "Zlib_jll", "xkbcommon_jll"]
@@ -2344,12 +955,6 @@ git-tree-sha1 = "91eddf657aca81df9ae6ceb20b959ae5653ad1de"
 uuid = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
 version = "1.0.3"
 
-[[deps.SimpleTraits]]
-deps = ["InteractiveUtils", "MacroTools"]
-git-tree-sha1 = "5d7e3f4e11935503d3ecaf7186eac40602e7d231"
-uuid = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
-version = "0.9.4"
-
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
@@ -2386,9 +991,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "8d7530a38dbd2c397be7ddd01a424e4f411dcc41"
+git-tree-sha1 = "2c11d7290036fe7aac9038ff312d3b3a2a5bf89e"
 uuid = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
-version = "1.2.2"
+version = "1.4.0"
 
 [[deps.StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
@@ -2446,12 +1051,6 @@ deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 version = "1.10.0"
 
-[[deps.Tectonic]]
-deps = ["Pkg"]
-git-tree-sha1 = "0b3881685ddb3ab066159b2ce294dc54fcf3b9ee"
-uuid = "9ac5f52a-99c6-489f-af81-462ef484790f"
-version = "0.8.0"
-
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "1feb45f88d133a655e001435632f019a9a1bcdb6"
@@ -2461,18 +1060,6 @@ version = "0.1.1"
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[[deps.TikzGraphs]]
-deps = ["Graphs", "LaTeXStrings", "TikzPictures"]
-git-tree-sha1 = "e8f41ed9a2cabf6699d9906c195bab1f773d4ca7"
-uuid = "b4f28e30-c73f-5eaf-a395-8a9db949a742"
-version = "1.4.0"
-
-[[deps.TikzPictures]]
-deps = ["LaTeXStrings", "Poppler_jll", "Requires", "Tectonic"]
-git-tree-sha1 = "4e75374d207fefb21105074100034236fceed7cb"
-uuid = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
-version = "3.4.2"
 
 [[deps.TranscodingStreams]]
 deps = ["Random", "Test"]
@@ -2746,75 +1333,19 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╟─d3221f99-adcc-457c-82f5-95aaa2a9e197
-# ╠═61189540-e578-11ec-3030-c3ebb611c28b
-# ╟─21639215-1463-46ff-80a0-f1f2028c7558
-# ╠═bc72d307-12f7-47c6-b90a-062814186978
-# ╠═217a9755-f4d6-4b13-b47b-9ad08430cffd
-# ╠═a575616a-81d4-4829-ae89-41eee625ad9b
-# ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
-# ╟─698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
-# ╟─12169dd2-6ea2-43a3-b6fd-94d55e23a568
-# ╠═d3da1adc-91a8-4a97-bb23-586582a31ad7
-# ╟─c1a3e0fe-c63d-41eb-9ef4-6a9c68246dc0
-# ╠═015b87d8-c652-41ea-8bd8-0634383afea9
-# ╟─cd893c83-7f8d-486e-af73-e411e154e631
-# ╠═63f15cd5-fb1b-4f74-a287-8e2265ad5d9e
-# ╟─e2144b8b-6b09-4f99-8bf3-819d0a7704f1
-# ╠═83f8c3e1-9a29-4e86-9125-ace58b0ad794
-# ╟─971d2a6e-72bb-4875-aee7-aeab10878dec
-# ╠═4fbcbb5d-f320-432f-b6df-df5c72bb10a5
-# ╟─2d603282-70c8-4a36-ada3-2459a6877e88
-# ╠═2454e123-aedc-4b7f-871f-4707e7c76b5c
-# ╟─f62e4864-8690-411a-b1c0-0c5d42f73dc1
-# ╠═50b84495-921d-42c8-91fb-8b933cf3d7be
-# ╟─69cda46a-380f-45c2-b5f8-a491f7d362d6
-# ╠═e318bb27-bc9b-40c1-af63-9feccb5fcda7
-# ╟─73ab86d3-7ab6-4288-a1d0-ca30432da9fc
-# ╟─101246ef-1753-4174-ab16-109b425adbec
-# ╟─1c7238b6-6a2c-4123-8f9b-061820e74c98
-# ╠═9ba5c4d2-6197-46ab-a2b6-ff81dd5175d5
-# ╠═3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
-# ╠═6e597df8-6b06-4ef8-8f9f-212f72022f48
-# ╟─8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
-# ╟─21fc0470-2c99-45fb-a3d2-e9cd40b01835
-# ╠═dbd801ce-d8fe-4d68-9493-088295b4f663
-# ╟─22f9488e-73c4-4d0b-8d42-abd654b99795
-# ╟─4541deee-dfa5-462c-a797-b221637baf64
-# ╠═2a9aadf8-cbd3-43ab-b8a6-14025d551208
-# ╟─a61fb19f-3e94-4097-844f-72ec845d55b2
-# ╟─6cc00479-e1d3-4b88-a0b6-28a50d12d610
-# ╠═ba99d317-87ae-4405-9237-f60748cec26f
-# ╟─fda02e26-8425-4ceb-93e5-7101b7acb8be
-# ╠═b8b4ebbe-0443-4471-b062-4605e4504702
-# ╠═13e635db-a044-4c30-8643-8a0d34880488
-# ╟─b4730f03-6d61-45cb-8a8b-27372b087ddc
-# ╠═244b96f0-9e91-4d5e-9da3-094e9215f475
-# ╠═5a0dad14-0f30-4623-9e6e-4053ca818606
-# ╠═22f080a3-eb4b-4c02-88e4-d301f4b97a85
-# ╠═c0b1feb5-7aec-4310-8c55-c2350ce005f8
-# ╠═ec276414-bd4e-4536-9307-ce773d49306e
-# ╟─4873983b-17e6-4889-8954-4989cc3923f5
-# ╠═dfc5b22a-5989-4912-a18b-719803ddcbd4
-# ╠═e23ae61e-f755-4cfc-8a57-b4cba9e47534
-# ╠═f3e65a88-87f1-4619-87f6-d196dfd96305
-# ╠═46e86b8e-2fba-4f16-bc71-91e1c05b00fd
-# ╠═c633899f-5719-44c8-ba8f-a71cdb2c3ab2
-# ╠═545262b9-fc38-4ea6-b3a6-90e8b96584a3
-# ╠═dbbcc0fe-7019-4d40-b477-3ba76b687cb6
-# ╠═29294762-c083-4461-a3cf-0789972b97a8
-# ╠═91f5a063-d799-46c6-888e-7112f80435e9
-# ╠═083b99e2-cafb-465c-9da1-c4c325ff6038
-# ╠═4aac2e0b-2b6c-4845-a7a9-92ef60f5a0ba
-# ╠═640e31ac-f2a3-4036-a064-618e840dc009
-# ╠═8881283e-93a8-4aa0-b0cf-39bf501b5847
-# ╠═ceef39d0-185e-496f-a2c1-9bffd3c1f619
-# ╠═fb370e9f-65c3-44e9-b30e-3efd778b345a
-# ╠═53ef9168-042d-48b5-bcda-61b77db1000c
-# ╠═a1047cd7-5683-4d37-91db-daec3ee7ddb4
-# ╠═dc9885c4-f003-4f25-ab30-0cccbb855f9f
-# ╠═8140f3c6-b711-469b-9d71-33fcb9361e91
-# ╠═722eb58c-aa69-4371-b737-fcead002aa51
-# ╠═92d177a0-3389-4da2-934c-a93d4311bd4a
+# ╟─84343c60-f599-11ec-2565-611ee3fe8319
+# ╠═a541b95e-015c-425f-b9dc-5b438ae47b54
+# ╠═0bab852c-51b5-4669-92fc-52aadf2ca7cb
+# ╠═f5255e2d-3ac4-4314-991c-353b03661f97
+# ╠═f52182e9-ee38-46ea-b52b-174dfbebdb3d
+# ╠═6f289b53-6850-4625-80e2-8d21c9331f16
+# ╠═dd9b24f7-be87-47e9-8073-241c7ad28be1
+# ╠═d6107ea8-9918-4f6b-b32d-fceb3fa68efd
+# ╠═fb6fbf5d-7e4d-4d6c-a986-a82f62f047d2
+# ╠═d6eb8aeb-8ac5-41e0-aa1e-e2c76f165522
+# ╠═7032272d-efa9-41ff-8e88-0515c486a8b8
+# ╠═9cb29a08-9f35-4f1b-b8b8-85fff8442256
+# ╠═c6b156da-f0ab-4941-9bbc-a0f7ca204120
+# ╠═e4b96828-7ebb-4094-8a0d-b046bb388b6c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

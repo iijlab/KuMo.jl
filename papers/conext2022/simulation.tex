@@ -1,5 +1,5 @@
 
-We have develop a simple simulation tool to evaluate the model
+We have developed a simple simulation tool to evaluate the model
 that is publicly available from (URL removed for blind-review).
 
 \subsection{Simulation settings}
@@ -52,7 +52,7 @@ one to show the total active jobs normalized to MDC's capacity.
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{lowering.pdf}
     \vspace{-2.0ex}
-    \caption{lowering load, interactve jobs vs. data intensive jobs}
+    \caption{lowering load, interactive jobs vs. data intensive jobs}
     \Description{Simulation results with basic behaviors.}
     \label{fig:lowering}
   \end{center}
@@ -72,8 +72,8 @@ assigned to the node that has the object (DC3).
 \subsection{Mixed Behaviors}
 
 A more complex scenario is shown in Figure~\ref{fig:mixed}.
-user0: cycle: 180  peak:1.2 interactve:data-intensive=1:2.
-user1: cycle: 135  peak:1.0  interactve:data-intensive=1:3.
+user0: cycle: 180  peak:1.2 interactive:data-intensive=1:2.
+user1: cycle: 135  peak:1.0  interactive:data-intensive=1:3.
 after time 540 (5th wave for user1), user1 load x 2.0, 
 after time 675 (6th wave for user1), user1 load x 10.
 before, time 540, interactive jobs are assigned closer to the user,
@@ -90,3 +90,55 @@ saturates, and the rest assigned to n3.
     \label{fig:mixed}
   \end{center}
 \end{figure}
+
+% \begin{figure}[tb]
+%   \begin{center}
+%     \includegraphics[width=1.0\columnwidth]{complex-convex-monotonic.pdf}
+%     \vspace{-2.0ex}
+%     \caption{Complex scenario with convex nodes and monotonic links}
+%     \label{fig:complex}
+%   \end{center}
+% \end{figure}
+
+% \begin{figure}[tb]
+%   \begin{center}
+%     \includegraphics[width=1.0\columnwidth]{complex-full-convex.pdf}
+%     \vspace{-2.0ex}
+%     \caption{Complex scenario with convex nodes and monotonic links}
+%     \label{fig:complex-convex}
+%   \end{center}
+% \end{figure}
+
+% \begin{figure}[tb]
+%   \begin{center}
+%     \includegraphics[width=1.0\columnwidth]{complex-full-monotonic.pdf}
+%     \vspace{-2.0ex}
+%     \caption{Complex scenario with convex nodes and monotonic links}
+%     \label{fig:complex-monotonic}
+%   \end{center}
+% \end{figure}
+
+\begin{figure}[tb]
+  \centering
+  \begin{subfigure}{\columnwidth}
+      \includegraphics[width=\textwidth]{complex-convex-monotonic.pdf}
+      \caption{Convex nodes and monotonic links}
+      \label{fig:first}
+  \end{subfigure}
+
+  \begin{subfigure}{\columnwidth}
+      \includegraphics[width=\textwidth]{complex-full-convex.pdf}
+      \caption{Convex nodes and links}
+      \label{fig:second}
+  \end{subfigure}
+
+  \begin{subfigure}{\columnwidth}
+      \includegraphics[width=\textwidth]{complex-full-monotonic.pdf}
+      \caption{Monotonic nodes and links}
+      \label{fig:third}
+  \end{subfigure}
+
+  \caption{Comparison of convex and monotonic resources in a complex scenario}
+
+  \label{fig:figures}
+  \end{figure}
