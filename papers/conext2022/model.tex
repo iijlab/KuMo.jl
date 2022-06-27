@@ -17,7 +17,7 @@ the service server instantiates the requested service into a series of
 microservice jobs.
 The server finds the required resources for each job,
 identifies the locations of the user and the required data object,
-asks available resources (or their proxies) for the current costs,
+asks resource agents for available resources and their current costs,
 and assigns the job to the node that minimizes the total cost for the
 job.
 The area for cost inquiry could be within proximity along the path
@@ -102,7 +102,7 @@ constraint is enforced by a penalizing cost when approaching the full
 capacity.
 
 Another key idea is {\em idle-resource pooling} that tries to put resources
-into idle state when possible for energy saving.
+into an idle state when possible for energy saving.
 We proposed a convex cost function that enables idle-resource pooling
 as part of the congestion pricing mechanism.
 
@@ -288,5 +288,9 @@ resource pool with a single shift parameter.
   \end{center}
 \end{figure}
 
-
+Other than manipulating the cost function,
+cloud service providers can adjust the required resources and their
+weights.  Also, it is effective to place data objects close to the
+users, and both service providers and their users should have some
+control over where to store the data.
 

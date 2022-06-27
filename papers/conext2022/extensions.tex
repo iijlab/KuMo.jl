@@ -7,14 +7,14 @@ and presented the basic idea for idle-resource pooling.
 We are planning to refine the proposed model and developing a working
 prototype system.
 
-For model refinement,
-the current model is simplistic. We will add bidirectional links,
-multiple users per job, interactions among jobs, and so on.
+For the model refinement,
+the current model is simplistic so that we will add bidirectional links,
+multiple users per job, interactions among jobs, and other features.
 We did not consider dependency among microservice jobs but it would be
 necessary to investigate the impact of the interplay of microservice
 jobs ~\cite{Suresh-SOA-SOCC2017}.
 
-For prototype development,
+For the prototype development,
 we need realistic microservice workload models.
 Also, it is necessary to develop mechanisms and protocols for
 discovering available resources~\cite{Albrecht2008} and exchanging
@@ -42,10 +42,11 @@ administrative domain.
 The hierarchical model, however, naturally extends to
 an {\bf inter-cloud model} in which different cloud systems are
 federated.
-The mechanism of the idle resource pooling allows utilizing external
+The mechanism of the idle-resource pooling allows utilizing external
 clouds only when needed.
 
-It would be possible to {\bf crowdsource the resource supply}. 
+Further, it would be possible to {\bf crowdsource the resource supply}
+at the edge. 
 Then, we need a monetary charging, authentication and authorization
 mechanisms to add externally provided resources to the resource pool.
 
@@ -57,7 +58,7 @@ Another possibility is design a new distributed storage system
 suitable for the cloud morphing model in which (cached) data can be
 easily moved.
 
-Idle-resource pooling is not used for network links in this paper, but
+The idle-resource pooling is not used for network links in this paper, but
 it is possible to use it for dynamically creating {\bf Layer 2 paths}
 (e.g., lightpath switching over WDM networks).
 
