@@ -38,6 +38,12 @@ end
 # ╔═╡ f52182e9-ee38-46ea-b52b-174dfbebdb3d
 df7 = DataFrame(CSV.File("../data/complex7.csv"));
 
+# ╔═╡ c2aa55f9-4caa-4e4e-8ba5-27f84235da82
+begin
+	df7[!, 6:22] = round.(df7[!,6:22]; digits = 5)
+	df7
+end
+
 # ╔═╡ da349491-8caa-47bd-a6d3-290761449bd5
 describe(df7)
 
@@ -102,13 +108,13 @@ p7_core = @df df7 areaplot(:instant,
 # ╔═╡ d51af3dd-fd81-48f9-afcb-d8d28b5a5ae0
 begin
 	df7_no_norm = deepcopy(df7)
-	df7_no_norm[!, 6:12] = df7[!,6:12] .* 100
-	df7_no_norm[!, 13:20] = df7[!,13:20] .* 500
-	df7_no_norm[!, 21:22] = df7[!,21:22] .* 5000
+	df7_no_norm[!, 6:12] = df7[!,6:12] .* 1
+	df7_no_norm[!, 13:20] = df7[!,13:20] .* 5
+	df7_no_norm[!, 21:22] = df7[!,21:22] .* 50
 
-	df7_no_norm[!, 23:32] = df7[!,23:32] .* 500
-	df7_no_norm[!, 33:48] = df7[!,33:48] .* 1000
-	df7_no_norm[!, 49:end] = df7[!,49:end] .* 2000
+	df7_no_norm[!, 23:32] = df7[!,23:32] .* 1
+	df7_no_norm[!, 33:48] = df7[!,33:48] .* 2
+	df7_no_norm[!, 49:end] = df7[!,49:end] .* 4
 	
 	df7_no_norm
 end;
@@ -193,6 +199,55 @@ p_decomposition = plot(p_norm_area, p_norm_line, p_no_norm_area, p_no_norm_line,
 
 # ╔═╡ 8bf29b25-8b28-4026-8a52-30142ec806a2
 savefig(p_decomposition, "decomposition_categories.pdf")
+
+# ╔═╡ f1b61c45-e20f-49a1-aa62-367f17f115e0
+p_micro = @df df7 plot(:instant,
+    cols(a7:12), xlabel="time", seriestype = :steppre,
+    ylabel="active jobs",
+    w=1., tex_output_standalone = true,
+)
+
+# ╔═╡ 223878cc-4c27-4e4a-9338-c2826aec285c
+p_micro2 = @df df7 plot(:instant,
+    cols(a7:8), xlabel="time", seriestype = :steppre,
+    ylabel="active jobs",
+    w=1., tex_output_standalone = true,
+)
+
+# ╔═╡ 5c9abe28-f38f-43bb-aee7-2b4afc3d097d
+p_micro3 = @df df7 plot(:instant,
+    cols(9:12), xlabel="time", seriestype = :steppre,
+    ylabel="active jobs",
+    w=1., tex_output_standalone = true,
+)
+
+# ╔═╡ 9d686c6f-1ae0-4510-9fad-5c3e7a675b85
+p_local = @df df7 plot(:instant,
+    cols(13:20), xlabel="time", seriestype = :steppre,
+    ylabel="active jobs",
+    w=1., tex_output_standalone = true,
+)
+
+# ╔═╡ f5cbf362-435f-4007-ab6a-aed5f3541c4e
+p_local2 = @df df7 plot(:instant,
+    cols(13:15), xlabel="time", seriestype = :steppre,
+    ylabel="active jobs",
+    w=1., tex_output_standalone = true,
+)
+
+# ╔═╡ 8ba9d852-d8d5-4eda-953a-126a31f0365d
+p_local3 = @df df7 plot(:instant,
+    cols(16:20), xlabel="time", seriestype = :steppre,
+    ylabel="active jobs",
+    w=1., tex_output_standalone = true,
+)
+
+# ╔═╡ 1c752b2a-8c70-4427-bf76-55d4b23fbe15
+p_core = @df df7 plot(:instant,
+    cols(21:22), xlabel="time", seriestype = :steppre,
+    ylabel="active jobs",
+    w=1., tex_output_standalone = true,
+)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1455,6 +1510,7 @@ version = "0.9.1+5"
 # ╠═0bab852c-51b5-4669-92fc-52aadf2ca7cb
 # ╠═f5255e2d-3ac4-4314-991c-353b03661f97
 # ╠═f52182e9-ee38-46ea-b52b-174dfbebdb3d
+# ╠═c2aa55f9-4caa-4e4e-8ba5-27f84235da82
 # ╠═da349491-8caa-47bd-a6d3-290761449bd5
 # ╠═39e5b1b0-407c-4a54-8e6f-5391619e106c
 # ╠═b2bdb44e-5a6b-478d-a643-ce03f48d9b7d
@@ -1477,5 +1533,12 @@ version = "0.9.1+5"
 # ╠═9c27e0c2-949f-4431-bfb8-5092b8317426
 # ╠═9fbe648c-81eb-484d-a6a3-08995527969a
 # ╠═8bf29b25-8b28-4026-8a52-30142ec806a2
+# ╠═f1b61c45-e20f-49a1-aa62-367f17f115e0
+# ╠═223878cc-4c27-4e4a-9338-c2826aec285c
+# ╠═5c9abe28-f38f-43bb-aee7-2b4afc3d097d
+# ╠═9d686c6f-1ae0-4510-9fad-5c3e7a675b85
+# ╠═f5cbf362-435f-4007-ab6a-aed5f3541c4e
+# ╠═8ba9d852-d8d5-4eda-953a-126a31f0365d
+# ╠═1c752b2a-8c70-4427-bf76-55d4b23fbe15
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
