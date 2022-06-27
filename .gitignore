@@ -15,5 +15,5 @@ test/Manifest.toml
 *.fls
 *.log
 *.out
-*.pdf
+*main.pdf
 *.synctex.gz
