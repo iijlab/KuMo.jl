@@ -4,47 +4,43 @@ that is publicly available from (URL removed for blind-review).
 
 \subsection{Simulation settings}
 
-The simulation setting is shown in Figure~\ref{fig:topology-simple}.
-\begin{itemize}
-  \item		job: mean duration:4sec, mean 1 unit,
-        frontend 1, backend 2 for data intensive job,
-        frontend 2, backend 1 for interactive job,
-  \item		node: capacity 100 for MDC, 1000 for DC
-  \item		link: capacity 200 for MDC-DC, 1000 for DC-DC
-\end{itemize}
-
-\begin{figure}[tb]
-  \begin{center}
-    \includegraphics[width=7.5cm,clip]{topology-simple.pdf}
-    \vspace{-2.0ex}
-    \caption{simple simulation topology}
-    \Description{Simulation topology with 2 datacenters and 2 micro datacenters.}
-    \label{fig:topology-simple}
-  \end{center}
-\end{figure}
-
-Simulation scenarios:
-\begin{enumerate}
-  \item	{\bf node only:} 4 nodes without randomization to show how the
-        cost function works
-  \item	{\bf link only:} 4 links without randomization to show
-        different costs affects
-  \item	{\bf monotonic function:} same as above but use monotonic cost
-        function.
-  \item	{\bf randomize:} 4 nodes and 4 links with randomization
-  \item {\bf comparison:} compared with, no idle-resource pooling
-  \item	{\bf surge:} same as above but with a request surge at one location
-  \item	{\bf edge computing:} 2 nodes (big and small) and 1 link, the
-    users are closer to the small node. 2 types jobs (interactive,
-    data intensive).  show interactive jobs are on the small node,
-    data intensive jobs are on the big node.
-  \item {\bf premium service:} 4 nodes with 3 standard and 1 premium services.
-  \item	{\bf complex?:} realistic scenario
-\end{enumerate}
-
-We use 3 types of time-series plots: one for the load of each node
-(computing resource), another for the load of each link, and the last
-one to show the total active jobs normalized to MDC's capacity.
+%%The simulation setting is shown in Figure~\ref{fig:topology-simple}.
+%%\begin{itemize}
+%%  \item		job: mean duration:4sec, mean 1 unit,
+%%        frontend 1, backend 2 for data intensive job,
+%%        frontend 2, backend 1 for interactive job,
+%%  \item		node: capacity 100 for MDC, 1000 for DC
+%%  \item		link: capacity 200 for MDC-DC, 1000 for DC-DC
+%%\end{itemize}
+%%
+%%\begin{figure}[tb]
+%%  \begin{center}
+%%    \includegraphics[width=7.5cm,clip]{topology-simple.pdf}
+%%    \vspace{-2.0ex}
+%%    \caption{simple simulation topology}
+%%    \Description{Simulation topology with 2 datacenters and 2 micro datacenters.}
+%%    \label{fig:topology-simple}
+%%  \end{center}
+%%\end{figure}
+%%
+%%Simulation scenarios:
+%%\begin{enumerate}
+%%  \item	{\bf node only:} 4 nodes without randomization to show how the
+%%        cost function works
+%%  \item	{\bf link only:} 4 links without randomization to show
+%%        different costs affects
+%%  \item	{\bf monotonic function:} same as above but use monotonic cost
+%%        function.
+%%  \item	{\bf randomize:} 4 nodes and 4 links with randomization
+%%  \item {\bf comparison:} compared with, no idle-resource pooling
+%%  \item	{\bf surge:} same as above but with a request surge at one location
+%%  \item	{\bf edge computing:} 2 nodes (big and small) and 1 link, the
+%%    users are closer to the small node. 2 types jobs (interactive,
+%%    data intensive).  show interactive jobs are on the small node,
+%%    data intensive jobs are on the big node.
+%%  \item {\bf premium service:} 4 nodes with 3 standard and 1 premium services.
+%%  \item	{\bf complex?:} realistic scenario
+%%\end{enumerate}
 
 \subsection{Basic Behaviors}
 
@@ -52,40 +48,54 @@ one to show the total active jobs normalized to MDC's capacity.
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{lowering.pdf}
     \vspace{-2.0ex}
-    \caption{lowering load, interactive jobs vs. data intensive jobs}
-    \Description{Simulation results with basic behaviors.}
+    \caption{Cost manipulations (S3): raising the cost $\times2$,
+      $\times10$ and the weight for data access}
+    \Description{Simulation results to illustrate the effects of cost manipulations.}
     \label{fig:lowering}
   \end{center}
 \end{figure}
 
-The effects of manipulating the cost function and the job
-specification is shown in Figure~\ref{fig:lowering}.
-A series of jobs are generated between a user at MDC0 and an object at DC3.
-The first and second waves contain only interactive jobs, and most of
-the jobs are assigned to the node closest to the user (MDC0) but some
-overflowing jobs are assigned to DC2.
-In the second wave, the cost function of MDC0 is manipulated to reduce
-the load by multiplying the cost function by 1.5.
-The third wave contains only data intensive jobs, and all jobs are
-assigned to the node that has the object (DC3).
+The effects of manipulating the cost function and the resource weight
+for a job is illustrated using the topology in Figure~\ref{fig:lowering}.
+Herre, a series of interactive jobs of the same type are generated in
+4 waves between a user at MDC0 and an object at DC3 in
+Figure~\ref{fig:system}.
+In the first wave,  most of the jobs are assigned to the node closest
+to the user (MDC0) but some overflowing jobs are assigned to DC2.
+The peak load of MDC0 is .80.
+In the second and the third waves, the cost function of MDC0 is
+manipulated to reduce the load by adding 1.0 and 1.4 to the cost
+function of MDC0. As a result, the peak load of MDC0 is reduced from
+.80 to .74 in the second wave, and the jobs are completely moved to
+DC2 in the third wave.
+In the fourth wave, the weight for the backend communication is
+increased, and all jobs are assigned to the node that has the object
+(DC3).
 
 \subsection{Mixed Behaviors}
 
 A more complex scenario is shown in Figure~\ref{fig:mixed}.
-user0: cycle: 180  peak:1.2 interactive:data-intensive=1:2.
-user1: cycle: 135  peak:1.0  interactive:data-intensive=1:3.
-after time 540 (5th wave for user1), user1 load x 2.0, 
-after time 675 (6th wave for user1), user1 load x 10.
-before, time 540, interactive jobs are assigned closer to the user,
+Again, the topology in Figure~\ref{fig:lowering} is used, and
+random fluctuation is added to the interval and duration of the jobs.
+A series of jobs are generated
+between user0 at MDC0 and an object at DC3, and
+between user1 at MDC1 and an object at DC2.
+Both have the ratio of $1:2$ for interactive and data-intensive jobs.
+User1's jobs are increased by a factor of 2 in the third wave (time
+360-540), and by a factor of 10 in the fourth wave (time 540-720). 
+Before time 360, interactive jobs are assigned closer to the user,
 and data intensive jobs are assigned closer to the data.
-For the 6th wave, n1 saturates, then assigned to n2 but the link to n2
-saturates, and the rest assigned to n3.
+In the 3rd wave, MDC1 reaches the upper limit and overflowing jobs are
+assigned to DC2.
+In the 4th wave, the link MDC1-DC2 reaches the upper limit so that
+overflowing jobs are assigned to DC3.
+This scenario illustrates the responsive behavior of the system.
 
 \begin{figure}[tb]
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{simu2.pdf}
     \vspace{-2.0ex}
-    \caption{mixed scenario}
+    \caption{Mixed load with 2 DCs and 2 MDCs (S4)}
     \Description{Simulation results with mixed scenario.}
     \label{fig:mixed}
   \end{center}
@@ -142,3 +152,16 @@ saturates, and the rest assigned to n3.
 
   \label{fig:figures}
   \end{figure}
+
+The last scenario shows a more complex case with 18 DCs: 2 core-DCs, 8
+local-DCs and 8 leaf-DCs connected by a FAT-tree.  Each leaf is
+connected to one local-DC, but a local-DC is connected to 2 core-DCs
+and 2 other local-DCs, or just to 2 other local-DCs.
+Jobs are generated from all leaf-DCs and local-DCs.
+
+The load of leaf-DCs and local-DCs are mostly around the target load
+$.75$.
+This simulation result illustrates
+the responsive behavior to changing load,
+and the convergence to the stable state by the idle-resource pooling.
+

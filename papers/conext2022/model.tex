@@ -167,7 +167,8 @@ Figure~\ref{fig:4node-ratio}.
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{4node.pdf}
     \vspace{-2.0ex}
-    \caption{Load distribution: 4 equivalent cost nodes}
+    \caption{Load distribution among 4 equivalent cost nodes (S1):
+    the load of each resource (top) and the total load (bottom)}
     \Description{Simulation results with 4 nodes with the same cost function.}
     \label{fig:4node}
   \end{center}
@@ -194,7 +195,7 @@ At this point, another resource $r_{1}$ is selected for allocation.
 $r_{1}$ is preferred over $r_{0}$ as its cost becomes lower with new
 allocation so that both loads move towards $\rho_{0} = \rho_{1} = .5$,
 where both are balanced.
-Both loads rise again until $\rho_{r_{0}} = \rho_{r_{1}} = .75$,
+Both loads rise again until $\rho_{r0} = \rho_{r1} = .75$,
 where the third resource $r_{2}$ kicks in.
 It repeats for $r_{3}$, but no more idle resource is available
 when $\sum \rho$ reaches $3.0$ so that the loads grow beyond $.75$
@@ -222,7 +223,7 @@ $[.5, .75]$, while keeping idle resources as much as possible.
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{4node-ratio.pdf}
     \vspace{-2.0ex}
-    \caption{Load distribution: 4 proportional cost nodes}
+    \caption{Load distribution among 4 proportional cost nodes (S2)}
     \Description{Simulation results with 4 nodes with proportional cost functions.}
     \label{fig:4node-ratio}
   \end{center}
@@ -230,15 +231,15 @@ $[.5, .75]$, while keeping idle resources as much as possible.
 
 When resources are not equal, the behavior becomes more complex, but
 the underlying mechanisms are the same.
-Let's take a look at a case of 4 resources with the cost ratio $1:2:4:8$,
-that is $8 f_{r_{0}} = 4 f_{r_{1}} = 2 f_{r_{2}} = f_{r_{3}}$ in
-Figure~\ref{fig:4node-ratio}.
+Let's take a look at a case of 4 resources in Figure~\ref{fig:4node-ratio}
+with the cost ratio $1:2:4:8$,
+that is $8 f_{r0} = 4 f_{r1} = 2 f_{r2} = f_{r3}$.
 Here, we focus on the interaction between $r_{0}$ and $r_{1}$ since
 the other interactions are similar.
 To activate $r_{1}$, the load of $r_{0}$ goes up to $.84$ to satisfy:
-$f_{r_{1}}(0) = 4 = f_{r_{0}}(.84)$.
+$f_{r1}(0) = 4 = f_{r0}(.84)$.
 When $r_{1}$ is moving towards idle after time 550, the load
-of $r_{0}$ is $.75$ to satisfy: $f_{r_{1}}(.5) = 2 = f_{r_{0}}(.75)$
+of $r_{0}$ is $.75$ to satisfy: $f_{r1}(.5) = 2 = f_{r0}(.75)$
 
 For unequal resources in general, the required load to trigger new
 resource allocation would be higher than $\rho = .75$ for the already
