@@ -1,8 +1,10 @@
 
 We have developed a simple simulation tool to evaluate the model
 that is publicly available from (URL removed for blind-review).
+We omit the details of the simulation settings in this paper but all
+the settings are described in the simulation tool.
 
-\subsection{Simulation settings}
+%%\subsection{Simulation settings}
 
 %%The simulation setting is shown in Figure~\ref{fig:topology-simple}.
 %%\begin{itemize}
@@ -48,26 +50,26 @@ that is publicly available from (URL removed for blind-review).
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{lowering.pdf}
     \vspace{-2.0ex}
-    \caption{Cost manipulations (S3): raising the cost $\times2$,
-      $\times10$ and the weight for data access}
+    \caption{Cost manipulations (S3): raising the cost x2,
+      x10 and the weight for data access}
     \Description{Simulation results to illustrate the effects of cost manipulations.}
     \label{fig:lowering}
   \end{center}
 \end{figure}
 
 The effects of manipulating the cost function and the resource weight
-for a job is illustrated using the topology in Figure~\ref{fig:lowering}.
-Herre, a series of interactive jobs of the same type are generated in
+for a job is illustrated in Figure~\ref{fig:lowering}.
+Here, a series of interactive jobs of the same type are generated in
 4 waves between a user at MDC0 and an object at DC3 in
 Figure~\ref{fig:system}.
 In the first wave,  most of the jobs are assigned to the node closest
 to the user (MDC0) but some overflowing jobs are assigned to DC2.
-The peak load of MDC0 is .80.
+The peak load of MDC0 is .80 in the first wave.
 In the second and the third waves, the cost function of MDC0 is
-manipulated to reduce the load by adding 1.0 and 1.4 to the cost
-function of MDC0. As a result, the peak load of MDC0 is reduced from
-.80 to .74 in the second wave, and the jobs are completely moved to
-DC2 in the third wave.
+manipulated to reduce the load by adding $1.0$ and $1.4$ respectively to
+the cost function of MDC0. As a result, the peak load of MDC0 is
+reduced from $.80$ to $.74$ in the second wave, and the jobs are
+completely moved to DC2 in the third wave.
 In the fourth wave, the weight for the backend communication is
 increased, and all jobs are assigned to the node that has the object
 (DC3).
@@ -85,10 +87,12 @@ User1's jobs are increased by a factor of 2 in the third wave (time
 360-540), and by a factor of 10 in the fourth wave (time 540-720). 
 Before time 360, interactive jobs are assigned closer to the user,
 and data intensive jobs are assigned closer to the data.
-In the 3rd wave, MDC1 reaches the upper limit and overflowing jobs are
+In the third wave, MDC1 reaches the upper limit and overflowing jobs are
 assigned to DC2.
-In the 4th wave, the link MDC1-DC2 reaches the upper limit so that
+In the fourth wave, the link MDC1-DC2 reaches the upper limit so that
 overflowing jobs are assigned to DC3.
+To absorb the surge in the fourth wave in this scenario, enough
+capacity is provided to the link MDC1-DC3.
 This scenario illustrates the responsive behavior of the system.
 
 \begin{figure}[tb]
