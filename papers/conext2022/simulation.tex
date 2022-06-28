@@ -71,8 +71,8 @@ Here, a series of interactive jobs of the same type are generated in
 4 waves between a user at MDC0 and an object at DC3 in
 Figure~\ref{fig:system}.
 In the first wave,  most of the jobs are assigned to the node closest
-to the user (MDC0) but some overflowing jobs are assigned to DC2.
-The peak load of MDC0 is .80 in the first wave.
+to the user (MDC0) but some overflowing jobs are offloaded to DC2.
+The peak load of MDC0 is $.8$ in the first wave.
 In the second and the third waves, the cost function of MDC0 is
 manipulated to reduce the load by shifting the load by $.2$ and $.4$
 respectively. As a result, the peak load of MDC0 is
@@ -94,7 +94,7 @@ Both have the ratio of $1:2$ for interactive vs. data-intensive jobs.
 To observe offloading behaviors, user1's jobs are increased by a
 factor of 2 in the third wave (time 360-540), and by a factor of 10 in
 the fourth wave (time 540-720). 
-Before time 360, interactive jobs are assigned closer to the user,
+Before time 360, interactive jobs are assigned closer to the users,
 and data intensive jobs are assigned closer to the data.
 In the third wave, MDC1 reaches the upper limit and overflowing jobs are
 assigned to DC2.
@@ -103,8 +103,7 @@ overflowing jobs are assigned to DC3.
 (To absorb the surge in the fourth wave in this scenario, enough
 capacity is provided to the link MDC1-DC3.)
 This scenario illustrates the responsive behavior of the system,
-and how jobs for micro datacenters can be offloaded to upstream data
-centers.
+and how jobs for MDCs can be offloaded to upstream DCs.
 
 \begin{figure}[tb]
   \begin{center}
@@ -145,39 +144,22 @@ centers.
 
 \begin{figure}[tb]
   \centering
-  \begin{subfigure}{\columnwidth}
-      \includegraphics[width=\textwidth]{complex-convex-monotonic.pdf}
-      \caption{Convex nodes and monotonic links}
-      \label{fig:first}
-  \end{subfigure}
+  \includegraphics[width=\columnwidth]{18nodes.pdf}
+  \vspace{-2.0ex}
+  \caption{Mixed load with 18 DCs}
+  \Description{A more complex scenario to illustrate offloading behaviors.}
+  \label{fig:18nodes}
+\end{figure}
 
-  \begin{subfigure}{\columnwidth}
-      \includegraphics[width=\textwidth]{complex-full-convex.pdf}
-      \caption{Convex nodes and links}
-      \label{fig:second}
-  \end{subfigure}
-
-  \begin{subfigure}{\columnwidth}
-      \includegraphics[width=\textwidth]{complex-full-monotonic.pdf}
-      \caption{Monotonic nodes and links}
-      \label{fig:third}
-  \end{subfigure}
-
-  \caption{Comparison of convex and monotonic resources in a complex scenario}
-
-  \label{fig:figures}
-  \end{figure}
-
-The last scenario shows a more complex case with 18 DCs: 2 core-DCs, 8
-local-DCs and 8 leaf-DCs connected by a FAT-tree.  Each leaf is
-connected to one local-DC, but a local-DC is connected to 2 core-DCs
-and 2 other local-DCs, or just to 2 other local-DCs.
+The last scenario in Figure~\ref{fig:18nodes} shows a more complex case with
+18 DCs: 2 cores, 8 locals and 8 leaves connected by a FAT-tree.
+Each leaf-DC is connected to one local-DC, and a local-DC is connected to
+2 core-DCs and 2 other local-DCs, or just to 2 other local-DCs.
 Jobs are generated from all leaf-DCs and local-DCs.
-
-The load of leaf-DCs and local-DCs are mostly around the target load
-$.75$.
-This simulation result illustrates
-quick responses to changing load,
+The top plot shows the load of 3 leaf-DCs for readability.
+We can see that the load stays at around $.75$ when a leaf-DC is
+active, except during a short transient overshoot by a surge at time XX.
+The results illustrate quick responses to changing load,
 yet converging to stable states once the load is settled,
 and offloading excess jobs to upstream data centers.
 
