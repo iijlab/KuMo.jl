@@ -154,6 +154,7 @@ function inner_queue(
     finally
         unlock(lck)
     end
+
     paths_user = dijkstra_shortest_paths(g, u, user_costs; trackvertices=true)
 
     for v in keys(node_costs)
