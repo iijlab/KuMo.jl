@@ -1299,6 +1299,304 @@ pc9_links_areas = plot_links(dfc9; kind = :areaplot)
 # ╔═╡ 722eb58c-aa69-4371-b737-fcead002aa51
 pc9_links_lines = plot_links(dfc9; kind = :plot)
 
+# ╔═╡ ea4b5ab1-5b11-4bdd-b6e2-c7c8c5395f95
+function scenario_c10()
+	duration = 100
+	
+	local_dc = 9:16
+	large_dc = 17:18
+	all_dc = 9:18
+
+	users_loc = 1:8
+
+	# job duration normal law
+	# job distribution exponential law
+
+	function interactive(; μ = 5)
+		d_duration = truncated(Normal(μ); lower = 1.)
+		return job(1, 5, rand(all_dc), rand(d_duration), 2)
+	end
+	
+	function data_intensive(; μ = 5)
+		d_duration = truncated(Normal(μ); lower = 1.)
+		return job(5, 10, rand(local_dc), rand(d_duration), 1)
+	end
+
+	jobs = [data_intensive() for _ in 1:23]
+	types = Set()
+	reqs = Vector()
+	for j in jobs
+		push!(types, typeof(j))
+		reqs = vcat(reqs, steady(j, j.duration, 1, 150, 15))
+		reqs = vcat(reqs, steady(j, j.duration, 201, 800, 15))
+	end
+	j = data_intensive()
+	push!(types, typeof(j))
+	# reqs = vcat(reqs, Request(j, 200.))
+	# reqs = vcat(reqs, Request(j, 1000.))
+	reqs = vcat(reqs, spike(j, 250., 1000))
+	UT = Union{collect(types)...}
+	R = Vector{Request{UT}}()
+	foreach(r -> push!(R, r), reqs)
+	user1 = user(requests(R), 1)
+
+	jobs = [data_intensive() for _ in 1:23]
+	types = Set()
+	reqs = Vector()
+	for j in jobs
+		push!(types, typeof(j))
+		reqs = vcat(reqs, steady(j, j.duration, 51, 150, 15))
+		reqs = vcat(reqs, steady(j, j.duration, 401, 800, 15))
+	end
+	j = data_intensive()
+	push!(types, typeof(j))
+	reqs = vcat(reqs, spike(j, 450., 1000))
+	UT = Union{collect(types)...}
+	R = Vector{Request{UT}}()
+	foreach(r -> push!(R, r), reqs)
+	user2 = user(requests(R), 2)
+
+	jobs = [data_intensive() for _ in 1:23]
+	types = Set()
+	reqs = Vector()
+	for j in jobs
+		push!(types, typeof(j))
+		reqs = vcat(reqs, steady(j, j.duration, 101, 150, 15))
+		reqs = vcat(reqs, steady(j, j.duration, 601, 800, 15))
+	end
+	j = data_intensive()
+	push!(types, typeof(j))
+	reqs = vcat(reqs, spike(j, 650., 1000))
+	UT = Union{collect(types)...}
+	R = Vector{Request{UT}}()
+	foreach(r -> push!(R, r), reqs)
+	user3 = user(requests(R), 3)
+	
+	s1 = scenario(;
+        duration,
+        nodes=[
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(5000),
+			Node(5000),
+		],
+        links=[
+			# MDC <-> DC
+	    	(1, 9, 500.0),
+	    	(2, 10, 500.0),
+	    	(3, 11, 500.0),
+	    	(4, 12, 500.0),
+	    	(5, 13, 500.0),
+	    	(6, 14, 500.0),
+	    	(7, 15, 500.0),
+	    	(8, 16, 500.0),
+			(9, 1, 500.0),
+			(10, 2, 500.0),
+			(11, 3, 500.0),
+			(12, 4, 500.0),
+			(13, 5, 500.0),
+			(14, 6, 500.0),
+			(15, 7, 500.0),
+			(16, 8, 500.0),
+			# DC <-> DC
+	    	(10, 9, 1000.0), (9, 10, 1000.0),
+	    	(11, 10, 1000.0), (10, 11, 1000.0),
+	    	(12, 11, 1000.0), (11, 12, 1000.0),
+	    	(13, 12, 1000.0), (12, 13, 1000.0),
+	    	(14, 13, 1000.0), (13, 14, 1000.0),
+	    	(15, 14, 1000.0), (14, 15, 1000.0),
+	    	(16, 15, 1000.0), (15, 16, 1000.0),
+	    	(9, 16, 1000.0), (16, 9, 1000.0),
+			# LargeDC <-> DC			
+	    	(10, 17, 2000.0), (17, 10, 2000.0),
+	    	(12, 17, 2000.0), (17, 12, 2000.0),
+	    	(14, 17, 2000.0), (17, 14, 2000.0),
+	    	(16, 17, 2000.0), (17, 16, 2000.0),
+	    	(10, 18, 2000.0), (18, 10, 2000.0),
+	    	(12, 18, 2000.0), (18, 12, 2000.0),
+	    	(14, 18, 2000.0), (18, 14, 2000.0),
+	    	(16, 18, 2000.0), (18, 16, 2000.0),
+			# LargeDC <-> DC			
+	    	(17, 18, 10000.0), (18, 17, 10000.0),		
+        ],
+        users = [
+			user1,
+			user2,
+			user3,
+		],
+    )
+
+	s2 = scenario(;
+        duration,
+        nodes=[
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(100),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(500),
+			Node(5000),
+			Node(5000),
+		],
+        links=(
+			ConvexLink,
+			[
+				# MDC <-> DC
+		    	(1, 9, 500.0),
+		    	(2, 10, 500.0),
+		    	(3, 11, 500.0),
+		    	(4, 12, 500.0),
+		    	(5, 13, 500.0),
+		    	(6, 14, 500.0),
+		    	(7, 15, 500.0),
+		    	(8, 16, 500.0),
+				(9, 1, 500.0),
+				(10, 2, 500.0),
+				(11, 3, 500.0),
+				(12, 4, 500.0),
+				(13, 5, 500.0),
+				(14, 6, 500.0),
+				(15, 7, 500.0),
+				(16, 8, 500.0),
+				# DC <-> DC
+		    	(10, 9, 1000.0), (9, 10, 1000.0),
+		    	(11, 10, 1000.0), (10, 11, 1000.0),
+		    	(12, 11, 1000.0), (11, 12, 1000.0),
+		    	(13, 12, 1000.0), (12, 13, 1000.0),
+		    	(14, 13, 1000.0), (13, 14, 1000.0),
+		    	(15, 14, 1000.0), (14, 15, 1000.0),
+		    	(16, 15, 1000.0), (15, 16, 1000.0),
+		    	(9, 16, 1000.0), (16, 9, 1000.0),
+				# LargeDC <-> DC			
+		    	(10, 17, 5000.0), (17, 10, 5000.0),
+		    	(12, 17, 5000.0), (17, 12, 5000.0),
+		    	(14, 17, 5000.0), (17, 14, 5000.0),
+		    	(16, 17, 5000.0), (17, 16, 5000.0),
+		    	(10, 18, 5000.0), (18, 10, 5000.0),
+		    	(12, 18, 5000.0), (18, 12, 5000.0),
+		    	(14, 18, 5000.0), (18, 14, 5000.0),
+		    	(16, 18, 5000.0), (18, 16, 5000.0),
+				# LargeDC <-> DC			
+		    	(17, 18, 10000.0), (18, 17, 10000.0),		
+	        ]
+		),
+        users = [
+			user1,
+			user2,
+			user3,
+		],
+    )
+
+		s3 = scenario(;
+        duration,
+        nodes=[
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(100),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(500),
+			EqualLoadBalancingNode(5000),
+			EqualLoadBalancingNode(5000),
+		],
+        links=(
+			ConvexLink,
+			[
+				# MDC <-> DC
+		    	(1, 9, 500.0),
+		    	(2, 10, 500.0),
+		    	(3, 11, 500.0),
+		    	(4, 12, 500.0),
+		    	(5, 13, 500.0),
+		    	(6, 14, 500.0),
+		    	(7, 15, 500.0),
+		    	(8, 16, 500.0),
+				(9, 1, 500.0),
+				(10, 2, 500.0),
+				(11, 3, 500.0),
+				(12, 4, 500.0),
+				(13, 5, 500.0),
+				(14, 6, 500.0),
+				(15, 7, 500.0),
+				(16, 8, 500.0),
+				# DC <-> DC
+		    	(10, 9, 1000.0), (9, 10, 1000.0),
+		    	(11, 10, 1000.0), (10, 11, 1000.0),
+		    	(12, 11, 1000.0), (11, 12, 1000.0),
+		    	(13, 12, 1000.0), (12, 13, 1000.0),
+		    	(14, 13, 1000.0), (13, 14, 1000.0),
+		    	(15, 14, 1000.0), (14, 15, 1000.0),
+		    	(16, 15, 1000.0), (15, 16, 1000.0),
+		    	(9, 16, 1000.0), (16, 9, 1000.0),
+				# LargeDC <-> DC			
+		    	(10, 17, 5000.0), (17, 10, 5000.0),
+		    	(12, 17, 5000.0), (17, 12, 5000.0),
+		    	(14, 17, 5000.0), (17, 14, 5000.0),
+		    	(16, 17, 5000.0), (17, 16, 5000.0),
+		    	(10, 18, 5000.0), (18, 10, 5000.0),
+		    	(12, 18, 5000.0), (18, 12, 5000.0),
+		    	(14, 18, 5000.0), (18, 14, 5000.0),
+		    	(16, 18, 5000.0), (18, 16, 5000.0),
+				# LargeDC <-> DC			
+		    	(17, 18, 10000.0), (18, 17, 10000.0),		
+	        ]
+		),
+        users = [
+			user1,
+			user2,
+			user3,
+		],
+    )
+	return s1, s2, s3
+end
+
+# ╔═╡ f50c4351-1adb-4b08-b9fe-d6396a78776d
+s10, s11, s12 = scenario_c10();
+
+# ╔═╡ 18bd8ac5-c709-49e3-a0cc-7e13c899fb14
+# ╠═╡ show_logs = false
+pc10, dfc10 = simulate_and_plot(s10, ShortestPath()); pc10
+
+# ╔═╡ a96c1117-3692-4238-b72f-b5067a286a36
+pc10_nodes_areas = plot_nodes(dfc10; kind = :areaplot)
+
+# ╔═╡ 1fe7399c-f5d4-4924-b2fe-d8ea07f3704d
+pc10_nodes_lines = plot_nodes(dfc10; kind = :plot)
+
 # ╔═╡ 92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╠═╡ show_logs = false
 begin
@@ -1324,12 +1622,18 @@ begin
 		pc9_nodes_areas => "complex9_nodes_areas.pdf",
 		pc9_links_lines => "complex9_links_lines.pdf",
 		pc9_links_areas => "complex9_links_areas.pdf",
+		pc10 => "complex10.pdf",
+		pc9_nodes_lines => "complex10_nodes_lines.pdf",
+		pc9_nodes_areas => "complex10_nodes_areas.pdf",
+		# pc9_links_lines => "complex10_links_lines.pdf",
+		# pc9_links_areas => "complex10_links_areas.pdf",
 	]
 	foreach(p -> savefig(p.first, p.second), figures_c)
 	TikzPictures.save(PDF("complex_network"), complex_network())
 	CSV.write("complex7.csv", dfc7)
 	CSV.write("complex8.csv", dfc8)
 	CSV.write("complex9.csv", dfc9)
+	CSV.write("complex10.csv", dfc10)
 end;
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2831,6 +3135,11 @@ version = "0.9.1+5"
 # ╠═dc9885c4-f003-4f25-ab30-0cccbb855f9f
 # ╠═8140f3c6-b711-469b-9d71-33fcb9361e91
 # ╠═722eb58c-aa69-4371-b737-fcead002aa51
+# ╠═ea4b5ab1-5b11-4bdd-b6e2-c7c8c5395f95
+# ╠═f50c4351-1adb-4b08-b9fe-d6396a78776d
+# ╠═18bd8ac5-c709-49e3-a0cc-7e13c899fb14
+# ╠═a96c1117-3692-4238-b72f-b5067a286a36
+# ╠═1fe7399c-f5d4-4924-b2fe-d8ea07f3704d
 # ╠═92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
