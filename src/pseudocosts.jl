@@ -23,5 +23,5 @@ end
 function pseudo_cost(cap, charge, ::Val{:premium_node}, Δ)
     ρ = charge / cap + Δ
     isapprox(1.0, ρ) || ρ > 1.0 && (@debug("Error in pseudo_cost", charge, cap); return Inf)
-    return n * (2 * ρ - 1)^2 / (1 - ρ^n) + 1
+    return (2 * ρ - 1)^2 / (1 - ρ) + 1
 end
