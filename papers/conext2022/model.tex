@@ -10,8 +10,8 @@
 \end{figure}
 
 Our resource management model is explained using a simple system
-configuration with 2 datacenters and 2 micro-datacenters shown in
-Figure~\ref{fig:system}.
+configuration with 2 datacenters (DCs) and 2 micro-datacenters (MDCs)
+shown in Figure~\ref{fig:system}.
 When a user requests a service to a nearby service allocation server,
 the service server instantiates the requested service into a series of
 microservice jobs.
@@ -167,7 +167,7 @@ Figure~\ref{fig:4node-ratio}.
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{4node.pdf}
     \vspace{-2.0ex}
-    \caption{Load distribution among 4 equivalent cost nodes (S1):
+    \caption{Load distribution among 4 equivalent cost nodes:
     the load of each resource (top) and the total load (bottom)}
     \Description{Simulation results with 4 nodes with the same cost function.}
     \label{fig:4node}
@@ -223,7 +223,7 @@ $[.5, .75]$, while keeping idle resources as much as possible.
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{4node-ratio.pdf}
     \vspace{-2.0ex}
-    \caption{Load distribution among 4 proportional cost nodes (S2)}
+    \caption{Load distribution: 4 proportional cost nodes}
     \Description{Simulation results with 4 nodes with proportional cost functions.}
     \label{fig:4node-ratio}
   \end{center}
@@ -258,9 +258,12 @@ $f(.5)$ for the deactivating one.
 The utilization of a resource can be manipulated by modifying the cost
 function of the resource as shown in Figure~\ref{fig:costfunc3}.
 
-One can {\bf lower or raise the utilization} of a resource by raising or
-lowering the cost, which will be the most common manipulation.
-To make the cost $n$ times more expensive, $f'(\rho) = n f(\rho)$.
+One can {\bf lower or raise the utilization} of a resource by shifting
+the load and adjusting the target load, $f'(\rho) = f(\rho + \Delta)$.
+
+To {\bf change the activation order} in the idlle-resource pooling,
+one can raise or lower the cost,
+e.g., by making the cost  $n$ times more expensive, $f'(\rho) = n f(\rho)$.
 For minor adjustment, one can use an additive form,
 $f'(\rho) = f(\rho) + \Delta$.
 
@@ -269,13 +272,13 @@ one can raise the cost at $\rho = 0$:
 e.g., to raise the cost at $\rho = 0$ by a factor of $n$,
 $f'(\rho) = n (2\rho - 1)^{2}/(1 - \rho^{n}) + 1$.
 
-A {\bf premium service} can be realized by shifting the cost function
-to the left so as to have premium jobs being assigned to less loaded
-resources, 
-$f'(\rho) = f(\rho + \Delta)$.
+A {\bf premium service} can be realized by shifting the load
+in the same way as lowering the utilization
+but for specific users or jobs (not for a specific resource) so as to
+have premium jobs being assigned to less loaded resources.
 Similarly, an {\bf economy service} that allows to be assigned to more
-loaded resources can be made by shifting the cost function to the
-right.  It could be appealing to enable multiple classes using a single
+loaded resources can be made by shifting the load in the opposite direction.
+It could be appealing to enable multiple classes using a single
 resource pool with a single shift parameter.
 
 \begin{figure}[tb]
