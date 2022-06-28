@@ -152,13 +152,19 @@ and how jobs for MDCs can be offloaded to upstream DCs.
 \end{figure}
 
 The last scenario in Figure~\ref{fig:18nodes} shows a more complex case with
-18 DCs: 2 cores, 8 locals and 8 leaves connected by a FAT-tree.
+18 DCs: 2 cores (capacity 5,000), 8 locals (capacity 500) and 8 leaves
+(capacity 100) connected by a FAT-tree.
 Each leaf-DC is connected to one local-DC, and a local-DC is connected to
 2 core-DCs and 2 other local-DCs, or just to 2 other local-DCs.
 Jobs are generated from all leaf-DCs and local-DCs.
-The top plot shows the load of 3 leaf-DCs for readability.
-We can see that the load stays at around $.75$ when a leaf-DC is
-active, except during a short transient overshoot by a surge at time XX.
+The top plot shows the normalized total load $\sum \tilde{\rho}$
+divided into the 3 DC classes, which shows how excess jobs are
+offloaded to upstream DCs.
+The bottom plot shows the load of 3 leaf-DCs for readability.
+Although the leaves handle only a small fraction of the total jobs,
+the load of the leaves stays at around $.75$ when they are
+active, except a short transient overshoot above $.8$ during the
+surge from time 680.
 The results illustrate quick responses to changing load,
 yet converging to stable states once the load is settled,
 and offloading excess jobs to upstream data centers.
