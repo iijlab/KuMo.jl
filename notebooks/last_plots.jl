@@ -781,6 +781,34 @@ begin
 	df
 end;
 
+# ╔═╡ 997cb93e-f95a-4c23-9b2f-91e48dbcc24e
+# keep it
+p_no_norm_area = @df df areaplot(:instant,
+    cols(2:4), seriestype = :steppre,
+    ylabel="total load",
+    w=0.01, tex_output_standalone = true,
+	lab = ["leaves" "locals" "cores"]
+)
+
+# ╔═╡ 87524fa7-a3dc-4abd-a1df-f79037514978
+# keep it, 0 origin for resources, MDC#id
+p_micro2 = @df df7 StatsPlots.plot(:instant,
+    cols(6:8), xlabel="time", #seriestype = :steppre,
+    ylabel="load",
+	yticks=0:.25:1,
+    w=1, tex_output_standalone = true,
+	lab = ["Leaf-0" "Leaf-1" "Leaf-2"]
+)
+
+# ╔═╡ 5b384ccd-2e90-468e-801f-d0803dc3091d
+begin
+	p_7 = StatsPlots.plot(p_no_norm_area, p_micro2; layout=(2,1),
+			w=.5,
+			thickness_scaling = 2)
+	savefig(p_7, "../papers/conext2022/18nodes.pdf")
+	p_7
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -2504,5 +2532,8 @@ version = "0.9.1+5"
 # ╠═4d2dab2f-917a-43bf-abd5-86c9cb0b74f5
 # ╠═16863b19-8049-4c38-b0c8-41937798e47c
 # ╠═ef387e1d-60af-4e5e-95cf-4fd4d211a1f7
+# ╠═997cb93e-f95a-4c23-9b2f-91e48dbcc24e
+# ╠═87524fa7-a3dc-4abd-a1df-f79037514978
+# ╠═5b384ccd-2e90-468e-801f-d0803dc3091d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
