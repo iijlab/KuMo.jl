@@ -139,7 +139,8 @@ function inner_queue(
     user_path = Vector{Pair{Int,Int}}()
 
     if ii == 50000
-        @info "debug shortest" state j
+        @info "debug shortest" state.links state.nodes j
+        @info "edges" collect(edges(g))
     end
     # computing shortest paths starting with frontend (user)
     lock(lck)
@@ -172,12 +173,12 @@ function inner_queue(
     if ii == 50000
         @info "debug shortest" u paths_user.dists paths_user.parents
         @info "retriev path" retrieve_path(u, 3, paths_user)
-        @info "debug shortest" u paths_user2.dists paths_user2.parents
-        @info "retriev path" retrieve_path(u, 3, paths_user2)
+        # @info "debug shortest" u paths_user2.dists paths_user2.parents
+        # @info "retriev path" retrieve_path(u, 3, paths_user2)
     end
 
     for v in keys(node_costs)
-        current_path = retrieve_path(u, v, paths_user2)
+        current_path = retrieve_path(u, v, paths_user)
 
         charges = deepcopy(state.links)
         for p in current_path
@@ -218,8 +219,8 @@ function inner_queue(
         if ii == 50000
             @info "debug shortest  123" j.data_location paths_data.dists paths_data.parents
             @info "retriev path" retrieve_path(j.data_location, v, paths_data)
-            @info "debug shortest" j.data_location paths_data2.dists paths_data2.parents
-            @info "retriev path" retrieve_path(j.data_location, v, paths_data2)
+            # @info "debug shortest" j.data_location paths_data2.dists paths_data2.parents
+            # @info "retriev path" retrieve_path(j.data_location, v, paths_data2)
         end
 
         current_cost = paths_user.dists[v] + paths_data.dists[v] + node_costs[v]
@@ -253,7 +254,7 @@ function inner_queue(
     for v in keys(node_costs)
         current_path = retrieve_path(j.data_location, v, paths_data)
 
-        charges = zeros(size(capacities))
+        charges = deepcopy(state.links)
         for p in current_path
             a, b = p.first, p.second
             charges[a, b] = state.links[a, b] + j.backend
@@ -530,13 +531,13 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
     last_unload = zero(Float64)
     unchecked_unload = true
 
-    ii_stop = 50000
+    # ii_stop = Inf
 
     while ii < 2 * length(tasks)
-        if ii == ii_stop + 1
-            @warn "debug" state g
-            break
-        end
+        # if ii == ii_stop + 1
+        #     @warn "debug" state g
+        #     break
+        # end
         start_iteration = time()
 
         next_queued = iterate(queued, previous_queued)
@@ -547,23 +548,23 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
             @debug "debug entering queued" next_queued ii
             (task, _) = next_queued
             best_links, best_cost, best_node, is_valid =
-                execute_valid_load(s, task, g, capacities, state, algo, demands, ii == ii_stop ? ii : 0)
+                execute_valid_load(s, task, g, capacities, state, algo, demands)
 
             if is_valid
                 @debug "debug is_valid" task
                 j = task.job
                 # Add load
                 add_load!(state, best_links, j.containers, best_node, n)
-                if ii == ii_stop
-                    @info "debug snapshots prior push" snapshots last_unload n
-                end
+                # if ii == ii_stop
+                #     @info "debug snapshots prior push" snapshots last_unload n
+                # end
                 @debug "debug snapshots prior push" snapshots last_unload n
                 # Snap new state
                 push_snap!(snapshots, state, 0, 0, 0, 0, last_unload, n)
                 @debug "debug snapshots after push" snapshots last_unload n
-                if ii == ii_stop
-                    @info "debug snapshots after push" last(snapshots)
-                end
+                # if ii == ii_stop
+                #     @info "debug snapshots after push" last(snapshots)
+                # end
                 # Assign unload
                 unload = Unload(last_unload + j.duration, best_node, j.containers, best_links)
                 insert_sorted!(unloads, unload, next_unload)
@@ -586,13 +587,13 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
             if next_task === nothing || unload.occ ≤ next_task[1].occ
                 v, c, ls = unload.node, unload.vload, unload.lloads
                 rem_load!(state, ls, c, v, n)
-                if ii == ii_stop
-                    @info "debug snapshots prior push" snapshots last_unload n
-                end
+                # if ii == ii_stop
+                #     @info "debug snapshots prior push" snapshots last_unload n
+                # end
                 push_snap!(snapshots, state, 0, 0, 0, 0, unload.occ, n)
-                if ii == ii_stop
-                    @info "debug snapshots after push" last(snapshots)
-                end
+                # if ii == ii_stop
+                #     @info "debug snapshots after push" last(snapshots)
+                # end
 
                 previous_unload += 1
                 unchecked_unload = true
