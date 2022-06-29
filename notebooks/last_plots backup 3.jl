@@ -28,8 +28,12 @@ begin
 		label = ["convex cost func" "monotonic cost func"], legend=:topleft,
 		ylims = (0., Inf),
 		xticks = 0.0:0.25:0.75,
+		yticks = 1:8,
 		xlabel = "load",
-		ylabel = "pseudo cost"
+		ylabel = "pseudo cost",
+		w=.5,
+		line=:auto,
+		thickness_scaling = 2
 	)
 
 	savefig(plot_pc, "pseudo_costs.pdf")
@@ -45,13 +49,18 @@ begin
 	n = 2
 	pc5 = ρ -> n * (2 * ρ - 1)^2 / (1 - ρ^n) + 1
     plot_pc2 = StatsPlots.plot(
-		[pc1, pc2, pc3, pc4, pc5], [0:0.01:0.91, 0:0.01:0.71, 0:0.01:0.91, 0:0.01:0.91, 0:0.01:0.91],
-		label = ["standard cost func" "load +.2" "cost ×2" "cost +.5" "idle cost ×1.5"], legend=:topleft,
+		[pc2, pc3, pc4, pc5], [0:0.01:0.71, 0:0.01:0.91, 0:0.01:0.91, 0:0.01:0.91],
+		label = ["load +.2" "cost ×2" "cost +.5" "idle cost ×1.5"], legend=:topleft,
 		ylims = (0., 8),
 		xticks = 0.0:0.25:0.75,
+		yticks = 1:8,
 		xlabel = "load",
-		ylabel = "pseudo cost"
+		ylabel = "pseudo cost",
+		w=.65,
+		line=:auto,
+		thickness_scaling = 2
 	)
+	plot!(0:0.01:0.91, pc1; label = "std cost func", w = .9)
 	savefig(plot_pc2, "pseudo_costs_2.pdf")
 	plot_pc2
 end
@@ -102,6 +111,7 @@ begin
 	pa_1 = @df dfa StatsPlots.plot(:instant,
 	    cols([9,8,7,6]), seriestype = :steppre,
 	    ylabel="load",
+		yticks = 0:.25:1,
 	    w=1, tex_output_standalone = true,
 		lab = ["r0" "r1" "r3" "r4"]
 	)
@@ -111,7 +121,7 @@ begin
 	    w=1, tex_output_standalone = true,
 		lab = ["r0" "r1" "r3" "r4"]
 	)
-	pa = StatsPlots.plot(pa_1, pa_2; layout = (2,1))
+	pa = StatsPlots.plot(pa_1, pa_2; layout = (2,1), thickness_scaling = 2, w=.5)
 	savefig(pa, "equivalent_nodes.pdf")
 	pa
 end
@@ -168,6 +178,7 @@ begin
 	pb_1 = @df dfb StatsPlots.plot(:instant,
 	    cols(6:9), seriestype = :steppre,
 	    ylabel="load",
+		yticks= 0:0.25:1,
 	    w=1, tex_output_standalone = true,
 		lab = ["r0" "r1" "r3" "r4"]
 	)
@@ -177,7 +188,7 @@ begin
 	    w=1, tex_output_standalone = true,
 		lab = ["r0" "r1" "r3" "r4"]
 	)
-	pb = StatsPlots.plot(pb_1, pb_2; layout = (2,1))
+	pb = StatsPlots.plot(pb_1, pb_2; layout = (2,1), thickness_scaling = 2, w=.5)
 	savefig(pb, "proportional_nodes.pdf")
 	pb
 end
