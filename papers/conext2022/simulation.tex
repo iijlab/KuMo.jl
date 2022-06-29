@@ -118,7 +118,7 @@ Each leaf-DC is connected to one local-DC, and each local-DCs is connected to
 2 other local-DCs; 4 of the local-DCs are also connected to 2 core-DCs.
 The bottom plot shows the normalized total load $\sum \tilde{\rho}$
 divided into the 3 DC classes.
-Jobs are generated from 3 leaf-DCs at 3 levels with additional surges,
+Jobs are generated from 3 leaf-DCs at 3 levels in volume with additional surges,
 and data objects are randomly populated at all leaf-DCs and local-DCs.
 The bottom plot shows how excess jobs are offloaded to upstream DCs,
 and the top plot shows the loads of the 3 job-generating leaf-DCs.
@@ -127,9 +127,11 @@ the loads of the leaf-DCs stay at around $.75$ while they are
 active, except a short transient overshoot during the surge from time
 680.
 
-Overall, the simulation results illustrate quick responses to changing
-load by offloading excess jobs to upstreams,
+Overall, the simulation results illustrate the basic behaviors of the
+idle-resource pooling,
+quick responses to changing
+load by offloading excess jobs to upstream DCs,
 yet converging to stable states once the load is settled,
 while maintaining the load for each active resource at around the target
-range.
+load.
 
