@@ -29,5 +29,6 @@ function graph(topo::Topology, algo)
         C[e[1], e[2]] = capacity(r)
         # C[e[2], e[1]] = capacity(r)
     end
+    # show(g)
     return g, C
 end

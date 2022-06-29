@@ -51,7 +51,7 @@ struct Unload
 end
 
 function inner_queue(
-    g, u, j, nodes, capacities, state, algo::MinCostFlow;
+    g, u, j, nodes, capacities, state, algo::MinCostFlow, ii=0;
     lck=ReentrantLock(), demands, links=nothing
 )
     nvtx = nv(g)
@@ -87,7 +87,7 @@ function inner_queue(
 
         aux_cap[i, nvtx] = j.backend + j.frontend
         f, links_cost = mincost_flow(g, demands, capacities, aux_cap, algo.optimizer)
-        cost = round(node_cost + links_cost, sigdigits=5)
+        cost = node_cost + links_cost
         if cost < best_cost
             best_cost = cost
             best_links = f
@@ -115,14 +115,14 @@ function retrieve_path(u, v, paths)
     w = v
     while w != u
         x = paths.parents[w]
-        push!(path, w => x)
+        pushfirst!(path, x => w)
         w = x
     end
     return path
 end
 
 function inner_queue(
-    g, u, j, nodes, capacities, state, ::ShortestPath;
+    g, u, j, nodes, capacities, state, ::ShortestPath, ii=0;
     lck=ReentrantLock(), demands=nothing, links
 )
     nvtx = nv(g)
@@ -138,6 +138,10 @@ function inner_queue(
     data_path = Vector{Pair{Int,Int}}()
     user_path = Vector{Pair{Int,Int}}()
 
+    if ii == 50000
+        @info "debug shortest" state.links state.nodes j
+        @info "edges" collect(edges(g))
+    end
     # computing shortest paths starting with frontend (user)
     lock(lck)
     try
@@ -148,21 +152,42 @@ function inner_queue(
         user_costs = zeros(size(capacities))
         for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
             if (i, k) ∈ keys(links)
-                user_costs[i, k] = pseudo_cost(links[(i, k)], state.links[i, k] + j.frontend)
+                user_costs[i, k] =
+                    pseudo_cost(links[(i, k)], state.links[i, k] + j.frontend)
             end
         end
     finally
         unlock(lck)
     end
+
+    if ii == 50000
+        @info "debug shortest" user_costs
+    end
+
     paths_user = dijkstra_shortest_paths(g, u, user_costs; trackvertices=true)
+    paths_user2 = dijkstra_shortest_paths(
+        g, u, transpose(user_costs);
+        trackvertices=true
+    )
+
+    if ii == 50000
+        @info "debug shortest" u paths_user.dists paths_user.parents
+        @info "retriev path" retrieve_path(u, 3, paths_user)
+        # @info "debug shortest" u paths_user2.dists paths_user2.parents
+        # @info "retriev path" retrieve_path(u, 3, paths_user2)
+    end
 
     for v in keys(node_costs)
         current_path = retrieve_path(u, v, paths_user)
 
-        charges = zeros(size(capacities))
+        charges = deepcopy(state.links)
         for p in current_path
             a, b = p.first, p.second
-            charges[a, b] = state.links[a, b] + j.frontend
+            charges[a, b] = j.frontend
+        end
+
+        if ii == 50000
+            @info "debug shortest" u v current_path charges
         end
 
         lock(lck)
@@ -177,12 +202,33 @@ function inner_queue(
             unlock(lck)
         end
 
+        if ii == 50000
+            @info "debug shortest" data_costs user_costs node_costs
+        end
+
         paths_data = dijkstra_shortest_paths(
             g, j.data_location, data_costs;
             trackvertices=true
         )
 
+        paths_data2 = dijkstra_shortest_paths(
+            g, j.data_location, transpose(data_costs);
+            trackvertices=true
+        )
+
+        if ii == 50000
+            @info "debug shortest  123" j.data_location paths_data.dists paths_data.parents
+            @info "retriev path" retrieve_path(j.data_location, v, paths_data)
+            # @info "debug shortest" j.data_location paths_data2.dists paths_data2.parents
+            # @info "retriev path" retrieve_path(j.data_location, v, paths_data2)
+        end
+
         current_cost = paths_user.dists[v] + paths_data.dists[v] + node_costs[v]
+
+        if ii == 50000
+            @info "debug shortest" current_cost paths_user.dists[v] paths_data.dists[v] node_costs[v]
+        end
+
         if current_cost ≤ total_cost
             total_cost = current_cost
             data_path = retrieve_path(j.data_location, v, paths_data)
@@ -208,7 +254,7 @@ function inner_queue(
     for v in keys(node_costs)
         current_path = retrieve_path(j.data_location, v, paths_data)
 
-        charges = zeros(size(capacities))
+        charges = deepcopy(state.links)
         for p in current_path
             a, b = p.first, p.second
             charges[a, b] = state.links[a, b] + j.backend
@@ -243,6 +289,11 @@ function inner_queue(
     foreach(p -> best_links[p.first, p.second] = j.frontend, user_path)
     foreach(p -> best_links[p.first, p.second] += j.backend, data_path)
 
+    if ii == 50000
+        @info "debug shortest" best_links total_cost best_node
+    end
+
+
     return best_links, total_cost, best_node
 end
 
@@ -271,12 +322,12 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
 
     acc = Vector{Symbol}()
     for (i, col) in enumerate(propertynames(df))
-        if i < 6 || !all(iszero, df[!,col])
+        if i < 6 || !all(iszero, df[!, col])
             push!(acc, col)
         end
     end
 
-    df = df[!,acc]
+    df = df[!, acc]
 
     verbose && pretty_table(describe(df))
 
@@ -424,16 +475,19 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)
     return nothing
 end
 
-function execute_valid_load(s, task, g, capacities, state, algo, demands)
+function execute_valid_load(s, task, g, capacities, state, algo, demands, ii=0)
     occ, u, j = task.occ, task.node, task.job
 
     nodes = s.topology.nodes
     links = s.topology.links
     best_links, best_cost, best_node = inner_queue(
-        g, u, j, nodes, capacities, state, algo;
+        g, u, j, nodes, capacities, state, algo, ii;
         links, demands
     )
 
+    if ii != 0
+        @info "debug 1" state.links best_links capacities best_cost best_node
+    end
     compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
     valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
     valid_nodes =
@@ -477,7 +531,13 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
     last_unload = zero(Float64)
     unchecked_unload = true
 
+    # ii_stop = Inf
+
     while ii < 2 * length(tasks)
+        # if ii == ii_stop + 1
+        #     @warn "debug" state g
+        #     break
+        # end
         start_iteration = time()
 
         next_queued = iterate(queued, previous_queued)
@@ -495,12 +555,16 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
                 j = task.job
                 # Add load
                 add_load!(state, best_links, j.containers, best_node, n)
-
+                # if ii == ii_stop
+                #     @info "debug snapshots prior push" snapshots last_unload n
+                # end
                 @debug "debug snapshots prior push" snapshots last_unload n
                 # Snap new state
                 push_snap!(snapshots, state, 0, 0, 0, 0, last_unload, n)
                 @debug "debug snapshots after push" snapshots last_unload n
-
+                # if ii == ii_stop
+                #     @info "debug snapshots after push" last(snapshots)
+                # end
                 # Assign unload
                 unload = Unload(last_unload + j.duration, best_node, j.containers, best_links)
                 insert_sorted!(unloads, unload, next_unload)
@@ -523,7 +587,13 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
             if next_task === nothing || unload.occ ≤ next_task[1].occ
                 v, c, ls = unload.node, unload.vload, unload.lloads
                 rem_load!(state, ls, c, v, n)
+                # if ii == ii_stop
+                #     @info "debug snapshots prior push" snapshots last_unload n
+                # end
                 push_snap!(snapshots, state, 0, 0, 0, 0, unload.occ, n)
+                # if ii == ii_stop
+                #     @info "debug snapshots after push" last(snapshots)
+                # end
 
                 previous_unload += 1
                 unchecked_unload = true
