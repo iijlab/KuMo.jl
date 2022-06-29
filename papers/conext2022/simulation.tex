@@ -23,7 +23,8 @@ the settings are described in the simulation tool.
 The effects of manipulating the cost function and the resource weight
 for a job is illustrated in Figure~\ref{fig:lowering} using the
 topology in Figure~\ref{fig:system}.
-The capacities of MDC and DC are set to 100 and 1,000.
+The capacities of MDC and DC are set to 100 and 1,000 respectively
+.
 Note that the capacity of DCs is 10 times larger than that of MDCs
 so that DC's load in the top plot looks much smaller for the same
 volume of jobs.
@@ -57,7 +58,7 @@ between user1 at MDC1 and an object at DC2.
 Both have the ratio of $1:2$ for interactive vs. data-intensive jobs.
 To observe offloading behaviors, user1's jobs are increased by a
 factor of 2 in the third wave (time 360-540), and by a factor of 10 in
-the fourth wave (time 540-720). 
+the fourth wave (time 540-720).
 Before time 360, interactive jobs are assigned closer to the users,
 and data intensive jobs are assigned closer to the data.
 In the third wave, MDC1 reaches the upper limit and overflowing jobs are
