@@ -57,6 +57,7 @@ p3 = @df df_no_norm areaplot(
 	xlabel="time",
 	# legend=:topleft,
 	xticks = 0:120:1000,
+	yticks = 0:4:12,
     w=1, tex_output_standalone = true,
 	# lab = ["MDC0-DC2" "MDC1-DC3" "MDC1-DC2" "DC2-DC3"]
 )
@@ -65,7 +66,7 @@ p3 = @df df_no_norm areaplot(
 p = plot(
 	p1,p2,p3;
 	layout=(3,1),
-	thickness_scaling = 1.25,
+	thickness_scaling = 1.5,
 	w=.5,
 )
 
