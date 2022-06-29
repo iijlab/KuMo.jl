@@ -15,7 +15,7 @@ shown in Figure~\ref{fig:system}.
 When a user requests a service to a nearby service allocation server,
 the service server instantiates the requested service into a series of
 microservice jobs.
-The server finds the required resources for each job,
+The server obtains the required resource information for each job,
 identifies the locations of the user and the required data object,
 asks resource agents for available resources and their current costs,
 and assigns the job to the node that minimizes the total cost for the
@@ -34,7 +34,7 @@ Still, if each allocation is not small enough both in size and in
 duration, the loads may not converge as expected.
 Therefore, microservice is the enabler for this approach.
 
-\subsection{Job Assignment}
+\subsection{Micro-job Assignment}
 
 In this paper, we use a simple micro-job model that defines the
 required resources for a micro-job as $J(p, q, r, s)$ where 
@@ -42,17 +42,15 @@ $p$ is the number of micro containers for computation,
 $q$ is frontend communication with the user, 
 $r$ is backend communication with data objects (e.g., database), and
 $s$ is the number of time slots.
-%%The unit is one micro-container for $p$, 1Mbps for $q$ and $r$, and 1
-%%second for $s$.
 The communication costs $q$ and $r$ are also a function of distance so
 that an interactive job with $q \gg r$ will be placed close to the
 user and a data-intensive jobs with $q \ll r$ will be placed close to
 the data.
 For simplicity, we do not distinguish directions of
 communications for $q$ and $r$, and assume only one user and one data
-object per job in this paper.
+object per micro-job in this paper.
 
-A job is specified by a service provider, optionally associated with
+A micro-job is specified by a service provider, optionally associated with
 weights, e.g., a service provider may raise the weight for the
 frontend communication to place the job close to the user.
 In this manner, cloud service providers can specify which
@@ -63,7 +61,7 @@ To instantiate a micro-job requested from a user, the service
 server finds the best node to allocate the required resource
 for $J$: $p$, $q$ and $r$ for duration $s$.
 
-The pseudo cost $E$ to host job $j$ for a unit time at node $i$ for
+The pseudo cost $E$ to host micro-job $j$ for a unit time at node $i$ for
 user $m$ and data object $o$ is:
 \begin{equation*}
 	E(j, i)     = H(j,i) + G(j,i,m,o)
@@ -78,7 +76,7 @@ between $m$ and $o$.
 $f(\rho)$ is the cost function of a resource load, and $path(m,i)$ is a set
 of links from $m$ to $i$ (e.g., the shortest path weighted by cost).
 
-To assign Job $j$, the server simply finds the node that minimizes the
+To assign micro-job $j$, the server simply finds the node that minimizes the
 cost:
 \begin{equation*}
 	argmin_{i} \: E(j, i)

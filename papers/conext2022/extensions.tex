@@ -2,20 +2,21 @@
 
 In this paper, we have presented the cloud morphing vision for
 future distributed cloud services,
-proposed a cost function based resource allocation model,
-and presented the basic idea for idle-resource pooling.
-We are planning to refine the proposed model and developing a working
+proposed a cost functions based resource allocation model,
+and presented how the idle-resource pooling works.
+We are planning to refine the proposed model and develop a working
 prototype system.
 
 For the model refinement,
-the current model is simplistic so that we will add bidirectional links,
+the current model is simplistic so that we will add bidirectional
+communication costs,
 multiple users per job, interactions among jobs, and other features.
 We did not consider dependency among microservice jobs but it would be
 necessary to investigate the impact of the interplay of microservice
 jobs ~\cite{Suresh-SOA-SOCC2017}.
 
 For the prototype development,
-we need realistic microservice workload models.
+we need realistic future microservice workload models.
 Also, it is necessary to develop mechanisms and protocols for
 discovering available resources~\cite{Albrecht2008} and exchanging
 cost information.
@@ -31,7 +32,7 @@ It would be interesting to apply reinforcement learning to cost
 tuning.
 
 Another topic is {\bf hierarchical configurations}.
-It would be better to use hierarchical configurations for scalability
+A hierarchical system model would be preferred for scalability
 and for management purposes.
 For example, a distributed datacenter model can consist of
 the inter-DC layer with DC-level resources and the intra-DC layer
@@ -52,14 +53,14 @@ mechanisms to add externally provided resources to the resource pool.
 
 The location of data is critical for the pseudo cost so that
 {\bf data placement} would play an important role for cloud morphing. 
-A possible approach is to migrate data at coarser timescale, based
+A possible approach is to migrate data at a coarser timescale, based
 on usage history.
 Another possibility is to design a new distributed storage system
 suitable for the cloud morphing model in which (cached) data can be
 easily moved.
 
 The idle-resource pooling is not used for network links in this paper, but
-it is possible to use it for dynamically creating {\bf Layer 2 paths}
+it is possible to use it for dynamically making {\bf Layer 2 paths}
 (e.g., lightpath switching over WDM networks).
 
 We believe that future distributed heterogeneous clouds need a new
