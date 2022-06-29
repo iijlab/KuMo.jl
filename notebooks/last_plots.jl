@@ -19,6 +19,169 @@ begin
 	latexengine!(PGFPlotsX.LUALATEX)
 end;
 
+# ╔═╡ 7b9d3d46-a10f-466a-91de-89cea401941f
+begin
+	c1 = ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1
+	c3 = ρ ->　ρ^4.5 / (1 - ρ) + 1
+    plot_pc = StatsPlots.plot(
+		[c1, c3], 0:0.01:0.91,
+		label = ["convex cost func" "monotonic cost func"], legend=:topleft,
+		ylims = (0., Inf),
+		xticks = 0.0:0.25:0.75,
+		xlabel = "load",
+		ylabel = "pseudo cost"
+	)
+
+	savefig(plot_pc, "pseudo_costs.pdf")
+	plot_pc
+end
+
+# ╔═╡ d3dffe88-c2af-4962-831b-a7fea9e61df7
+begin
+	pc1 = ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1
+	pc2 = ρ -> pc1(ρ+0.2)
+	pc3 = ρ -> pc1(ρ) * 2
+	pc4 = ρ -> pc1(ρ) + 0.5
+	n = 2
+	pc5 = ρ -> n * (2 * ρ - 1)^2 / (1 - ρ^n) + 1
+    plot_pc2 = StatsPlots.plot(
+		[pc1, pc2, pc3, pc4, pc5], [0:0.01:0.91, 0:0.01:0.71, 0:0.01:0.91, 0:0.01:0.91, 0:0.01:0.91],
+		label = ["standard cost func" "load +.2" "cost ×2" "cost +.5" "idle cost ×1.5"], legend=:topleft,
+		ylims = (0., 8),
+		xticks = 0.0:0.25:0.75,
+		xlabel = "load",
+		ylabel = "pseudo cost"
+	)
+	savefig(plot_pc2, "pseudo_costs_2.pdf")
+	plot_pc2
+end
+
+# ╔═╡ 4a5f3a59-8cf7-4a9e-89fe-e9c034851214
+function scenarioa(;
+    max_load=3.50,
+    nodes=(4, 100),
+    rate=0.01,
+    j=job(0, 1, rand(1:4), 3.25, 0)
+)
+    _requests = Vector{KuMo.Request{typeof(j)}}()
+
+    L = prod(nodes)
+    r = rate
+    λ = max_load
+    n = nodes[1]
+    δ = j.duration
+    c = j.containers
+
+    π1 = λ / r
+    π2 = (2n - λ) / r
+
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
+        end
+    end
+
+    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
+
+    scenario(;
+        duration=1000,
+        nodes=(4, 100),
+        users=[
+            # user 1
+            user(KuMo.Requests(_requests), 1),
+        ]
+    )
+end
+
+# ╔═╡ 7e255750-ea08-4aa5-ae28-00bb03d7042b
+# ╠═╡ show_logs = false
+_, dfa = simulate_and_plot(scenarioa(), ShortestPath());
+
+# ╔═╡ 96b528be-ae7e-416f-be98-466734aeb029
+begin
+	pa_1 = @df dfa StatsPlots.plot(:instant,
+	    cols([9,8,7,6]), seriestype = :steppre,
+	    ylabel="load",
+	    w=1, tex_output_standalone = true,
+		lab = ["r0" "r1" "r3" "r4"]
+	)
+	pa_2 = @df dfa areaplot(:instant,
+	    cols([9,8,7,6]), xlabel="time", seriestype = :steppre,
+	    ylabel="total load",
+	    w=1, tex_output_standalone = true,
+		lab = ["r0" "r1" "r3" "r4"]
+	)
+	pa = StatsPlots.plot(pa_1, pa_2; layout = (2,1))
+	savefig(pa, "equivalent_nodes.pdf")
+	pa
+end
+
+# ╔═╡ aba667e8-6a28-4693-8946-af613ce77951
+function scenariob(;
+    max_load=3.5,
+    nodes=(4, 100),
+    rate=0.01,
+    j=job(0, 1, rand(1:4), 3.25, 0)
+)
+    _requests = Vector{KuMo.Request{typeof(j)}}()
+
+    L = prod(nodes)
+    r = rate
+    λ = max_load
+    n = nodes[1]
+    δ = j.duration
+    c = j.containers
+
+    π1 = λ / r
+    π2 = (2n - λ) / r
+
+    for i in 0:π1+π2
+        for t in i:δ:π1+π2-i
+            i ≤ π1 && push!(_requests, KuMo.Request(j, t))
+        end
+    end
+
+    # @info "Parameters" L r λ n δ c π1 π2 length(_requests)
+
+    scenario(;
+        duration=1000,
+        nodes=[
+            MultiplicativeNode(100, 1),
+            MultiplicativeNode(100, 2),
+            MultiplicativeNode(100, 4),
+            MultiplicativeNode(100, 8),
+        ],
+        # nodes=(4, 100),
+        users=[
+            # user 1
+            user(KuMo.Requests(_requests), 1),
+        ]
+    )
+end
+
+# ╔═╡ 0ccb45a7-9a82-41fa-b740-86a911b43e7e
+# ╠═╡ show_logs = false
+_, dfb = simulate_and_plot(scenariob(), ShortestPath());
+
+# ╔═╡ 04d2ee88-af75-498f-8519-f02e7615e64b
+begin
+	pb_1 = @df dfb StatsPlots.plot(:instant,
+	    cols(6:9), seriestype = :steppre,
+	    ylabel="load",
+	    w=1, tex_output_standalone = true,
+		lab = ["r0" "r1" "r3" "r4"]
+	)
+	pb_2 = @df dfb areaplot(:instant,
+	    cols(6:9), xlabel="time", seriestype = :steppre,
+	    ylabel="total load",
+	    w=1, tex_output_standalone = true,
+		lab = ["r0" "r1" "r3" "r4"]
+	)
+	pb = StatsPlots.plot(pb_1, pb_2; layout = (2,1))
+	savefig(pb, "proportional_nodes.pdf")
+	pb
+end
+
 # ╔═╡ c0b650b6-48c4-4557-aebd-abd1987101cb
 function scenario1(;)
 	Δ1 = 120
@@ -742,7 +905,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "f2604676aae5f9dcf60909fd4be6dbd2bea8c6e4"
+project_hash = "fcf8acf627e7ec7f1af5e4a7ec7be5c2004317fa"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -2400,6 +2563,14 @@ version = "0.9.1+5"
 # ╠═eb7b42c0-f6b5-11ec-0d00-63b5a9ff3b25
 # ╠═da618257-92e7-4264-951e-180533e3a697
 # ╠═12104e66-852e-4226-bb6d-8c8627f08a0b
+# ╠═7b9d3d46-a10f-466a-91de-89cea401941f
+# ╠═d3dffe88-c2af-4962-831b-a7fea9e61df7
+# ╠═4a5f3a59-8cf7-4a9e-89fe-e9c034851214
+# ╠═7e255750-ea08-4aa5-ae28-00bb03d7042b
+# ╠═96b528be-ae7e-416f-be98-466734aeb029
+# ╠═aba667e8-6a28-4693-8946-af613ce77951
+# ╠═0ccb45a7-9a82-41fa-b740-86a911b43e7e
+# ╠═04d2ee88-af75-498f-8519-f02e7615e64b
 # ╠═c0b650b6-48c4-4557-aebd-abd1987101cb
 # ╠═0c296017-8a73-49fe-adb4-4fd604f54bc6
 # ╠═07f6987c-8e00-4443-bcef-06ce2e21136f
