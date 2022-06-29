@@ -3,7 +3,7 @@
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{system.pdf}
     \vspace{-2.0ex}
-    \caption{Simple system model}
+    \caption{Simple system model for job assignment}
     \Description{A simple system model with 2 datacenters and 2 micro datacenters.}
     \label{fig:system}
   \end{center}
@@ -17,7 +17,7 @@ the service server instantiates the requested service into a series of
 microservice jobs.
 The server obtains the required resource information for each job,
 identifies the locations of the user and the required data object,
-asks resource agents for available resources and their current costs,
+asks nearby resource agents for available resources and their current costs,
 and assigns the job to the node that minimizes the total cost for the
 job.
 The area for cost inquiry could be within proximity along the path
@@ -31,7 +31,7 @@ can be used to stabilize the behavior.
 A load value does not need to be precise, and a rough approximation is
 enough for loose resource management.
 Still, if each allocation is not small enough both in size and in
-duration, the loads may not converge as expected.
+duration, the load may not converge as expected.
 Therefore, microservice is the enabler for this approach.
 
 \subsection{Micro-job Assignment}
@@ -54,7 +54,7 @@ A micro-job is specified by a service provider, optionally associated with
 weights, e.g., a service provider may raise the weight for the
 frontend communication to place the job close to the user.
 In this manner, cloud service providers can specify which
-type of resources have a priority for a specific service without
+type of resources have priority for a specific service without
 overclaiming required resources.
 
 To instantiate a micro-job requested from a user, the service
@@ -210,9 +210,9 @@ $\rho$ in $[.5, .75]$. It repeats for the remaining ones.
 It is easy to see how the number of active resources changes when
 there are more resources.
 When the number of active resources is increasing, the load of each
-active resource stay at around $\rho = .75$.
+active resource stays at around $\rho = .75$.
 On the other hand, when the number of active resources is decreasing,
-the load of each active resource stay at around $\rho = .5$.
+the load of each active resource stays at around $\rho = .5$.
 In short, when all resources are equal, the system tries to maintain
 the load of active resources in the {\em working load range}
 $[.5, .75]$, while keeping idle resources as much as possible.
@@ -277,7 +277,7 @@ but for specific users or jobs (not for a specific resource) so as to
 have premium jobs always being assigned to less loaded resources.
 Similarly, an {\bf economy service} that allows to be assigned to more
 loaded resources can be made by a negative shift.
-It could be appealing to enable multiple classes using a single
+It could be appealing as a business model to enable multiple classes using a single
 resource pool with a single shift parameter.
 
 \begin{figure}[tb]

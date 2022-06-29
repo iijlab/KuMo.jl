@@ -118,10 +118,10 @@ Each leaf-DC is connected to one local-DC, and a local-DC is connected to
 2 core-DCs and 2 other local-DCs, or just to 2 other local-DCs.
 Jobs are randomly generated from all leaf-DCs and local-DCs, and data
 objects are populated at all DCs.
-The top plot shows the normalized total load $\sum \tilde{\rho}$
+The bottom plot shows the normalized total load $\sum \tilde{\rho}$
 divided into the 3 DC classes, which shows how excess jobs are
 offloaded to upstream DCs.
-The bottom plot shows the load of 3 leaf-DCs for readability.
+The top plot shows the load of 3 leaf-DCs for readability.
 Although the leaves handle only a small fraction of the total jobs,
 the load of the leaves stays at around $.75$ when they are
 active, except a short transient overshoot above $.8$ during the
@@ -130,6 +130,6 @@ surge from time 680.
 The results illustrate quick responses to changing load
 by offloading excess jobs to upstreams,
 yet converging to stable states once the load is settled,
-while maintaining the load for each resource at around the target
+while maintaining the load for each active resource at around the target
 range.
 
