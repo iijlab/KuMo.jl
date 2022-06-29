@@ -830,8 +830,6 @@ begin
 		if floor(r[:instant]) > last
 			last = floor(r[:instant])
 			r10 = sum(j -> collect(j), acc) / length(acc)
-			# r10 = sum.(collect(acc))/length(acc)			
-			# @info "in" df10 r10 acc
 			push!(df10, r10)
 			newstep = true
 		end
@@ -841,7 +839,7 @@ end
 
 # ╔═╡ 6a4370ca-7c79-4d0e-aad2-2f1a6c49b908
 p9 = @df df10 StatsPlots.plot(:instant,
-    cols(6:8), xlabel="time", #seriestype = :steppre,
+    cols(6:8), xlabel="time", seriestype = :steppre,
     ylabel="load",
 	yticks=0:.25:1,
     w=.5, tex_output_standalone = true,
