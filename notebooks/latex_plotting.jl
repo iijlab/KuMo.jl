@@ -221,6 +221,12 @@ p_micro = @df df7 plot(:instant,
     w=1., tex_output_standalone = true,
 )
 
+# ╔═╡ 7d59660c-2267-4b2a-93f1-fff608bbbcc7
+df7
+
+# ╔═╡ af477fb5-b936-4f98-a063-d661cc52230d
+CSV.write("savedf7.csv",df7)
+
 # ╔═╡ 50d63acb-7d19-4cdc-bd61-5be227da9010
 begin
 	dfmean = deepcopy(df7)
@@ -1961,6 +1967,8 @@ version = "0.9.1+5"
 # ╠═9fbe648c-81eb-484d-a6a3-08995527969a
 # ╠═8bf29b25-8b28-4026-8a52-30142ec806a2
 # ╠═f1b61c45-e20f-49a1-aa62-367f17f115e0
+# ╠═7d59660c-2267-4b2a-93f1-fff608bbbcc7
+# ╠═af477fb5-b936-4f98-a063-d661cc52230d
 # ╠═50d63acb-7d19-4cdc-bd61-5be227da9010
 # ╠═072079b1-e0d9-4b7c-8876-db85de314710
 # ╠═223878cc-4c27-4e4a-9338-c2826aec285c

@@ -759,14 +759,14 @@ end;
 
 # ╔═╡ 16863b19-8049-4c38-b0c8-41937798e47c
 begin
-	df7_no_norm = deepcopy(df7)
-	df7_no_norm[!, 6:13] = df7[!,6:13] .* 1
-	df7_no_norm[!, 14:21] = df7[!,14:21] .* 5
-	df7_no_norm[!, 22:23] = df7[!,22:23] .* 50
+	df7_no_norm = deepcopy(df8)
+	df7_no_norm[!, 6:13] = df8[!,6:13] .* 1
+	df7_no_norm[!, 14:21] = df8[!,14:21] .* 5
+	df7_no_norm[!, 22:23] = df8[!,22:23] .* 50
 
-	df7_no_norm[!, 24:32] = df7[!,24:32] .* 1
-	df7_no_norm[!, 33:48] = df7[!,33:48] .* 2
-	df7_no_norm[!, 49:end] = df7[!,49:end] .* 4
+	df7_no_norm[!, 24:32] = df8[!,24:32] .* 1
+	df7_no_norm[!, 33:48] = df8[!,33:48] .* 2
+	df7_no_norm[!, 49:end] = df8[!,49:end] .* 4
 	
 	df7_no_norm
 end;
@@ -780,6 +780,9 @@ begin
 	df.core = sum.(eachrow(df7_no_norm[:, 22:23]))
 	df
 end;
+
+# ╔═╡ 7cef0202-ef1d-469b-ba68-98f3960b51ee
+df
 
 # ╔═╡ 997cb93e-f95a-4c23-9b2f-91e48dbcc24e
 # keep it
@@ -807,6 +810,79 @@ begin
 			thickness_scaling = 2)
 	savefig(p_7, "../papers/conext2022/18nodes.pdf")
 	p_7
+end
+
+# ╔═╡ 99f11d5e-1cd1-4998-9e1a-ffcbfad19f50
+df9 = DataFrame(CSV.File("savedf7.csv"))
+
+# ╔═╡ d1e567b0-dc24-4a3a-90f8-954f7409e9ff
+begin
+	df10 = deepcopy(df9)
+	empty!(df10)
+	acc = Vector{Any}()
+	newstep = true
+	last = -Inf
+	for r in eachrow(df9)
+		if newstep
+			empty!(acc)
+		end		
+		push!(acc, r)
+		if floor(r[:instant]) > last
+			last = floor(r[:instant])
+			r10 = sum(j -> collect(j), acc) / length(acc)
+			# r10 = sum.(collect(acc))/length(acc)			
+			# @info "in" df10 r10 acc
+			push!(df10, r10)
+			newstep = true
+		end
+	end
+	df10
+end
+
+# ╔═╡ 6a4370ca-7c79-4d0e-aad2-2f1a6c49b908
+p9 = @df df10 StatsPlots.plot(:instant,
+    cols(6:8), xlabel="time", #seriestype = :steppre,
+    ylabel="load",
+	yticks=0:.25:1,
+    w=.5, tex_output_standalone = true,
+	lab = ["Leaf-0" "Leaf-1" "Leaf-2"]
+)
+
+# ╔═╡ 7082cdde-d52a-4f17-8a06-facfbf8473ab
+begin
+	df10_no_norm = deepcopy(df10)
+	df10_no_norm[!, 6:13] = df10[!,6:13] .* 1
+	df10_no_norm[!, 14:21] = df10[!,14:21] .* 5
+	df10_no_norm[!, 22:23] = df10[!,22:23] .* 50
+
+	df10_no_norm[!, 24:32] = df10[!,24:32] .* 1
+	df10_no_norm[!, 33:48] = df10[!,33:48] .* 2
+	df10_no_norm[!, 49:end] = df10[!,49:end] .* 4
+
+	df11 = DataFrame()
+	df11.instant = df10_no_norm[!,:instant]
+	df11.micro = sum.(eachrow(df10_no_norm[:, 6:13]))
+	df11.local = sum.(eachrow(df10_no_norm[:, 14:21]))
+	df11.core = sum.(eachrow(df10_no_norm[:, 22:23]))
+	df11
+end;
+
+# ╔═╡ 1364697e-cd53-4f5f-864c-a0cf186cb6eb
+# keep it
+p10 = @df df11 areaplot(:instant,
+    cols(2:4), seriestype = :steppre,
+    ylabel="total load",
+    w=0.01, tex_output_standalone = true,
+	lab = ["leaves" "locals" "cores"]
+)
+
+# ╔═╡ 80aa97d4-a3ad-4173-9e3f-057daa773417
+begin
+	p_11 = StatsPlots.plot(p9, p10; layout=(2,1),
+			w=.5,
+			thickness_scaling = 2)
+	savefig(p_11, "../papers/conext2022/18nodes.pdf")
+	p_11
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2532,8 +2608,15 @@ version = "0.9.1+5"
 # ╠═4d2dab2f-917a-43bf-abd5-86c9cb0b74f5
 # ╠═16863b19-8049-4c38-b0c8-41937798e47c
 # ╠═ef387e1d-60af-4e5e-95cf-4fd4d211a1f7
+# ╠═7cef0202-ef1d-469b-ba68-98f3960b51ee
 # ╠═997cb93e-f95a-4c23-9b2f-91e48dbcc24e
 # ╠═87524fa7-a3dc-4abd-a1df-f79037514978
 # ╠═5b384ccd-2e90-468e-801f-d0803dc3091d
+# ╠═99f11d5e-1cd1-4998-9e1a-ffcbfad19f50
+# ╠═d1e567b0-dc24-4a3a-90f8-954f7409e9ff
+# ╠═6a4370ca-7c79-4d0e-aad2-2f1a6c49b908
+# ╠═7082cdde-d52a-4f17-8a06-facfbf8473ab
+# ╠═1364697e-cd53-4f5f-864c-a0cf186cb6eb
+# ╠═80aa97d4-a3ad-4173-9e3f-057daa773417
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
