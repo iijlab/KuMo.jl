@@ -112,23 +112,23 @@ and how jobs for MDCs can be offloaded to upstream DCs.
 \end{figure}
 
 The last scenario in Figure~\ref{fig:18nodes} shows a more complex case with
-18 DCs: 2 cores (capacity 5,000), 8 locals (capacity 500) and 8 leaves
+18 DCs: 2 core-DCs (capacity 5,000), 8 local-DCs (capacity 500) and 8 leaf-DCs
 (capacity 100) connected by a FAT-tree.
-Each leaf-DC is connected to one local-DC, and a local-DC is connected to
-2 core-DCs and 2 other local-DCs, or just to 2 other local-DCs.
-Jobs are randomly generated from all leaf-DCs and local-DCs, and data
-objects are populated at all DCs.
+Each leaf-DC is connected to one local-DC, and each local-DCs is connected to
+2 other local-DCs; 4 of the local-DCs are also connected to 2 core-DCs.
 The bottom plot shows the normalized total load $\sum \tilde{\rho}$
-divided into the 3 DC classes, which shows how excess jobs are
-offloaded to upstream DCs.
-The top plot shows the load of 3 leaf-DCs for readability.
-Although the leaves handle only a small fraction of the total jobs,
-the load of the leaves stays at around $.75$ when they are
-active, except a short transient overshoot above $.8$ during the
-surge from time 680.
+divided into the 3 DC classes.
+Jobs are generated from 3 leaf-DCs at 3 levels with additional surges,
+and data objects are randomly populated at all leaf-DCs and local-DCs.
+The bottom plot shows how excess jobs are offloaded to upstream DCs,
+and the top plot shows the loads of the 3 job-generating leaf-DCs.
+Although the leaf-DCs handle only a small fraction of the total jobs,
+the loads of the leaf-DCs stay at around $.75$ while they are
+active, except a short transient overshoot during the surge from time
+680.
 
-The results illustrate quick responses to changing load
-by offloading excess jobs to upstreams,
+Overall, the simulation results illustrate quick responses to changing
+load by offloading excess jobs to upstreams,
 yet converging to stable states once the load is settled,
 while maintaining the load for each active resource at around the target
 range.
