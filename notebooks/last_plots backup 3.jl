@@ -29,9 +29,7 @@ begin
 		ylims = (0., Inf),
 		xticks = 0.0:0.25:0.75,
 		xlabel = "load",
-		ylabel = "pseudo cost",
-		thickness_scaling=1.4,
-		w = 0.75,
+		ylabel = "pseudo cost"
 	)
 
 	savefig(plot_pc, "pseudo_costs.pdf")
@@ -52,9 +50,7 @@ begin
 		ylims = (0., 8),
 		xticks = 0.0:0.25:0.75,
 		xlabel = "load",
-		ylabel = "pseudo cost",
-		thickness_scaling=1.75,
-		w = 0.75,
+		ylabel = "pseudo cost"
 	)
 	savefig(plot_pc2, "pseudo_costs_2.pdf")
 	plot_pc2
@@ -106,23 +102,16 @@ begin
 	pa_1 = @df dfa StatsPlots.plot(:instant,
 	    cols([9,8,7,6]), seriestype = :steppre,
 	    ylabel="load",
-	    tex_output_standalone = true,
-		lab = ["r0" "r1" "r3" "r4"],
-		thickness_scaling=2,
-		w = 0.5,
+	    w=1, tex_output_standalone = true,
+		lab = ["r0" "r1" "r3" "r4"]
 	)
 	pa_2 = @df dfa areaplot(:instant,
 	    cols([9,8,7,6]), xlabel="time", seriestype = :steppre,
 	    ylabel="total load",
-	    tex_output_standalone = true,
-		lab = ["r0" "r1" "r3" "r4"],
-		thickness_scaling=2,
-		w = 0.25,
+	    w=1, tex_output_standalone = true,
+		lab = ["r0" "r1" "r3" "r4"]
 	)
-	pa = StatsPlots.plot(pa_1, pa_2; layout = (2,1),
-		thickness_scaling=2,
-		w = 0.5,
-	)
+	pa = StatsPlots.plot(pa_1, pa_2; layout = (2,1))
 	savefig(pa, "equivalent_nodes.pdf")
 	pa
 end
@@ -179,22 +168,16 @@ begin
 	pb_1 = @df dfb StatsPlots.plot(:instant,
 	    cols(6:9), seriestype = :steppre,
 	    ylabel="load",
-	    tex_output_standalone = true,
-		lab = ["r0" "r1" "r3" "r4"],
-		thickness_scaling=2,
-		w = 0.5,
+	    w=1, tex_output_standalone = true,
+		lab = ["r0" "r1" "r3" "r4"]
 	)
 	pb_2 = @df dfb areaplot(:instant,
 	    cols(6:9), xlabel="time", seriestype = :steppre,
 	    ylabel="total load",
-	    tex_output_standalone = true,
-		lab = ["r0" "r1" "r3" "r4"],
-		thickness_scaling=2,
-		w = 0.25,
+	    w=1, tex_output_standalone = true,
+		lab = ["r0" "r1" "r3" "r4"]
 	)
-	pb = StatsPlots.plot(pb_1, pb_2; layout = (2,1),
-		thickness_scaling=2,
-		w = 0.5,)
+	pb = StatsPlots.plot(pb_1, pb_2; layout = (2,1))
 	savefig(pb, "proportional_nodes.pdf")
 	pb
 end
@@ -206,13 +189,13 @@ function scenario1(;)
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	jd() = rand(norm_dist) 
-	# jd() = 4
+	# jd() = rand(norm_dist) 
+	jd() = 4
 
 	λ = 1.
 	fish = Poisson(λ)
-	ji() = rand(fish)
-	# ji() = λ
+	# ji() = rand(fish)
+	ji() = λ
 
 	interactive(data) = job(1, 1, data, jd(), 2)
 	data_intensive(data) = job(2, 1, data, jd(), 1)
@@ -416,7 +399,7 @@ function scenario1(;)
 			r -= ji() / 10
 			j = rand() < 1/3 ? interactive(3) : data_intensive(3)
 			push!(types, typeof(j))
-			foreach(_ -> push!(reqs, Request(j, r - δ/4.75 + 3Δ2)), 1:k)
+			foreach(_ -> push!(reqs, Request(j, r - δ/10 + 3Δ2)), 1:k)
 		end
 	end
 
@@ -446,6 +429,38 @@ function scenario1(;)
     )
 end
 
+# ╔═╡ 0c296017-8a73-49fe-adb4-4fd604f54bc6
+begin
+	s = scenario1()
+	g = KuMo.graph(s.topology, ShortestPath())[1]
+	
+	capacities = Dict(filter(p -> p.first[1] < p.first[2], [p.first => Int(p.second.capacity) for p in pairs(s.topology.links)]))
+	
+	t = TikzGraphs.plot(
+		g,
+		Layouts.SpringElectrical(charge=20000),
+		# Layouts.Spring(dist=10),
+		node_style="draw, rounded corners, fill=blue!10",
+		node_styles=Dict(
+			1=>"fill=green!10",
+			2=>"fill=green!10",
+			3=>"fill=red!10",
+			4=>"fill=red!10",
+		),
+		# edge_labels=capacities,
+		# edge_styles=Dict((3,4)=>"blue"),
+		options="scale=.1",
+	)
+	TikzPictures.save(PDF("2levelsnetwork"), t)
+	t
+end
+
+# ╔═╡ 07f6987c-8e00-4443-bcef-06ce2e21136f
+g0 = Graphs.SimpleGraphs.SimpleDiGraph{Int64}(8, [[3], [3, 4], [1, 2, 4], [2, 3]], [[3], [3, 4], [1, 2, 4], [2, 3]])
+
+# ╔═╡ a08e33b1-7285-46b9-8241-9f2570aad781
+TikzGraphs.plot(g0)
+
 # ╔═╡ 9c21d620-a684-4a44-8a96-f5c2e5c352c0
 # ╠═╡ show_logs = false
 p1, df1 = simulate_and_plot(scenario1(), ShortestPath()); p1
@@ -453,43 +468,23 @@ p1, df1 = simulate_and_plot(scenario1(), ShortestPath()); p1
 # ╔═╡ f7d43c5a-dd86-4c79-9dd6-974ffc6a4afa
 begin
 	df1_no_norm = deepcopy(df1)
-	df1_no_norm[!, 6:7] = df1[!,6:7] .* 1
-	df1_no_norm[!, 8:9] = df1[!,8:9] .* 10
+	df1_no_norm[!, 6:6] = df1[!,6:6] .* 1
+	df1_no_norm[!, 7:7] = df1[!,7:7] .* 10
 
-	df1_no_norm[!, 11:12] = df1[!,11:12] .* 10
-	df1_no_norm[!, 15] = df1[!,15] .* 10
+	# df1_no_norm[!, 8:9] = df1[!,8:9] .* 1
+	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
 	
 	df1_no_norm
 end;
 
 # ╔═╡ 6b596bd9-dbaa-4f8a-a9b2-9c8280ca2e64
+# keep it
 p11 = @df df1_no_norm areaplot(:instant,
-    cols(6:9), xlabel="time", seriestype = :steppre,
+    cols(6:7), xlabel="time", seriestype = :steppre,
     ylabel="total load",
     w=1, tex_output_standalone = true,
-	lab = ["MDC0" "MDC1" "DC2" "DC3"]
+	lab = ["MDC0" "DC2" "DC3"]
 )
-
-# ╔═╡ 076d8ab2-c16e-4690-b15a-20bbdee94812
-# keep it
-p11_2 = @df df1 StatsPlots.plot(:instant,
-    cols(6:9), seriestype = :steppre,
-    ylabel="load",
-    w=0.5, tex_output_standalone = true,
-	lab = ["MDC0" "MDC1" "DC2" "DC3"]
-)
-
-# ╔═╡ f7ce6b4b-b55b-459c-9d8c-4de06809f627
-# keep it
-p11_3 = @df df1 StatsPlots.plot(:instant,
-    cols(10:15), seriestype = :steppre,
-    ylabel="link load",
-    w=0.5, tex_output_standalone = true,
-	# lab = ["MDC0" "MDC1" "DC2" "DC3"]
-)
-
-# ╔═╡ ac923436-3cd0-4e00-a701-50daa9b4deea
-StatsPlots.plot(p11_2, p11_3, p11; layout=(3,1))
 
 # ╔═╡ 0de8409c-aa08-45df-8d75-1f6167ef9f76
 function scenario2a(;)
@@ -580,7 +575,7 @@ end
 
 # ╔═╡ 480f90df-f395-457f-813f-4d80bf75793b
 # ╠═╡ show_logs = false
-p2, df2 = simulate_and_plot(scenario2a(), ShortestPath()); p2
+p2, df2 = simulate_and_plot(scenario2a(), ShortestPath());
 
 # ╔═╡ ca7815d4-d97f-4300-9226-48a7fe159978
 begin
@@ -663,7 +658,7 @@ end
 
 # ╔═╡ e54c3071-721e-4773-ae73-b5916e003ad4
 # ╠═╡ show_logs = false
-p2b, df2b = simulate_and_plot(scenario2b(), ShortestPath()); p2b
+p2b, df2b = simulate_and_plot(scenario2b(), ShortestPath());
 
 # ╔═╡ a427be40-0f2f-404b-9649-f3e3220edccd
 begin
@@ -746,7 +741,7 @@ end
 
 # ╔═╡ a407a75e-7b9d-42f8-9b2c-98c6505c9682
 # ╠═╡ show_logs = false
-p2c, df2c = simulate_and_plot(scenario2c(), ShortestPath()); p2c
+p2c, df2c = simulate_and_plot(scenario2c(), ShortestPath());
 
 # ╔═╡ f960e2ca-c6d1-4dc2-a4d3-39cdcdeeb1b7
 begin
@@ -829,7 +824,7 @@ end
 
 # ╔═╡ eec65bd7-5c3c-4974-8bce-a7fbf4ce3259
 # ╠═╡ show_logs = false
-p2d, df2d = simulate_and_plot(scenario2d(), ShortestPath()); p2d
+p2d, df2d = simulate_and_plot(scenario2d(), ShortestPath());
 
 # ╔═╡ c10c2e69-5525-4cad-9dc9-623470eab30e
 begin
@@ -851,30 +846,28 @@ begin
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
 	
 	df2_no_norm_final
-end
+end;
 
 # ╔═╡ 566e957f-68f3-4d0d-847e-1242f1e5278f
 # keep it
 p_no_norm_area2_final = @df df2_no_norm_final areaplot(:instant,
     cols([6,7,11]), xlabel="time", seriestype = :steppre,
-    ylabel="load",
+    ylabel="total load",
     w=0.01, tex_output_standalone = true,
 	lab = ["MDC0" "DC2" "DC3"]
-)
+);
 
 # ╔═╡ 2cc63aa9-d9f2-4110-90b5-cebc92ff4ad9
 # keep it
-p_line_final = @df df2 StatsPlots.plot(:instant,
+p_line_final = @df df2 plot(:instant,
     cols([6,7,11]), xlabel="time", seriestype = :steppre,
     ylabel="total load",
     w=1, tex_output_standalone = true,
 	lab = ["MDC0" "DC2" "DC3"]
-)
+);
 
 # ╔═╡ 495135df-7a2a-4235-9cd5-3ba17c6ef845
-p2_final = StatsPlots.plot(p_line_final, p_no_norm_area2_final; layout = (2,1),
-		thickness_scaling=2,
-		w = 0.5,)
+p2_final = plot(p_line_final, p_no_norm_area2_final; layout = (2,1))
 
 # ╔═╡ b9a6c8db-e0e7-49f1-8ef1-e4adcb311f94
 savefig(p2_final, "../papers/conext2022/fig6.pdf")
@@ -898,7 +891,7 @@ CSV = "~0.10.4"
 DataFrames = "~1.3.4"
 Distributions = "~0.25.63"
 Graphs = "~1.7.1"
-KuMo = "~0.1.26"
+KuMo = "~0.1.25"
 LaTeXStrings = "~1.3.0"
 PGFPlotsX = "~1.5.0"
 StatsPlots = "~0.14.34"
@@ -912,7 +905,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0-rc1"
 manifest_format = "2.0"
-project_hash = "f2604676aae5f9dcf60909fd4be6dbd2bea8c6e4"
+project_hash = "fcf8acf627e7ec7f1af5e4a7ec7be5c2004317fa"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1555,10 +1548,10 @@ uuid = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
 version = "0.6.3"
 
 [[deps.KuMo]]
-deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "GLMakie", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "RecipesBase", "SimpleTraits", "SparseArrays", "StatsPlots"]
-git-tree-sha1 = "f874ae51231480e0d0c8af7116b1e1f090762a82"
+deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "GLMakie", "Graphs", "JuMP", "MathOptInterface", "PrettyTables", "ProgressMeter", "Random", "RecipesBase", "SimpleTraits", "SparseArrays", "StatsPlots"]
+git-tree-sha1 = "fe2108de5221b2c111ff0263ee436c5d59b94c58"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.26"
+version = "0.1.25"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2195,9 +2188,9 @@ version = "1.2.2"
 
 [[deps.StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
-git-tree-sha1 = "48598584bacbebf7d30e20880438ed1d24b7c7d6"
+git-tree-sha1 = "642f08bf9ff9e39ccc7b710b2eb9a24971b52b1a"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.33.18"
+version = "0.33.17"
 
 [[deps.StatsFuns]]
 deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
@@ -2579,12 +2572,12 @@ version = "0.9.1+5"
 # ╠═0ccb45a7-9a82-41fa-b740-86a911b43e7e
 # ╠═04d2ee88-af75-498f-8519-f02e7615e64b
 # ╠═c0b650b6-48c4-4557-aebd-abd1987101cb
+# ╠═0c296017-8a73-49fe-adb4-4fd604f54bc6
+# ╠═07f6987c-8e00-4443-bcef-06ce2e21136f
+# ╠═a08e33b1-7285-46b9-8241-9f2570aad781
 # ╠═9c21d620-a684-4a44-8a96-f5c2e5c352c0
 # ╠═f7d43c5a-dd86-4c79-9dd6-974ffc6a4afa
 # ╠═6b596bd9-dbaa-4f8a-a9b2-9c8280ca2e64
-# ╠═076d8ab2-c16e-4690-b15a-20bbdee94812
-# ╠═f7ce6b4b-b55b-459c-9d8c-4de06809f627
-# ╠═ac923436-3cd0-4e00-a701-50daa9b4deea
 # ╟─0de8409c-aa08-45df-8d75-1f6167ef9f76
 # ╠═480f90df-f395-457f-813f-4d80bf75793b
 # ╠═ca7815d4-d97f-4300-9226-48a7fe159978
@@ -2594,11 +2587,11 @@ version = "0.9.1+5"
 # ╟─11a0c1d4-2230-4390-9853-e407b1398828
 # ╠═a407a75e-7b9d-42f8-9b2c-98c6505c9682
 # ╟─f960e2ca-c6d1-4dc2-a4d3-39cdcdeeb1b7
-# ╠═7114f833-263e-41cf-9ca6-38d8700d4fa4
+# ╟─7114f833-263e-41cf-9ca6-38d8700d4fa4
 # ╠═eec65bd7-5c3c-4974-8bce-a7fbf4ce3259
-# ╠═c10c2e69-5525-4cad-9dc9-623470eab30e
-# ╠═566e957f-68f3-4d0d-847e-1242f1e5278f
-# ╠═2cc63aa9-d9f2-4110-90b5-cebc92ff4ad9
+# ╟─c10c2e69-5525-4cad-9dc9-623470eab30e
+# ╟─566e957f-68f3-4d0d-847e-1242f1e5278f
+# ╟─2cc63aa9-d9f2-4110-90b5-cebc92ff4ad9
 # ╠═495135df-7a2a-4235-9cd5-3ba17c6ef845
 # ╠═b9a6c8db-e0e7-49f1-8ef1-e4adcb311f94
 # ╟─00000000-0000-0000-0000-000000000001
