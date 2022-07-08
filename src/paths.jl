@@ -1,11 +1,30 @@
+"""
+    AbstractAlgorithm
+
+An abstract supertype for algorithms.
+"""
 abstract type AbstractAlgorithm end
 
+"""
+    MinCostFlow{O<:MathOptInterface.AbstractOptimizer} <: AbstractAlgorithm
+
+A structure to construct a MinCostFlow algorithm associated with an NLP Optimizer, such as Ipopt.
+"""
 struct MinCostFlow{O<:MathOptInterface.AbstractOptimizer} <: AbstractAlgorithm
     optimizer::Type{O}
 end
 
+"""
+    ShortestPath <: AbstractAlgorithm
+
+A ShortestPath algorithm.
+"""
 struct ShortestPath <: AbstractAlgorithm end
 
+"""
+    mincost_flow
+Call the internal mincost_flow method.
+"""
 function mincost_flow end
 
 @traitfn function mincost_flow(g::AG::Graphs.IsDirected,

@@ -18,6 +18,11 @@ struct Job <: AbstractJob
     frontend::Int
 end
 
+"""
+    job_distributions(; backend, container, data_locations, duration, frontend)
+
+Construct a dictionary with random distributions to generate new jobs.
+"""
 function job_distributions(; backend, container, data_locations, duration, frontend)
     return Dict(
         :backend => censored(Normal(backend[1], backend[2]); lower=1),

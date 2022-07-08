@@ -1,3 +1,8 @@
+"""
+    AbstractRequests
+
+An abstract supertype for job requests.
+"""
 abstract type AbstractRequests end
 
 struct PeriodicRequests{J<:AbstractJob} <: AbstractRequests

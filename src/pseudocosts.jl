@@ -1,3 +1,11 @@
+"""
+    pseudo_cost(cap, charge, resource, param...)
+    pseudo_cost(r::<:AbstractResource, charge)
+
+Methods to compute the pseudo-cost of various resources.
+"""
+function pseudo_cost end
+
 function pseudo_cost(cap, charge, ::Val{:default})
     ρ = charge / cap
     isapprox(1.0, ρ) || ρ > 1.0 && (@debug("Error in pseudo_cost", charge, cap); return Inf)
