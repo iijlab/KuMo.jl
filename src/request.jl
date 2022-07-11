@@ -5,6 +5,11 @@ An abstract supertype for job requests.
 """
 abstract type AbstractRequests end
 
+"""
+    PeriodicRequests{J<:AbstractJob} <: AbstractRequests
+
+A structure to handle job that
+"""
 struct PeriodicRequests{J<:AbstractJob} <: AbstractRequests
     job::J
     period::Float64
