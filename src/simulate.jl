@@ -1,3 +1,14 @@
+"""
+    State
+
+A structure to store the state of the different resources, e.g. nodes and links, during a simualtion.
+
+# Arguments:
+- `links::SparseMatrixCSC{Float64, Int64}`: sparse matrice with the links loads
+- `nodes::SparseVector{Float64, Int64}`: sparse vector with the nodes loads
+- `State(n)`: inner constructor given the number of nodes `n`
+- `State(links, nodes)`: inner constructor given the `links` and `nodes` of an existing state
+"""
 struct State
     links::SparseMatrixCSC{Float64,Int64}
     nodes::SparseVector{Float64,Int64}
@@ -7,6 +18,18 @@ struct State
     State(links, nodes) = new(links, nodes)
 end
 
+"""
+    add_load!(state, links, containers, v, n)
+
+Adds load to a given state.
+
+# Arguments:
+- `state`
+- `links`: the load increase to be added on links
+- `containers`: the containers load to be added to `v`
+- `v`: node selected to execute a task
+- `n`: amount of available nodes
+"""
 function add_load!(state, links, containers, v, n)
     for i in 1:n, j in 1:n
         state.links[i, j] += links[i, j]
@@ -14,6 +37,18 @@ function add_load!(state, links, containers, v, n)
     state.nodes[v] += containers
 end
 
+"""
+    rem_load!(state, links, containers, v, n)
+
+Removes load from a given state.
+
+# Arguments:
+- `state`
+- `links`: the load increase to be removed from links
+- `containers`: the containers load to be removed from `v`
+- `v`: node where a task is endind
+- `n`: amount of available nodes
+"""
 function rem_load!(state, links, containers, v, n)
     for i in 1:n, j in 1:n
         state.links[i, j] -= links[i, j]
@@ -21,6 +56,19 @@ function rem_load!(state, links, containers, v, n)
     state.nodes[v] -= containers
 end
 
+"""
+    SnapShot
+
+A structure to take snapshot from the state of network and its resources at a specific instant.
+
+# Arguments:
+- `state::State`: state at `instant`
+- `total::Float64`: total load at `instant`
+- `selected::Int`: selected node at `instant`; value is zero if load is removed
+- `duration::Float64`: duration of all the actions taken during corresponding to the state of this snap
+- `solving_time::Float64`: time taken specifically by the solving algorithm (`<: AbstractAlgorithm`)
+- `instant::Float64`
+"""
 mutable struct SnapShot
     state::State
     total::Float64
@@ -30,6 +78,21 @@ mutable struct SnapShot
     instant::Float64
 end
 
+"""
+    push_snap!(snapshots, state, total, selected, duration, solving_time, instant, n)
+
+Add a snapshot to an existing collection of snapshots.
+
+# Arguments:
+- `snapshots`: collection of snapshots
+- `state`: current state
+- `total`: load
+- `selected`: node where a request is executed
+- `duration`: duration of the whole resource allocation for the request
+- `solving_time`: time taken specifically by the solving algorithm (`<: AbstractAlgorithm`)
+- `instant`: instant when the request is received
+- `n`: number of available nodes
+"""
 function push_snap!(snapshots, state, total, selected, duration, solving_time, instant, n)
     links = deepcopy(state.links[1:n, 1:n])
     nodes = deepcopy(state.nodes[1:n])
@@ -37,12 +100,33 @@ function push_snap!(snapshots, state, total, selected, duration, solving_time, i
     push!(snapshots, snap)
 end
 
+"""
+    Load
+
+A structure describing an increase of the total load.
+
+# Arguments:
+- `occ::Float64`: time when the load occurs
+- `node::Int`: node at which the request is executed
+- `job::Job`: the job request
+"""
 struct Load
     occ::Float64
     node::Int
     job::Job
 end
 
+"""
+    Unload
+
+A structure describing a decrease of the total load.
+
+# Arguments:
+- `occ::Float64`: time when the unload occurs
+- `node::Int`: node at which the request was executed
+- `vload::Int`: the number of freed containers
+- `lloads::SparseMatrixCSC{Float64, Int64}`: the freed loads on each link
+"""
 struct Unload
     occ::Float64
     node::Int
@@ -50,6 +134,27 @@ struct Unload
     lloads::SparseMatrixCSC{Float64,Int64}
 end
 
+"""
+    inner_queue(
+        g, u, j, nodes, capacities, state, algo::MinCostFlow, ii = 0;
+        lck = ReentrantLock(), demands, links = nothing
+    )
+
+The inner queue step of the resource allocation of a new request. Uses a `MinCostFlow` algorithm.
+
+# Arguments:
+- `g`: a graph representing the topology of the network
+- `u`: user location
+- `j`: requested job
+- `nodes`: nodes capacities
+- `capacities`: links capacities
+- `state`: current state of the network
+- `algo`: `MinCostFlow <: AbstractAlgorithm`
+- `ii`: a counter to mesure the progress in the simulation
+- `lck`: a lck for asynchronous simulation
+- `demands`: flow demands for `MinCostFlow` algorithm
+- `links`: not needed for `MinCostFlow` algorithm
+"""
 function inner_queue(
     g, u, j, nodes, capacities, state, algo::MinCostFlow, ii=0;
     lck=ReentrantLock(), demands, links=nothing
@@ -110,6 +215,16 @@ function inner_queue(
     return best_links, best_cost, best_node
 end
 
+"""
+    retrieve_path(u, v, paths)
+
+Retrieves the path from `u` to `v`.
+
+# Arguments:
+- `u`: source vertex
+- `v`: target vertex
+- `paths`: list of shortest paths within a network
+"""
 function retrieve_path(u, v, paths)
     path = Vector{Pair{Int,Int}}()
     w = v
@@ -121,6 +236,24 @@ function retrieve_path(u, v, paths)
     return path
 end
 
+"""
+    inner_queue(g, u, j, nodes, capacities, state, ::ShortestPath, ii = 0; lck = ReentrantLock(), demands = nothing, links)
+
+DOCSTRING
+
+# Arguments:
+- `g`: a graph representing the topology of the network
+- `u`: user location
+- `j`: requested job
+- `nodes`: nodes capacities
+- `capacities`: links capacities
+- `state`: current state of the network
+- `algo`: `ShortestPath <: AbstractAlgorithm`
+- `ii`: a counter to mesure the progress in the simulation
+- `lck`: a lck for asynchronous simulation
+- `demands`: not needed for `ShortestPath` algorithm
+- `links`: description of the links topology
+"""
 function inner_queue(
     g, u, j, nodes, capacities, state, ::ShortestPath, ii=0;
     lck=ReentrantLock(), demands=nothing, links
@@ -298,6 +431,16 @@ function inner_queue(
 end
 
 # FIXME - links indices
+"""
+    make_df(snapshots::Vector{SnapShot}, topo; verbose = true)
+
+Make a DataFrame from the raw snapshots.
+
+# Arguments:
+- `snapshots`: A collection of snapshots
+- `topo`: topology of the network
+- `verbose`: if set to true, it will print a description of the snapshots in the terminal
+"""
 function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     function shape_entry(s)
         entry = Vector{Pair{String,Float64}}()
@@ -334,6 +477,11 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     return df
 end
 
+"""
+    init_simulate(::Val{0})
+
+Initialize a synchronous simulation.
+"""
 function init_simulate(::Val{0})
     tasks = Vector{Load}()
     queued = Vector{Load}()
@@ -341,12 +489,27 @@ function init_simulate(::Val{0})
     return tasks, queued, unloads
 end
 
+"""
+    init_simulate(::Val)
+
+Initialize an asynchronous simulation.
+"""
 function init_simulate(::Val)
     tasks = Vector{Load}()
     c = Channel{Tuple{Int,Job}}(10^7)
     return tasks, c
 end
 
+"""
+    init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
+
+Initialize user `u` periodic requests.
+
+# Arguments:
+- `s`: scenario that is about to be simulated
+- `u`: a user id
+- `tasks`: container of sorted tasks
+"""
 function init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
     jr = u.job_requests
     j = jr.job
@@ -357,11 +520,31 @@ function init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
     foreach(occ -> insert_sorted!(tasks, Load(occ, u.location, j)), t0:p:t1)
 end
 
+"""
+    init_user(::Scenario, u::User, tasks, ::Requests)
+
+Initialize user `u` non-periodic requests.
+
+# Arguments:
+- `u`: a user id
+- `tasks`: container of sorted tasks
+"""
 function init_user(::Scenario, u::User, tasks, ::Requests)
     foreach(r -> insert_sorted!(tasks, Load(r.start, u.location, r.job)), u.job_requests.requests)
     @debug "debug" tasks
 end
 
+"""
+    init_simulate(s, algo, tasks, start)
+
+Initialize structures before the simualtion of scenario `s`.
+
+# Arguments:
+- `s`: the scenario being simulated
+- `algo`: algorithm allocating resources at best known lower costs resources
+- `tasks`: sorted container of tasks to be simulated
+- `start`: instant when the simulation started
+"""
 function init_simulate(s, algo, tasks, start)
     times = Dict{String,Float64}()
     snapshots = Vector{SnapShot}()
@@ -381,6 +564,19 @@ function init_simulate(s, algo, tasks, start)
     return times, snapshots, g, capacities, n, state, demands
 end
 
+"""
+    simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)
+
+Inner loop of the simulation of scenario `s`.
+
+# Arguments:
+- `s`: scenario being simulated
+- `algo`: algo solving the resource allocation dynamically at each step
+- `speed`: asynchronous simulation speed
+- `start`: starting time of the simulation
+- `containers`: containers generated to allocate tasks dynamically during the run
+- `args_loop`: arguments required by this loop
+"""
 function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)
     tasks, c = containers
     times, snapshots, g, capacities, n, state, demands = args_loop
@@ -475,6 +671,21 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)
     return nothing
 end
 
+"""
+    execute_valid_load(s, task, g, capacities, state, algo, demands, ii = 0)
+
+Compute the best load allocation and return if it is a valid one.
+
+# Arguments:
+- `s`: scenario being simulated
+- `task`: task being requested
+- `g`: graph of the network topology
+- `capacities`: capacities of the network
+- `state`: current state of resources
+- `algo`: algo used for computing the best allocation cost
+- `demands`: if algo is `MinCostFlow`, demands are required
+- `ii`: a counter to measure the approximative progress of the simulation
+"""
 function execute_valid_load(s, task, g, capacities, state, algo, demands, ii=0)
     occ, u, j = task.occ, task.node, task.job
 
@@ -496,6 +707,16 @@ function execute_valid_load(s, task, g, capacities, state, algo, demands, ii=0)
     return (best_links, best_cost, best_node, valid_links && valid_nodes)
 end
 
+"""
+    insert_sorted!(w, val, it = iterate(w))
+
+DOCSTRING
+
+# Arguments:
+- `w`: DESCRIPTION
+- `val`: DESCRIPTION
+- `it`: DESCRIPTION
+"""
 function insert_sorted!(w, val, it=iterate(w))
     while it !== nothing
         (elt, state) = it
@@ -508,6 +729,20 @@ function insert_sorted!(w, val, it=iterate(w))
     push!(w, val)
 end
 
+"""
+    simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
+
+DOCSTRING
+
+# Arguments:
+- `s`: DESCRIPTION
+- `algo`: DESCRIPTION
+- `_`: DESCRIPTION
+- `start`: DESCRIPTION
+- `containers`: DESCRIPTION
+- `args_loop`: DESCRIPTION
+- `nothing`: DESCRIPTION
+"""
 function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
     tasks, queued, unloads = containers
     times, snapshots, g, capacities, n, state, demands = args_loop
@@ -636,6 +871,11 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
     return nothing
 end
 
+"""
+    clean(snaps)
+
+DOCSTRING
+"""
 function clean(snaps)
     snapshots = Vector{SnapShot}()
     fsnap = first(snaps)
@@ -663,6 +903,17 @@ function clean(snaps)
     return snapshots
 end
 
+"""
+    post_simulate(s, snapshots, verbose, output)
+
+DOCSTRING
+
+# Arguments:
+- `s`: DESCRIPTION
+- `snapshots`: DESCRIPTION
+- `verbose`: DESCRIPTION
+- `output`: DESCRIPTION
+"""
 function post_simulate(s, snapshots, verbose, output)
     df_snaps = make_df(clean(snapshots), s.topology; verbose)
     # df_snaps = make_df(snapshots, s.topology; verbose)
@@ -676,6 +927,18 @@ function post_simulate(s, snapshots, verbose, output)
     return df_snaps
 end
 
+"""
+    simulate(s::Scenario, algo; speed = 0, output = "", verbose = true)
+
+DOCSTRING
+
+# Arguments:
+- `s`: DESCRIPTION
+- `algo`: DESCRIPTION
+- `speed`: DESCRIPTION
+- `output`: DESCRIPTION
+- `verbose`: DESCRIPTION
+"""
 function simulate(s::Scenario, algo; speed=0, output="", verbose=true)
     start = time()
 
