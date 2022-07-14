@@ -1,3 +1,14 @@
+"""
+    Scenario{N <: AbstractNode, L <: AbstractLink, U <: User}
+
+Structure to store the information of a scenario.
+
+# Arguments:
+- `data::Dictionary{Int, Data}`: data collection (currently not in use)
+- `duration::Real`: optional duration of the scenario
+- `topology::Topology{N, L}`: network's topology
+- `users::Dictionary{Int, U}`: collection of users
+"""
 struct Scenario{N<:AbstractNode,L<:AbstractLink,U<:User}
     data::Dictionary{Int,Data}
     duration::Real
@@ -5,6 +16,11 @@ struct Scenario{N<:AbstractNode,L<:AbstractLink,U<:User}
     users::Dictionary{Int,U}
 end
 
+"""
+    make_nodes(nodes)
+
+Create nodes.
+"""
 function make_nodes(nodes)
     types = Set{Type}()
     foreach(v -> push!(types, v), Iterators.map(typeof, nodes))
@@ -34,6 +50,11 @@ end
 
 make_nodes(x::Tuple) = make_nodes(x...)
 
+"""
+    make_links(links)
+
+Creates links.
+"""
 function make_links(links)
     _links = Dictionary{Tuple{Int,Int},FreeLink}()
     foreach(l -> set!(_links, (l[1], l[2]), FreeLink()), links)
@@ -71,6 +92,11 @@ make_links(n::Int, c) = make_links(Iterators.product(1:n, 1:n), c)
 
 make_links(x::Tuple) = make_links(x...)
 
+"""
+    make_users(args...)
+
+Create users.
+"""
 function make_users(n::Int, rate, locations, jd, data)
     users = Dictionary{Int,User{PeriodicRequests{Job}}}()
     for i in 1:n
@@ -118,6 +144,19 @@ function scenario(duration, links, nodes, users, job_distribution, request_rate)
     return Scenario(_data, duration, topo, _users)
 end
 
+"""
+    scenario(; duration, links = nothing, nodes, users, job_distribution = nothing, request_rate = nothing)
+
+Build a scenario.
+
+# Arguments:
+- `duration`: duration of the interval where requests can be started
+- `links`: collection of links resources
+- `nodes`: collection of nodes resources
+- `users`: collections of users information
+- `job_distribution`: (optional) distributions used to generate jobs
+- `request_rate`: (optional) average request rate
+"""
 function scenario(;
     duration,
     links=nothing,
@@ -133,6 +172,11 @@ function scenario(;
     end
 end
 
+"""
+    make_df(s::Scenario; verbose = true)
+
+Make a DataFrame to describe the scenario `s`.
+"""
 function make_df(s::Scenario; verbose=true)
     df = DataFrame(
         backend=Int[],
@@ -166,6 +210,11 @@ function make_df(s::Scenario; verbose=true)
     return df
 end
 
+"""
+    SCENARII
+
+Collection of scenarii.
+"""
 const SCENARII = Dict(
     :four_nodes_four_users => scenario(;
         duration=399,
