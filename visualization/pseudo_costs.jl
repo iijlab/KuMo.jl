@@ -4,7 +4,10 @@ using KuMo
 using GLMakie
 using Colors
 
-set_theme!(backgroundcolor = :gray90)
+set_theme!(backgroundcolor=:gray90)
+
+fontsize_theme = Theme(fontsize=20)
+set_theme!(fontsize_theme)
 
 red = colorant"rgb(230, 25, 75)"
 green = colorant"rgb(60, 180, 75)"
@@ -13,18 +16,27 @@ cyan = colorant"rgb(70, 200, 200)"
 orange = colorant"rgb(245, 130, 48)"
 purple = colorant"rgb(145, 30, 180)"
 
-fig = Figure(resolution = (1200,1000))
+fig = Figure(resolution=(1200, 1000))
 
-ax = Axis(fig[1, 1]; title = "Pseudo-costs sandbox", xlabel = "Pseudo-cost", ylabel = "Resource load")
+ax = Axis(
+    fig[1, 1];
+    title="Pseudo-costs sandbox",
+    xlabel="Pseudo-cost",
+    ylabel="Resource load",
+    xticks=0:0.1:1,
+    yticks=0:1:10,
+    xminorticksvisible=true,
+    yminorticksvisible=true
+)
 
-xlims!(ax, nothing, .99)
-ylims!(ax, 0, 10.)
+xlims!(ax, nothing, 0.99)
+ylims!(ax, 0, 10.0)
 
 sg = SliderGrid(fig[2, 1],
-    (label = "Additive", range = 0:0.1:10, startvalue = 0, format = "cost + {:.1f}"),
-    (label = "Multiplicative", range = 0:0.1:10, startvalue = 1, format = "cost × {:.1f}"),
-    (label = "Load shift", range = 0:0.01:0.5, startvalue = 0, format = "load + {:.1f}"),
-    (label = "Idle", range = 1:0.1:10, startvalue = 1),
+    (label="Additive", range=-1:0.1:10, startvalue=0, format="cost + {:.1f}"),
+    (label="Multiplicative", range=0:0.1:10, startvalue=1, format="cost × {:.1f}"),
+    (label="Load shift", range=0:0.01:0.5, startvalue=0, format="load + {:.01f}"),
+    (label="Idle", range=1:0.1:10, startvalue=1),
 )
 
 
@@ -39,10 +51,11 @@ line3 = lift(sg.sliders[1].value) do val3
         init3 = true
     end
     lines!(
-        0..0.99,
-        x -> pseudo_cost(1., x, Val(:default)) + val3,
-        label = "additive",
-        color = blue,
+        0 .. 0.99,
+        x -> pseudo_cost(1.0, x, Val(:default)) + val3,
+        label="additive",
+        color=blue,
+        linewidth=2.0,
     )
 end
 
@@ -54,10 +67,11 @@ line4 = lift(sg.sliders[2].value) do val4
         init4 = true
     end
     lines!(
-        0..0.99,
-        x -> pseudo_cost(1., x, Val(:default)) * val4,
-        label = "multiplicative",
-        color = cyan,
+        0 .. 0.99,
+        x -> pseudo_cost(1.0, x, Val(:default)) * val4,
+        label="multiplicative",
+        color=cyan,
+        linewidth=2.0,
     )
 end
 
@@ -69,10 +83,11 @@ line5 = lift(sg.sliders[3].value) do val5
         init5 = true
     end
     lines!(
-        0..0.99,
-        x -> pseudo_cost(1., x + val5, Val(:default)),
-        label = "load shift",
-        color = purple,
+        0 .. 0.99,
+        x -> pseudo_cost(1.0, x + val5, Val(:default)),
+        label="load shift",
+        color=purple,
+        linewidth=2.0,
     )
 end
 
@@ -84,26 +99,29 @@ line6 = lift(sg.sliders[4].value) do val6
         init6 = true
     end
     lines!(
-        0..0.99,
-        x -> pseudo_cost(1., x, Val(:idle_node), val6),
-        label = "idle",
-        color = orange,
+        0 .. 0.99,
+        x -> pseudo_cost(1.0, x, Val(:idle_node), val6),
+        label="idle",
+        color=orange,
+        linewidth=2.0,
     )
 end
 
 line1 = lines!(
-    0..0.99,
-    x -> pseudo_cost.(1., x, Val(:default));
-    label = "std cost func",
-    color = red,
+    0 .. 0.99,
+    x -> pseudo_cost.(1.0, x, Val(:default));
+    label="std cost func",
+    color=red,
+    linewidth=2.0
 )
 line2 = lines!(
-    0..0.99,
-    x -> pseudo_cost(1., x, Val(:equal_load_balancing)),
-    label = "equal load balancing",
-    color = green
+    0 .. 0.99,
+    x -> pseudo_cost(1.0, x, Val(:equal_load_balancing)),
+    label="equal load balancing",
+    color=green,
+    linewidth=2.0,
 )
 
-axislegend(position = :lt)
+axislegend(position=:lt)
 
 fig
