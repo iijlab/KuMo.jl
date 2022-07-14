@@ -710,38 +710,38 @@ end
 """
     insert_sorted!(w, val, it = iterate(w))
 
-DOCSTRING
+Insert element in a sorted collection.
 
 # Arguments:
-- `w`: DESCRIPTION
-- `val`: DESCRIPTION
-- `it`: DESCRIPTION
+- `w`: sorted collection
+- `val`: value to be inserted
+- `it`: optional iterator
 """
 function insert_sorted!(w, val, it=iterate(w))
     while it !== nothing
         (elt, state) = it
         if elt.occ ≥ val.occ
             insert!(w, state - 1, val)
-            return w
+            break
         end
         it = iterate(w, state)
     end
     push!(w, val)
+    return w
 end
 
 """
     simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
 
-DOCSTRING
+Inner loop of the simulation of scenario `s`.
 
 # Arguments:
-- `s`: DESCRIPTION
-- `algo`: DESCRIPTION
-- `_`: DESCRIPTION
-- `start`: DESCRIPTION
-- `containers`: DESCRIPTION
-- `args_loop`: DESCRIPTION
-- `nothing`: DESCRIPTION
+- `s`: scenario being simulated
+- `algo`: algo solving the resource allocation dynamically at each step
+- `_`: simulation speed (unrequired)
+- `start`: starting time of the simulation
+- `containers`: containers generated to allocate tasks dynamically during the run
+- `args_loop`: arguments required by this loop
 """
 function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
     tasks, queued, unloads = containers
@@ -874,7 +874,7 @@ end
 """
     clean(snaps)
 
-DOCSTRING
+Clean the snapshots by merging snaps occuring at the same time.
 """
 function clean(snaps)
     snapshots = Vector{SnapShot}()
@@ -906,13 +906,13 @@ end
 """
     post_simulate(s, snapshots, verbose, output)
 
-DOCSTRING
+Post-simulation process that covers cleaning the snapshots and producing an output.
 
 # Arguments:
-- `s`: DESCRIPTION
-- `snapshots`: DESCRIPTION
-- `verbose`: DESCRIPTION
-- `output`: DESCRIPTION
+- `s`: simulated scenario
+- `snapshots`: resulting snapshots (before cleaning)
+- `verbose`: if set to true, prints information about the output and the snapshots
+- `output`: output path
 """
 function post_simulate(s, snapshots, verbose, output)
     df_snaps = make_df(clean(snapshots), s.topology; verbose)
@@ -930,14 +930,14 @@ end
 """
     simulate(s::Scenario, algo; speed = 0, output = "", verbose = true)
 
-DOCSTRING
+Simulate a scenario.
 
 # Arguments:
-- `s`: DESCRIPTION
-- `algo`: DESCRIPTION
-- `speed`: DESCRIPTION
-- `output`: DESCRIPTION
-- `verbose`: DESCRIPTION
+- `s`: simulation targetted scenario
+- `algo`: algorithm used to estimate the best allocation regarding to the pseudo-cost
+- `speed`: simulation speed. If set to 0, the requests are handled sequentially without computing time limits. Otherwise the requests are made as independant asynchronous processes
+- `output`: path to save the output, if empty (default), nothing is saved
+- `verbose`: if set to true, prints information about the simulation
 """
 function simulate(s::Scenario, algo; speed=0, output="", verbose=true)
     start = time()
