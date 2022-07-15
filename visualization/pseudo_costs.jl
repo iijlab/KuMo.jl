@@ -1,13 +1,13 @@
-# Script to generate plots for different pseudo-cost functions
+# SECTION - Script to generate plots for different pseudo-cost functions
 
 using KuMo
 using GLMakie
 using Colors
 
-set_theme!(backgroundcolor=:gray90)
 
+set_theme!(backgroundcolor=:gray90)
 fontsize_theme = Theme(fontsize=20)
-set_theme!(fontsize_theme)
+update_theme!(fontsize_theme)
 
 red = colorant"rgb(230, 25, 75)"
 green = colorant"rgb(60, 180, 75)"
