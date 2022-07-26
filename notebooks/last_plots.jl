@@ -26,7 +26,7 @@ function scenario1(;)
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	# jd() = rand(norm_dist) 
+	# jd() = rand(norm_dist)
 	jd() = 4
 
 	λ = 1.
@@ -58,7 +58,7 @@ function scenario1(;)
 			foreach(_ -> push!(reqs, Request(j, r - δ/2)), 1:k)
 		end
 	end
-	
+
 	# user1 - wave 2
 	t = 0.0
 	r = Float64(Δ1)
@@ -134,7 +134,7 @@ function scenario1(;)
 			foreach(_ -> push!(reqs, Request(j, r - δ/2 + 4Δ1)), 1:k)
 		end
 	end
-	
+
 	# user1 - wave 6
 	t = 0.0
 	r = Float64(Δ1)
@@ -161,7 +161,7 @@ function scenario1(;)
 	u1 = user(R, 1)
 
 
-	reqs = Vector{Request{<:KuMo.AbstractJob}}()	
+	reqs = Vector{Request{<:KuMo.AbstractJob}}()
 	types = Set()
 	k2 = 23
 	# user2 - wave 1
@@ -182,7 +182,7 @@ function scenario1(;)
 			foreach(_ -> push!(reqs, Request(j, r - δ/2)), 1:k)
 		end
 	end
-	
+
 	# user2 - wave 2
 	t = 0.0
 	r = Float64(Δ2)
@@ -243,10 +243,10 @@ function scenario1(;)
 	UT = Union{collect(types)...}
 	R = Vector{Request{UT}}()
 	foreach(r -> push!(R, r), reqs)
-	
+
 	u2 = user(R, 2)
 
-	
+
     scenario(;
         duration=1000,
         nodes=[
@@ -270,9 +270,9 @@ end
 begin
 	s = scenario1()
 	g = KuMo.graph(s.topology, ShortestPath())[1]
-	
+
 	capacities = Dict(filter(p -> p.first[1] < p.first[2], [p.first => Int(p.second.capacity) for p in pairs(s.topology.links)]))
-	
+
 	t = TikzGraphs.plot(
 		g,
 		Layouts.SpringElectrical(charge=20000),
@@ -310,7 +310,7 @@ begin
 
 	# df1_no_norm[!, 8:9] = df1[!,8:9] .* 1
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	df1_no_norm
 end;
 
@@ -326,14 +326,14 @@ p11 = @df df1_no_norm areaplot(:instant,
 # ╔═╡ 0de8409c-aa08-45df-8d75-1f6167ef9f76
 function scenario2a(;)
     reqs = Vector{Request{<:KuMo.AbstractJob}}()
-	
+
 	types = Set()
 
 	Δ = 180
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	# jd() = rand(norm_dist) 
+	# jd() = rand(norm_dist)
 	jd() = 4
 
 	λ = 1.
@@ -343,7 +343,7 @@ function scenario2a(;)
 
 	interactive(data) = job(1, 1, data, jd(), 2)
 	data_intensive(data) = job(2, 1, data, jd(), 1)
-	
+
 
 	t = 0.0
 	r = Float64(Δ)
@@ -364,7 +364,7 @@ function scenario2a(;)
 		end
 	end
 
-	
+
 	# t = 120.0
 	# r = Float64(Δ) + 120.0
 	# for i in 121.:Δ/2+120.0
@@ -390,7 +390,7 @@ function scenario2a(;)
 
 	u1 = user(R, 1)
 
-	
+
     scenario(;
         duration=1000,
         nodes=[
@@ -422,21 +422,21 @@ begin
 
 	df2_no_norm[!, 8:9] = df2[!,8:9] .* 1
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	df2_no_norm
 end;
 
 # ╔═╡ 16ccae76-6591-4167-bab1-edc5ac931c96
 function scenario2b(;)
     reqs = Vector{Request{<:KuMo.AbstractJob}}()
-	
+
 	types = Set()
 
 	Δ = 180
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	# jd() = rand(norm_dist) 
+	# jd() = rand(norm_dist)
 	jd() = 4
 
 	λ = 1.
@@ -446,7 +446,7 @@ function scenario2b(;)
 
 	interactive(data) = job(1, 1, data, jd(), 2)
 	data_intensive(data) = job(2, 1, data, jd(), 1)
-	
+
 
 	t = 0.0
 	r = Float64(Δ)
@@ -473,7 +473,7 @@ function scenario2b(;)
 
 	u1 = user(R, 1)
 
-	
+
     scenario(;
         duration=1000,
         nodes=[
@@ -505,21 +505,21 @@ begin
 
 	df2b_no_norm[!, 8:9] = df2b[!,8:9] .* 1
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	df2b_no_norm
 end;
 
 # ╔═╡ 11a0c1d4-2230-4390-9853-e407b1398828
 function scenario2c(;)
     reqs = Vector{Request{<:KuMo.AbstractJob}}()
-	
+
 	types = Set()
 
 	Δ = 180
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	# jd() = rand(norm_dist) 
+	# jd() = rand(norm_dist)
 	jd() = 4
 
 	λ = 1.
@@ -529,7 +529,7 @@ function scenario2c(;)
 
 	interactive(data) = job(1, 1, data, jd(), 2)
 	data_intensive(data) = job(2, 1, data, jd(), 1)
-	
+
 
 	t = 0.0
 	r = Float64(Δ)
@@ -556,7 +556,7 @@ function scenario2c(;)
 
 	u1 = user(R, 1)
 
-	
+
     scenario(;
         duration=1000,
         nodes=[
@@ -588,21 +588,21 @@ begin
 
 	df2c_no_norm[!, 8:9] = df2c[!,8:9] .* 1
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	df2c_no_norm
 end;
 
 # ╔═╡ 7114f833-263e-41cf-9ca6-38d8700d4fa4
 function scenario2d(;)
     reqs = Vector{Request{<:KuMo.AbstractJob}}()
-	
+
 	types = Set()
 
 	Δ = 180
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	# jd() = rand(norm_dist) 
+	# jd() = rand(norm_dist)
 	jd() = 4
 
 	λ = 1.
@@ -612,7 +612,7 @@ function scenario2d(;)
 
 	interactive(data) = job(250, 1, data, jd(), 2)
 	data_intensive(data) = job(2, 1, data, jd(), 1)
-	
+
 
 	t = 0.0
 	r = Float64(Δ)
@@ -639,7 +639,7 @@ function scenario2d(;)
 
 	u1 = user(R, 1)
 
-	
+
     scenario(;
         duration=1000,
         nodes=[
@@ -674,14 +674,14 @@ begin
 			df2[i,j] = 0.0
 		end
 	end
-	
+
 	df2_no_norm_final = deepcopy(df2)
 	df2_no_norm_final[!, 6:6] = df2[!,6:6] .* 1
 	df2_no_norm_final[!, 7:7] = df2[!,7:7] .* 10
 
 	df2_no_norm_final[!, 11:11] = df2[!,11:11] .* 10
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	df2_no_norm_final
 end;
 
@@ -767,7 +767,7 @@ begin
 	df7_no_norm[!, 24:32] = df8[!,24:32] .* 1
 	df7_no_norm[!, 33:48] = df8[!,33:48] .* 2
 	df7_no_norm[!, 49:end] = df8[!,49:end] .* 4
-	
+
 	df7_no_norm
 end;
 
@@ -825,7 +825,7 @@ begin
 	for r in eachrow(df9)
 		if newstep
 			empty!(acc)
-		end		
+		end
 		push!(acc, r)
 		if floor(r[:instant]) > last
 			last = floor(r[:instant])
@@ -874,7 +874,7 @@ begin
 end;
 
 # ╔═╡ 149ed59c-7d41-47ba-b5f9-d3d0e8418835
-begin 
+begin
 	@df df13 StatsPlots.plot(:instant, :ratio)
 	@df df12 StatsPlots.plot!(:instant, :ratio)
 
