@@ -642,7 +642,7 @@ version = "0.6.4"
 
 [[deps.KuMo]]
 deps = ["CSV", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "Graphs", "JuMP", "MathOptInterface", "PGFPlotsX", "PrettyTables", "ProgressMeter", "Random", "RecipesBase", "SimpleTraits", "SparseArrays", "StatsPlots"]
-path = "C:\\Users\\jeanf\\.julia\\dev\\KuMo"
+path = "/home/azzaare/.julia/dev/KuMo"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
 version = "0.1.29"
 
