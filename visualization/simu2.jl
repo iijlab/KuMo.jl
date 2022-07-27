@@ -1,8 +1,8 @@
 # SECTION - Script to simualte and analyse results for KuMo.jl
 
-using KuMo
 using GLMakie
 using DataFrames
+using CSV
 
 function interactive_analysis(df)
     df_no_norm = deepcopy(df)
@@ -20,6 +20,8 @@ function interactive_analysis(df)
         title="Interactive analysis",
         ylabel="Resource load",
     )
+
+
 
     a, b, δ = 2, 5, 9
     _lines = Vector{Any}(fill(nothing, length(a:δ)))
@@ -40,14 +42,40 @@ function interactive_analysis(df)
     )
 
     _areas = Vector{Any}(fill(nothing, length(a:δ)))
-    toggles2 = [Toggle(fig, active = i ≤ b) for i in a:δ]
+    toggles2 = [Observable(Toggle(fig, active = i ≤ b)) for i in a:δ]
     labels2 = map(l -> Label(fig, l), names(df)[a:δ])
-    fig[2, 2] = grid!(hcat(toggles2, labels2), tellheight = false)
+    fig[2, 2] = grid!(hcat(map(t -> to_value(t), toggles2), labels2), tellheight = false)
 
-    for c in a:δ
-        γ = c - a + 1
-        _areas[γ] = density!(df_no_norm[!,Symbol("#time")], df_no_norm[!, c])
-        connect!(_areas[γ].visible, toggles2[γ].active)
+    actives(toggs) = filter(c -> to_value(toggs[c-a+1]).active, a:δ)
+
+    function make_ys(toggs)
+        C = actives(toggs)
+        @info "debug Y internal 2"
+        M = zeros(size(df_no_norm, 1), length(C) + 1)
+        for c in C
+            M[:, c] = df_no_norm[!, c]
+        end
+        return cumsum(M, dims=2)
+    end
+
+    Y = lift(toggles2) do vals
+        @info "debug Y internal"
+        make_ys(vals)
+    end
+
+    @lift begin
+        @info "debug Y" Y
+        c = 0
+        for i in a:δ
+            γ = i - a + 1
+            if i ∈ actives($toggles2)
+                c += 1
+                _areas[γ] = band!(df_no_norm[!,Symbol("#time")], $Y[:,c], $Y[:,c+1])
+            else
+                _areas[γ] = band!(df_no_norm[!,Symbol("#time")], $Y[:,1], $Y[:,1])
+            end
+            # connect!(_areas[γ].visible, $toggles2[γ].active)
+        end
     end
 
     return fig
