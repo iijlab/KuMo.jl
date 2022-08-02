@@ -5,6 +5,7 @@ using GLMakie
 using DataFrames
 using CSV
 using Colors
+using Distributions
 
 function interactive_analysis(df, norms)
     a, b, _, d = marks(df)
@@ -92,9 +93,9 @@ function interactive_analysis(path::String; norms=Dict())
     return interactive_analysis(df, norms)
 end
 
-function interactive_analysis(s::Scenario=SCENARII[:four_nodes])
+function interactive_analysis(s::Scenario=SCENARII[:four_nodes]; norms=Dict())
     df = simulate(s, ShortestPath())[2]
-    return interactive_analysis(df)
+    return interactive_analysis(df, norms)
 end
 
 norms = Dict(
@@ -104,3 +105,9 @@ norms = Dict(
 ]
 )
 interactive_analysis("simu2.csv"; norms)
+
+interactive_analysis()
+
+interactive_analysis(SCENARII[:four_nodes_four_users])
+
+interactive_analysis(SCENARII[:square])

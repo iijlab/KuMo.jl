@@ -518,6 +518,7 @@ function init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
     t1 = min(jr.stop, s.duration)
 
     foreach(occ -> insert_sorted!(tasks, Load(occ, u.location, j)), t0:p:t1)
+    @info "debug PR" tasks
 end
 
 """
@@ -531,7 +532,7 @@ Initialize user `u` non-periodic requests.
 """
 function init_user(::Scenario, u::User, tasks, ::Requests)
     foreach(r -> insert_sorted!(tasks, Load(r.start, u.location, r.job)), u.job_requests.requests)
-    @debug "debug" tasks
+    @info "debug Rs" tasks
 end
 
 """
@@ -718,15 +719,18 @@ Insert element in a sorted collection.
 - `it`: optional iterator
 """
 function insert_sorted!(w, val, it=iterate(w))
+    @debug "debug" w val it
     while it !== nothing
         (elt, state) = it
+        @debug "debug while" elt state elt.occ val.occ
         if elt.occ ≥ val.occ
             insert!(w, state - 1, val)
-            break
+            return w
         end
         it = iterate(w, state)
     end
     push!(w, val)
+    @debug "debug after insert" w val
     return w
 end
 
