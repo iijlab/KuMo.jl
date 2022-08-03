@@ -271,10 +271,10 @@ function inner_queue(
     data_path = Vector{Pair{Int,Int}}()
     user_path = Vector{Pair{Int,Int}}()
 
-    if ii == 50000
-        @info "debug shortest" state.links state.nodes j
-        @info "edges" collect(edges(g))
-    end
+    # if ii == 50000
+    #     @info "debug shortest" state.links state.nodes j
+    #     @info "edges" collect(edges(g))
+    # end
     # computing shortest paths starting with frontend (user)
     lock(lck)
     try
@@ -293,9 +293,9 @@ function inner_queue(
         unlock(lck)
     end
 
-    if ii == 50000
-        @info "debug shortest" user_costs
-    end
+    # if ii == 50000
+    #     @info "debug shortest" user_costs
+    # end
 
     paths_user = dijkstra_shortest_paths(g, u, user_costs; trackvertices=true)
     paths_user2 = dijkstra_shortest_paths(
@@ -303,12 +303,12 @@ function inner_queue(
         trackvertices=true
     )
 
-    if ii == 50000
-        @info "debug shortest" u paths_user.dists paths_user.parents
-        @info "retriev path" retrieve_path(u, 3, paths_user)
-        # @info "debug shortest" u paths_user2.dists paths_user2.parents
-        # @info "retriev path" retrieve_path(u, 3, paths_user2)
-    end
+    # if ii == 50000
+    #     @info "debug shortest" u paths_user.dists paths_user.parents
+    #     @info "retriev path" retrieve_path(u, 3, paths_user)
+    #     # @info "debug shortest" u paths_user2.dists paths_user2.parents
+    #     # @info "retriev path" retrieve_path(u, 3, paths_user2)
+    # end
 
     for v in keys(node_costs)
         current_path = retrieve_path(u, v, paths_user)
@@ -319,9 +319,9 @@ function inner_queue(
             charges[a, b] = j.frontend
         end
 
-        if ii == 50000
-            @info "debug shortest" u v current_path charges
-        end
+        # if ii == 50000
+        #     @info "debug shortest" u v current_path charges
+        # end
 
         lock(lck)
         try
@@ -349,18 +349,18 @@ function inner_queue(
             trackvertices=true
         )
 
-        if ii == 50000
-            @info "debug shortest  123" j.data_location paths_data.dists paths_data.parents
-            @info "retriev path" retrieve_path(j.data_location, v, paths_data)
-            # @info "debug shortest" j.data_location paths_data2.dists paths_data2.parents
-            # @info "retriev path" retrieve_path(j.data_location, v, paths_data2)
-        end
+        # if ii == 50000
+        #     @info "debug shortest  123" j.data_location paths_data.dists paths_data.parents
+        #     @info "retriev path" retrieve_path(j.data_location, v, paths_data)
+        #     # @info "debug shortest" j.data_location paths_data2.dists paths_data2.parents
+        #     # @info "retriev path" retrieve_path(j.data_location, v, paths_data2)
+        # end
 
         current_cost = paths_user.dists[v] + paths_data.dists[v] + node_costs[v]
 
-        if ii == 50000
-            @info "debug shortest" current_cost paths_user.dists[v] paths_data.dists[v] node_costs[v]
-        end
+        # if ii == 50000
+        #     @info "debug shortest" current_cost paths_user.dists[v] paths_data.dists[v] node_costs[v]
+        # end
 
         if current_cost ≤ total_cost
             total_cost = current_cost
@@ -422,9 +422,9 @@ function inner_queue(
     foreach(p -> best_links[p.first, p.second] = j.frontend, user_path)
     foreach(p -> best_links[p.first, p.second] += j.backend, data_path)
 
-    if ii == 50000
-        @info "debug shortest" best_links total_cost best_node
-    end
+    # if ii == 50000
+    #     @info "debug shortest" best_links total_cost best_node
+    # end
 
 
     return best_links, total_cost, best_node
@@ -518,6 +518,7 @@ function init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
     t1 = min(jr.stop, s.duration)
 
     foreach(occ -> insert_sorted!(tasks, Load(occ, u.location, j)), t0:p:t1)
+    # @info "debug PR" tasks
 end
 
 """
@@ -531,7 +532,7 @@ Initialize user `u` non-periodic requests.
 """
 function init_user(::Scenario, u::User, tasks, ::Requests)
     foreach(r -> insert_sorted!(tasks, Load(r.start, u.location, r.job)), u.job_requests.requests)
-    @debug "debug" tasks
+    # @info "debug Rs" tasks
 end
 
 """
@@ -696,9 +697,9 @@ function execute_valid_load(s, task, g, capacities, state, algo, demands, ii=0)
         links, demands
     )
 
-    if ii != 0
-        @info "debug 1" state.links best_links capacities best_cost best_node
-    end
+    # if ii != 0
+    #     @info "debug 1" state.links best_links capacities best_cost best_node
+    # end
     compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
     valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
     valid_nodes =
@@ -718,15 +719,18 @@ Insert element in a sorted collection.
 - `it`: optional iterator
 """
 function insert_sorted!(w, val, it=iterate(w))
+    @debug "debug" w val it
     while it !== nothing
         (elt, state) = it
+        @debug "debug while" elt state elt.occ val.occ
         if elt.occ ≥ val.occ
             insert!(w, state - 1, val)
-            break
+            return w
         end
         it = iterate(w, state)
     end
     push!(w, val)
+    @debug "debug after insert" w val
     return w
 end
 

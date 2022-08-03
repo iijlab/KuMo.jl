@@ -42,6 +42,8 @@ export spike
 export steady
 export user
 
+export Scenario
+
 export MinCostFlow
 export ShortestPath
 
