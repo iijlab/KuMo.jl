@@ -35,12 +35,12 @@ The package `KuMo.jl` is used both as an interface and a simulator of scenarii. 
 
 # ╔═╡ 21639215-1463-46ff-80a0-f1f2028c7558
 begin
-	c1 = ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1
-	c2 = ρ ->　ρ^2 / (1 - ρ) + 1
-	c3 = ρ ->　ρ^4.5 / (1 - ρ) + 1
-    plot_pc = StatsPlots.plot([c1, c2, c3], 0:0.01:0.9, label = ["ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1" "ρ -> ρ^2 / (1 - ρ) + 1" "ρ -> ρ^4.5 / (1 - ρ) + 1"], legend=:topleft)
-	savefig(plot_pc, "pseudo_costs.pdf")
-	plot_pc
+    c1 = ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1
+    c2 = ρ -> ρ^2 / (1 - ρ) + 1
+    c3 = ρ -> ρ^4.5 / (1 - ρ) + 1
+    plot_pc = StatsPlots.plot([c1, c2, c3], 0:0.01:0.9, label=["ρ -> (2 * ρ - 1)^2 / (1 - ρ) + 1" "ρ -> ρ^2 / (1 - ρ) + 1" "ρ -> ρ^4.5 / (1 - ρ) + 1"], legend=:topleft)
+    savefig(plot_pc, "pseudo_costs.pdf")
+    plot_pc
 end
 
 # ╔═╡ 6eff9ab6-620a-4a31-833d-8b8ec2b399a6
@@ -58,7 +58,8 @@ Plots after that takes the time of allocation/deallocation as parameter.
 
 # ╔═╡ 698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═╡ show_logs = false
-pa1, dfa1 = simulate_and_plot(SCENARII[:four_nodes], ShortestPath()); pa1
+pa1, dfa1 = simulate_and_plot(SCENARII[:four_nodes], ShortestPath());
+pa1;
 
 # ╔═╡ 12169dd2-6ea2-43a3-b6fd-94d55e23a568
 # Load of 87.5% (long duration, low request rate)
@@ -78,7 +79,8 @@ scenario2() = scenario(;
 
 # ╔═╡ d3da1adc-91a8-4a97-bb23-586582a31ad7
 # ╠═╡ show_logs = false
-pa2, dfa2 = simulate_and_plot(scenario2(), ShortestPath()); pa2
+pa2, dfa2 = simulate_and_plot(scenario2(), ShortestPath());
+pa2;
 
 # ╔═╡ c1a3e0fe-c63d-41eb-9ef4-6a9c68246dc0
 # Load of 87.5% (small duration, high request rate)
@@ -86,14 +88,15 @@ scenario3() = scenario(;
     duration=10,
     nodes=(4, 32),
     users=[
-		user(job(0, 1, rand(1:4), 1, 0), 1.0/50, rand(1:4); start=4.01, stop=6.)
-        user(job(0, 1, rand(1:4), 1, 0), 1.0/50, rand(1:4);)
-	]
+        user(job(0, 1, rand(1:4), 1, 0), 1.0 / 50, rand(1:4); start=4.01, stop=6.0)
+        user(job(0, 1, rand(1:4), 1, 0), 1.0 / 50, rand(1:4);)
+    ]
 )
 
 # ╔═╡ 015b87d8-c652-41ea-8bd8-0634383afea9
 # ╠═╡ show_logs = false
-pa3, dfa3 = simulate_and_plot(scenario3(), ShortestPath()); pa3
+pa3, dfa3 = simulate_and_plot(scenario3(), ShortestPath());
+pa3;
 
 # ╔═╡ cd893c83-7f8d-486e-af73-e411e154e631
 # Load of 87.5% (small duration, high request rate, more users)
@@ -101,20 +104,21 @@ scenario4() = scenario(;
     duration=10,
     nodes=(4, 32),
     users=[
-		# user 1
-        user(job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4);)
-		# user 2
-		user(job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4); stop=12.)
-		# user 3
-		user(job(0, 1, rand(1:4), 1, 0), 1.0/20, rand(1:4); start=2.01, stop=5.)
-		# user 4
-		user(job(0, 1, rand(1:4), 1, 0), 1.0/75, rand(1:4); start=7.01, stop=9.)
-	]
+        # user 1
+        user(job(0, 1, rand(1:4), 1, 0), 1.0 / 20, rand(1:4);)
+        # user 2
+        user(job(0, 1, rand(1:4), 1, 0), 1.0 / 20, rand(1:4); stop=12.0)
+        # user 3
+        user(job(0, 1, rand(1:4), 1, 0), 1.0 / 20, rand(1:4); start=2.01, stop=5.0)
+        # user 4
+        user(job(0, 1, rand(1:4), 1, 0), 1.0 / 75, rand(1:4); start=7.01, stop=9.0)
+    ]
 )
 
 # ╔═╡ 63f15cd5-fb1b-4f74-a287-8e2265ad5d9e
 # ╠═╡ show_logs = false
-pa4, dfa4 = simulate_and_plot(scenario4(), ShortestPath()); pa4
+pa4, dfa4 = simulate_and_plot(scenario4(), ShortestPath());
+pa4;
 
 # ╔═╡ e2144b8b-6b09-4f99-8bf3-819d0a7704f1
 function scenario5(;
@@ -155,7 +159,8 @@ end
 
 # ╔═╡ 83f8c3e1-9a29-4e86-9125-ace58b0ad794
 # ╠═╡ show_logs = false
-pa5, dfa5 = simulate_and_plot(scenario5(), ShortestPath()); pa5
+pa5, dfa5 = simulate_and_plot(scenario5(), ShortestPath());
+pa5;
 
 # ╔═╡ a67d8276-bd35-472b-afba-6f0eb3c07b93
 CSV.write("convex-monotonic.csv", dfa5);
@@ -205,7 +210,8 @@ end
 
 # ╔═╡ 4fbcbb5d-f320-432f-b6df-df5c72bb10a5
 # ╠═╡ show_logs = false
-pa6, dfa6 = simulate_and_plot(scenario6(), ShortestPath()); pa6
+pa6, dfa6 = simulate_and_plot(scenario6(), ShortestPath());
+pa6;
 
 # ╔═╡ d67ba4bd-a74f-4a4f-9aa8-ffbd93c4e4c8
 CSV.write("convex(add)-monotonic.csv", dfa6);
@@ -255,7 +261,8 @@ end
 
 # ╔═╡ 2454e123-aedc-4b7f-871f-4707e7c76b5c
 # ╠═╡ show_logs = false
-pa7, dfa7 = simulate_and_plot(scenario7(), ShortestPath()); pa7
+pa7, dfa7 = simulate_and_plot(scenario7(), ShortestPath());
+pa7;
 
 # ╔═╡ 8d79bfd6-9e51-47db-9e82-e4beee382b2b
 CSV.write("iddlestate-monotonic.csv", dfa7);
@@ -299,14 +306,15 @@ end
 
 # ╔═╡ 50b84495-921d-42c8-91fb-8b933cf3d7be
 # ╠═╡ show_logs = false
-pa8, dfa8 = simulate_and_plot(scenario8(), ShortestPath()); pa8
+pa8, dfa8 = simulate_and_plot(scenario8(), ShortestPath());
+pa8;
 
 # ╔═╡ 69cda46a-380f-45c2-b5f8-a491f7d362d6
 function scenario9(;
     max_load=3.50,
     nodes=(4, 100),
     rate=0.01,
-    j=job(0, 1, rand(1:4), .8, 0)
+    j=job(0, 1, rand(1:4), 0.8, 0)
 )
     _requests = Vector{KuMo.Request{typeof(j)}}()
 
@@ -340,22 +348,23 @@ end
 
 # ╔═╡ e318bb27-bc9b-40c1-af63-9feccb5fcda7
 # ╠═╡ show_logs = false
-pa9, dfa9 = simulate_and_plot(scenario9(), ShortestPath()); pa9
+pa9, dfa9 = simulate_and_plot(scenario9(), ShortestPath());
+pa9;
 
 # ╔═╡ 73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 begin
-	figures_a = [
-		pa1 => "nodes-only-saturated-load.pdf",
-		pa2 => "4nodes-high-duration.pdf",
-		pa3 => "4nodes-low-duration.pdf",
-		pa4 => "4nodes-low-duration_4users.pdf",
-		pa5 => "4nodes-low-duration_steadyload.pdf",
-		pa6 => "4nodes-low-duration_nonequalload.pdf",
-		pa7 => "4nodes-low-duration_idle.pdf",
-		pa8 => "4nodes-1-duration.pdf",
-		pa9 => "4nodes-0.8-duration.pdf",
-	]
-	foreach(p -> savefig(p.first, p.second), figures_a)
+    figures_a = [
+        pa1 => "nodes-only-saturated-load.pdf",
+        pa2 => "4nodes-high-duration.pdf",
+        pa3 => "4nodes-low-duration.pdf",
+        pa4 => "4nodes-low-duration_4users.pdf",
+        pa5 => "4nodes-low-duration_steadyload.pdf",
+        pa6 => "4nodes-low-duration_nonequalload.pdf",
+        pa7 => "4nodes-low-duration_idle.pdf",
+        pa8 => "4nodes-1-duration.pdf",
+        pa9 => "4nodes-0.8-duration.pdf",
+    ]
+    foreach(p -> savefig(p.first, p.second), figures_a)
 end
 
 # ╔═╡ 101246ef-1753-4174-ab16-109b425adbec
@@ -369,12 +378,12 @@ square_full_load() = scenario(;
     duration=349,
     nodes=(4, 100),
     links=[
-    	(1, 2, 200.0), (2, 3, 200.0), (3, 4, 200.0), (4, 1, 200.0),
+        (1, 2, 200.0), (2, 3, 200.0), (3, 4, 200.0), (4, 1, 200.0),
         (2, 1, 200.0), (3, 2, 200.0), (4, 3, 200.0), (1, 4, 200.0),
     ],
     users=1,
     job_distribution=Dict(
-    	:backend => 2:2,
+        :backend => 2:2,
         :container => 1:1,
         :data_location => 1:4,
         :duration => 400:400,
@@ -385,7 +394,8 @@ square_full_load() = scenario(;
 
 # ╔═╡ 9ba5c4d2-6197-46ab-a2b6-ff81dd5175d5
 # ╠═╡ show_logs = false
-pb1, dfb1 = simulate_and_plot(square_full_load(), ShortestPath()); pb1
+pb1, dfb1 = simulate_and_plot(square_full_load(), ShortestPath());
+pb1;
 
 # ╔═╡ 3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
 function scenario_b2(;
@@ -408,7 +418,7 @@ function scenario_b2(;
 
     for i in 0:π1+π2
         for t in i:δ:π1+π2-i
-            i ≤ π1 && push!(_requests, KuMo.Request(job(1., 1, rand(1:4), 3.25, 2.), t))
+            i ≤ π1 && push!(_requests, KuMo.Request(job(1.0, 1, rand(1:4), 3.25, 2.0), t))
         end
     end
 
@@ -416,34 +426,35 @@ function scenario_b2(;
 
     scenario(;
         duration=1000,
-        nodes=[			
+        nodes=[
             MultiplicativeNode(100, 1),
             MultiplicativeNode(100, 2),
             MultiplicativeNode(100, 4),
             MultiplicativeNode(100, 8),
-		],
+        ],
         users=[
             # user 1
             user(KuMo.Requests(_requests), rand(1:4)),
-		],
-	    links=[
-	    	(1, 2, 200.0), (2, 3, 200.0), (3, 4, 200.0), (4, 1, 200.0),
-	        (2, 1, 200.0), (3, 2, 200.0), (4, 3, 200.0), (1, 4, 200.0),
-	    ],
+        ],
+        links=[
+            (1, 2, 200.0), (2, 3, 200.0), (3, 4, 200.0), (4, 1, 200.0),
+            (2, 1, 200.0), (3, 2, 200.0), (4, 3, 200.0), (1, 4, 200.0),
+        ]
     )
 end
 
 # ╔═╡ 6e597df8-6b06-4ef8-8f9f-212f72022f48
 # ╠═╡ show_logs = false
-pb2, dfb2 = simulate_and_plot(scenario_b2(), ShortestPath()); pb2
+pb2, dfb2 = simulate_and_plot(scenario_b2(), ShortestPath());
+pb2;
 
 # ╔═╡ 8fb3400b-bd36-4cb4-a466-3b7f75c07e6b
 begin
-	figures_b = [
-		pb1 => "square_long-duration.pdf",
-		pb2 => "square_aperiodic_multiplicative.pdf",
-	]
-	foreach(p -> savefig(p.first, p.second), figures_b)
+    figures_b = [
+        pb1 => "square_long-duration.pdf",
+        pb2 => "square_aperiodic_multiplicative.pdf",
+    ]
+    foreach(p -> savefig(p.first, p.second), figures_b)
 end
 
 # ╔═╡ 21fc0470-2c99-45fb-a3d2-e9cd40b01835
@@ -453,28 +464,28 @@ md"""
 
 # ╔═╡ dbd801ce-d8fe-4d68-9493-088295b4f663
 function complex_network()
-	g = Graph(4)
-	add_edge!(g, 1, 3)
-	add_edge!(g, 2, 3)
-	add_edge!(g, 3, 4)
-	add_edge!(g, 2, 4)
-	p = TikzGraphs.plot(
-		g,
-		Layouts.Spring(),
-		[L"v_1", L"v_2", L"v_3", L"v_4"],
-		node_style="draw, rounded corners, fill=blue!10",
-		node_styles=Dict(1=>"fill=green!10",2=>"fill=green!10"),
-		edge_labels=Dict((1,3)=>"200", (2,3)=>"200", (3,4)=>"1000", (2,4)=>"200"),
-		edge_styles=Dict((3,4)=>"blue"),
-		options="scale=2",
-	)
-	return p
+    g = Graph(4)
+    add_edge!(g, 1, 3)
+    add_edge!(g, 2, 3)
+    add_edge!(g, 3, 4)
+    add_edge!(g, 2, 4)
+    p = TikzGraphs.plot(
+        g,
+        Layouts.Spring(),
+        [L"v_1", L"v_2", L"v_3", L"v_4"],
+        node_style="draw, rounded corners, fill=blue!10",
+        node_styles=Dict(1 => "fill=green!10", 2 => "fill=green!10"),
+        edge_labels=Dict((1, 3) => "200", (2, 3) => "200", (3, 4) => "1000", (2, 4) => "200"),
+        edge_styles=Dict((3, 4) => "blue"),
+        options="scale=2",
+    )
+    return p
 end
 
 # ╔═╡ 22f9488e-73c4-4d0b-8d42-abd654b99795
 function scenario_c1()
-	# backend - containers - data_center - duration - frontend
-	j = job(2, 1, 4, 3, 1)
+    # backend - containers - data_center - duration - frontend
+    j = job(2, 1, 4, 3, 1)
 
     _requests = Vector{KuMo.Request{typeof(j)}}()
 
@@ -498,18 +509,18 @@ function scenario_c1()
     scenario(;
         duration=1000,
         nodes=[
-			Node(100),
-			Node(100),
-			Node(1000),
-			Node(1000),
-		],
+            Node(100),
+            Node(100),
+            Node(1000),
+            Node(1000),
+        ],
         users=[
             user(_requests, 1)
-		],
-	    links=[
-	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
-	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
-	    ],
+        ],
+        links=[
+            (1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
+            (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
+        ]
     )
 end
 
@@ -518,12 +529,13 @@ complex_network()
 
 # ╔═╡ 2a9aadf8-cbd3-43ab-b8a6-14025d551208
 # ╠═╡ show_logs = false
-pc1, dfc1 = simulate_and_plot(scenario_c1(), ShortestPath()); pc1
+pc1, dfc1 = simulate_and_plot(scenario_c1(), ShortestPath());
+pc1;
 
 # ╔═╡ a61fb19f-3e94-4097-844f-72ec845d55b2
 function scenario_c2()
-	# backend - containers - data_center - duration - frontend
-	j = job(1, 1, 4, 3, 2)
+    # backend - containers - data_center - duration - frontend
+    j = job(1, 1, 4, 3, 2)
 
     _requests = Vector{KuMo.Request{typeof(j)}}()
 
@@ -547,18 +559,18 @@ function scenario_c2()
     scenario(;
         duration=1000,
         nodes=[
-			Node(100),
-			Node(100),
-			Node(1000),
-			Node(1000),
-		],
+            Node(100),
+            Node(100),
+            Node(1000),
+            Node(1000),
+        ],
         users=[
             user(_requests, 1)
-		],
-	    links=[
-	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
-	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
-	    ],
+        ],
+        links=[
+            (1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
+            (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
+        ]
     )
 end
 
@@ -567,16 +579,17 @@ complex_network()
 
 # ╔═╡ ba99d317-87ae-4405-9237-f60748cec26f
 # ╠═╡ show_logs = false
-pc2, dfc2 = simulate_and_plot(scenario_c2(), ShortestPath()); pc2
+pc2, dfc2 = simulate_and_plot(scenario_c2(), ShortestPath());
+pc2;
 
 # ╔═╡ fda02e26-8425-4ceb-93e5-7101b7acb8be
 complex_network()
 
 # ╔═╡ b8b4ebbe-0443-4471-b062-4605e4504702
 function scenario_c3()
-	# backend - containers - data_center - duration - frontend
-	j1 = job(1, 3, 4, 4, 2)
-	j2 = job(2, 3, 3, 4, 1)
+    # backend - containers - data_center - duration - frontend
+    j1 = job(1, 3, 4, 4, 2)
+    j2 = job(2, 3, 3, 4, 1)
 
     reqs1 = Vector{KuMo.Request{typeof(j1)}}()
     reqs2 = Vector{KuMo.Request{typeof(j2)}}()
@@ -602,26 +615,25 @@ function scenario_c3()
     scenario(;
         duration=1000,
         nodes=[
-			Node(100),
-			Node(100),
-			Node(1000),
-			Node(1000),
-		],
+            Node(100),
+            Node(100),
+            Node(1000),
+            Node(1000),
+        ],
         users=[
             user(reqs1, 1),
-            user(reqs2, 2),
-			
-		],
-	    links=[
-	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
-	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
-	    ],
+            user(reqs2, 2),],
+        links=[
+            (1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
+            (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
+        ]
     )
 end
 
 # ╔═╡ 13e635db-a044-4c30-8643-8a0d34880488
 # ╠═╡ show_logs = false
-pc3, dfc3 = simulate_and_plot(scenario_c3(), ShortestPath()); pc3
+pc3, dfc3 = simulate_and_plot(scenario_c3(), ShortestPath());
+pc3;
 
 # ╔═╡ 12f5cb78-2e6e-4812-862e-6a6179ef57c5
 CSV.write("complex3.csv", dfc3);
@@ -631,17 +643,17 @@ complex_network()
 
 # ╔═╡ 244b96f0-9e91-4d5e-9da3-094e9215f475
 function scenario_c4()
-	scenario(;
+    scenario(;
         duration=10,
         nodes=[
-			Node(100),
-			Node(100),
-			Node(1000),
-			Node(1000),
-		],
+            Node(100),
+            Node(100),
+            Node(1000),
+            Node(1000),
+        ],
         links=[
-	    	(1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
-	        (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
+            (1, 3, 200.0), (2, 3, 200.0), (3, 4, 1000.0), (4, 2, 200.0),
+            (3, 1, 200.0), (3, 2, 200.0), (4, 3, 1000.0), (2, 4, 200.0),
         ],
         users=100,
         job_distribution=Dict(
@@ -657,7 +669,8 @@ end
 
 # ╔═╡ 5a0dad14-0f30-4623-9e6e-4053ca818606
 # ╠═╡ show_logs = false
-pc4, dfc4 = simulate_and_plot(scenario_c4(), ShortestPath()); pc4
+pc4, dfc4 = simulate_and_plot(scenario_c4(), ShortestPath());
+pc4;
 
 # ╔═╡ 22f080a3-eb4b-4c02-88e4-d301f4b97a85
 CSV.write("complex4.csv", dfc4);
@@ -667,585 +680,587 @@ vcat(rand(2), rand(3))
 
 # ╔═╡ ec276414-bd4e-4536-9307-ce773d49306e
 function scenario_c5()
-	duration = 100
-	
-	local_dc = 9:16
-	large_dc = 17:18
-	all_dc = 9:18
+    duration = 100
 
-	users_loc = 1:8
+    local_dc = 9:16
+    large_dc = 17:18
+    all_dc = 9:18
 
-	spike(j, t, intensity) = fill(Request(j, t), (intensity,))
-	
-	function smooth(j, δ, π1, π2)
-		reqs = Vector{KuMo.Request{typeof(j)}}()
-		for i in 0:π1+π2
-	        for t in i:δ:π1+π2-i
-	            i ≤ π1 && push!(reqs, KuMo.Request(j, t))
-	        end
-	    end
-		return reqs
-	end
+    users_loc = 1:8
 
-	function steady(j, δ, π1, π2, intensity)
-		reqs = Vector{KuMo.Request{typeof(j)}}()
-		for t in 0:δ:π1+π2
-			foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
-	    end
-		return reqs
-	end
+    spike(j, t, intensity) = fill(Request(j, t), (intensity,))
 
-	interactive() = job(1, 5, rand(all_dc), 10, 2)
-	data_intensive() = job(5, 10, rand(all_dc), 10, 1)
+    function smooth(j, δ, π1, π2)
+        reqs = Vector{KuMo.Request{typeof(j)}}()
+        for i in 0:π1+π2
+            for t in i:δ:π1+π2-i
+                i ≤ π1 && push!(reqs, KuMo.Request(j, t))
+            end
+        end
+        return reqs
+    end
 
-	users = Vector{KuMo.User}()
-	for i in 1:2:24
-		reqs = Vector{Request{<:KuMo.AbstractJob}}()
-		rang = sort!(rand(0:duration, 2))
-		bounds = rang[1]:rang[2]
-		types = Set()
-		for _ in 1:(i % 8 + 1)
-			j = rand([interactive, data_intensive])()
-			push!(types, typeof(j))
-			kind = rand([:spike, :smooth, :steady])
-			if kind == :spike
-				t = Float64(rand(bounds))
-				intensity = rand(1:100)
-				req = spike(j, t, intensity)
-				reqs = vcat(reqs, req)
-			elseif kind == :smooth
-				inners = sort!(rand(bounds, 2))
-				π1, π2 = inners[1], inners[2]
-				req = smooth(j, j.duration, π1, π2)
-				reqs = vcat(reqs, req)
-			else
-				inners = sort!(rand(bounds, 2))
-				π1, π2 = inners[1], inners[2]				
-				intensity = rand(1:10)
-				req = steady(j, j.duration, π1, π2, intensity)
-				reqs = vcat(reqs, req)
-			end
-		end
-		UT = Union{collect(types)...}
-		R = Vector{Request{UT}}()
-		foreach(r -> push!(R, r), reqs)
-		u = user(requests(R), i % 8 + 1)
-		push!(users, u)		
-	end
+    function steady(j, δ, π1, π2, intensity)
+        reqs = Vector{KuMo.Request{typeof(j)}}()
+        for t in 0:δ:π1+π2
+            foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
+        end
+        return reqs
+    end
 
-	scenario(;
+    interactive() = job(1, 5, rand(all_dc), 10, 2)
+    data_intensive() = job(5, 10, rand(all_dc), 10, 1)
+
+    users = Vector{KuMo.User}()
+    for i in 1:2:24
+        reqs = Vector{Request{<:KuMo.AbstractJob}}()
+        rang = sort!(rand(0:duration, 2))
+        bounds = rang[1]:rang[2]
+        types = Set()
+        for _ in 1:(i%8+1)
+            j = rand([interactive, data_intensive])()
+            push!(types, typeof(j))
+            kind = rand([:spike, :smooth, :steady])
+            if kind == :spike
+                t = Float64(rand(bounds))
+                intensity = rand(1:100)
+                req = spike(j, t, intensity)
+                reqs = vcat(reqs, req)
+            elseif kind == :smooth
+                inners = sort!(rand(bounds, 2))
+                π1, π2 = inners[1], inners[2]
+                req = smooth(j, j.duration, π1, π2)
+                reqs = vcat(reqs, req)
+            else
+                inners = sort!(rand(bounds, 2))
+                π1, π2 = inners[1], inners[2]
+                intensity = rand(1:10)
+                req = steady(j, j.duration, π1, π2, intensity)
+                reqs = vcat(reqs, req)
+            end
+        end
+        UT = Union{collect(types)...}
+        R = Vector{Request{UT}}()
+        foreach(r -> push!(R, r), reqs)
+        u = user(requests(R), i % 8 + 1)
+        push!(users, u)
+    end
+
+    scenario(;
         duration,
         nodes=[
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(5000),
-			Node(5000),
-		],
-        links=[
-			# MDC <-> DC
-	    	(1, 9, 500.0),
-	    	(2, 10, 500.0),
-	    	(3, 11, 500.0),
-	    	(4, 12, 500.0),
-	    	(5, 13, 500.0),
-	    	(6, 14, 500.0),
-	    	(7, 15, 500.0),
-	    	(8, 16, 500.0),
-			(9, 1, 500.0),
-			(10, 2, 500.0),
-			(11, 3, 500.0),
-			(12, 4, 500.0),
-			(13, 5, 500.0),
-			(14, 6, 500.0),
-			(15, 7, 500.0),
-			(16, 8, 500.0),
-			# DC <-> DC
-	    	(10, 9, 1000.0), (9, 10, 1000.0),
-	    	(11, 10, 1000.0), (10, 11, 1000.0),
-	    	(12, 11, 1000.0), (11, 12, 1000.0),
-	    	(13, 12, 1000.0), (12, 13, 1000.0),
-	    	(14, 13, 1000.0), (13, 14, 1000.0),
-	    	(15, 14, 1000.0), (14, 15, 1000.0),
-	    	(16, 15, 1000.0), (15, 16, 1000.0),
-	    	(9, 16, 1000.0), (16, 9, 1000.0),
-			# LargeDC <-> DC			
-	    	(10, 17, 2000.0), (17, 10, 2000.0),
-	    	(12, 17, 2000.0), (17, 12, 2000.0),
-	    	(14, 17, 2000.0), (17, 14, 2000.0),
-	    	(16, 17, 2000.0), (17, 16, 2000.0),
-	    	(10, 18, 2000.0), (18, 10, 2000.0),
-	    	(12, 18, 2000.0), (18, 12, 2000.0),
-	    	(14, 18, 2000.0), (18, 14, 2000.0),
-	    	(16, 18, 2000.0), (18, 16, 2000.0),
-			# LargeDC <-> DC			
-	    	(17, 18, 10000.0), (18, 17, 10000.0),		
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(5000),
+            Node(5000),
         ],
-        users = users,
+        links=[
+            # MDC <-> DC
+            (1, 9, 500.0),
+            (2, 10, 500.0),
+            (3, 11, 500.0),
+            (4, 12, 500.0),
+            (5, 13, 500.0),
+            (6, 14, 500.0),
+            (7, 15, 500.0),
+            (8, 16, 500.0),
+            (9, 1, 500.0),
+            (10, 2, 500.0),
+            (11, 3, 500.0),
+            (12, 4, 500.0),
+            (13, 5, 500.0),
+            (14, 6, 500.0),
+            (15, 7, 500.0),
+            (16, 8, 500.0),
+            # DC <-> DC
+            (10, 9, 1000.0), (9, 10, 1000.0),
+            (11, 10, 1000.0), (10, 11, 1000.0),
+            (12, 11, 1000.0), (11, 12, 1000.0),
+            (13, 12, 1000.0), (12, 13, 1000.0),
+            (14, 13, 1000.0), (13, 14, 1000.0),
+            (15, 14, 1000.0), (14, 15, 1000.0),
+            (16, 15, 1000.0), (15, 16, 1000.0),
+            (9, 16, 1000.0), (16, 9, 1000.0),
+            # LargeDC <-> DC			
+            (10, 17, 2000.0), (17, 10, 2000.0),
+            (12, 17, 2000.0), (17, 12, 2000.0),
+            (14, 17, 2000.0), (17, 14, 2000.0),
+            (16, 17, 2000.0), (17, 16, 2000.0),
+            (10, 18, 2000.0), (18, 10, 2000.0),
+            (12, 18, 2000.0), (18, 12, 2000.0),
+            (14, 18, 2000.0), (18, 14, 2000.0),
+            (16, 18, 2000.0), (18, 16, 2000.0),
+            # LargeDC <-> DC			
+            (17, 18, 10000.0), (18, 17, 10000.0),
+        ],
+        users=users
     )
 end
 
 # ╔═╡ 4873983b-17e6-4889-8954-4989cc3923f5
 # ╠═╡ show_logs = false
 begin
-	s = scenario_c5()
-	
-	g = KuMo.graph(s.topology, ShortestPath())[1]
-	
-	capacities = Dict(filter(p -> p.first[1] < p.first[2], [p.first => Int(p.second.capacity) for p in pairs(s.topology.links)]))
-	
-	t = TikzGraphs.plot(
-		g,
-		Layouts.SpringElectrical(charge=20000),
-		# Layouts.Spring(dist=10),
-		node_style="draw, rounded corners, fill=blue!10",
-		node_styles=Dict(
-			1=>"fill=green!10",
-			2=>"fill=green!10",
-			3=>"fill=green!10",
-			4=>"fill=green!10",
-			5=>"fill=green!10",
-			6=>"fill=green!10",
-			7=>"fill=green!10",
-			8=>"fill=green!10",
-			17=>"fill=red!10",
-			18=>"fill=red!10",
-		),
-		# edge_labels=capacities,
-		# edge_styles=Dict((3,4)=>"blue"),
-		options="scale=.1",
-	)
-	TikzPictures.save(PDF("3levelsnetwork"), t)
-	t
+    s = scenario_c5()
+
+    g = KuMo.graph(s.topology, ShortestPath())[1]
+
+    capacities = Dict(filter(p -> p.first[1] < p.first[2], [p.first => Int(p.second.capacity) for p in pairs(s.topology.links)]))
+
+    t = TikzGraphs.plot(
+        g,
+        Layouts.SpringElectrical(charge=20000),
+        # Layouts.Spring(dist=10),
+        node_style="draw, rounded corners, fill=blue!10",
+        node_styles=Dict(
+            1 => "fill=green!10",
+            2 => "fill=green!10",
+            3 => "fill=green!10",
+            4 => "fill=green!10",
+            5 => "fill=green!10",
+            6 => "fill=green!10",
+            7 => "fill=green!10",
+            8 => "fill=green!10",
+            17 => "fill=red!10",
+            18 => "fill=red!10",
+        ),
+        # edge_labels=capacities,
+        # edge_styles=Dict((3,4)=>"blue"),
+        options="scale=.1",
+    )
+    TikzPictures.save(PDF("3levelsnetwork"), t)
+    t
 end
 
 # ╔═╡ dfc5b22a-5989-4912-a18b-719803ddcbd4
 # ╠═╡ show_logs = false
-pc5, dfc5 = simulate_and_plot(scenario_c5(), ShortestPath()); pc5
+pc5, dfc5 = simulate_and_plot(scenario_c5(), ShortestPath());
+pc5;
 
 # ╔═╡ e23ae61e-f755-4cfc-8a57-b4cba9e47534
 function scenario_c6()
-	duration = 100
-	
-	local_dc = 9:16
-	large_dc = 17:18
-	all_dc = 9:18
+    duration = 100
 
-	users_loc = 1:8
+    local_dc = 9:16
+    large_dc = 17:18
+    all_dc = 9:18
 
-	spike(j, t, intensity) = fill(Request(j, t), (intensity,))
-	
-	function smooth(j, δ, π1, π2)
-		reqs = Vector{KuMo.Request{typeof(j)}}()
-		for i in 0:π1+π2
-	        for t in i:δ:π1+π2-i
-	            i ≤ π1 && push!(reqs, KuMo.Request(j, t))
-	        end
-	    end
-		return reqs
-	end
+    users_loc = 1:8
 
-	function steady(j, δ, π1, π2, intensity)
-		reqs = Vector{KuMo.Request{typeof(j)}}()
-		for t in 0:δ:π1+π2
-			foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
-	    end
-		return reqs
-	end
+    spike(j, t, intensity) = fill(Request(j, t), (intensity,))
 
-	interactive() = job(1, 5, rand(all_dc), 10, 2)
-	data_intensive() = job(5, 10, rand(all_dc), 10, 1)
+    function smooth(j, δ, π1, π2)
+        reqs = Vector{KuMo.Request{typeof(j)}}()
+        for i in 0:π1+π2
+            for t in i:δ:π1+π2-i
+                i ≤ π1 && push!(reqs, KuMo.Request(j, t))
+            end
+        end
+        return reqs
+    end
 
-	users = Vector{KuMo.User}()
-	for i in 1:8
-		reqs = Vector{Request{<:KuMo.AbstractJob}}()
-		rang = sort!(rand(0:duration, 2))
-		bounds = rang[1]:rang[2]
-		types = Set()
-		for _ in 1:(i % 8 + 1)
-			j = rand([interactive, data_intensive])()
-			push!(types, typeof(j))
-			kind = rand([:spike, :smooth, :steady])
-			if kind == :spike
-				t = Float64(rand(bounds))
-				intensity = rand(1:100)
-				req = spike(j, t, intensity)
-				reqs = vcat(reqs, req)
-			elseif kind == :smooth
-				inners = sort!(rand(bounds, 2))
-				π1, π2 = inners[1], inners[2]
-				req = smooth(j, j.duration, π1, π2)
-				reqs = vcat(reqs, req)
-			else
-				inners = sort!(rand(bounds, 2))
-				π1, π2 = inners[1], inners[2]				
-				intensity = rand(1:10)
-				req = steady(j, j.duration, π1, π2, intensity)
-				reqs = vcat(reqs, req)
-			end
-		end
-		UT = Union{collect(types)...}
-		R = Vector{Request{UT}}()
-		foreach(r -> push!(R, r), reqs)
-		u = user(requests(R), i % 8 + 1)
-		push!(users, u)		
-	end
+    function steady(j, δ, π1, π2, intensity)
+        reqs = Vector{KuMo.Request{typeof(j)}}()
+        for t in 0:δ:π1+π2
+            foreach(_ -> push!(reqs, KuMo.Request(j, t)), 1:intensity)
+        end
+        return reqs
+    end
 
-	scenario(;
+    interactive() = job(1, 5, rand(all_dc), 10, 2)
+    data_intensive() = job(5, 10, rand(all_dc), 10, 1)
+
+    users = Vector{KuMo.User}()
+    for i in 1:8
+        reqs = Vector{Request{<:KuMo.AbstractJob}}()
+        rang = sort!(rand(0:duration, 2))
+        bounds = rang[1]:rang[2]
+        types = Set()
+        for _ in 1:(i%8+1)
+            j = rand([interactive, data_intensive])()
+            push!(types, typeof(j))
+            kind = rand([:spike, :smooth, :steady])
+            if kind == :spike
+                t = Float64(rand(bounds))
+                intensity = rand(1:100)
+                req = spike(j, t, intensity)
+                reqs = vcat(reqs, req)
+            elseif kind == :smooth
+                inners = sort!(rand(bounds, 2))
+                π1, π2 = inners[1], inners[2]
+                req = smooth(j, j.duration, π1, π2)
+                reqs = vcat(reqs, req)
+            else
+                inners = sort!(rand(bounds, 2))
+                π1, π2 = inners[1], inners[2]
+                intensity = rand(1:10)
+                req = steady(j, j.duration, π1, π2, intensity)
+                reqs = vcat(reqs, req)
+            end
+        end
+        UT = Union{collect(types)...}
+        R = Vector{Request{UT}}()
+        foreach(r -> push!(R, r), reqs)
+        u = user(requests(R), i % 8 + 1)
+        push!(users, u)
+    end
+
+    scenario(;
         duration,
         nodes=[
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(5000),
-			Node(5000),
-		],
-        links=[
-			# MDC <-> DC
-	    	(1, 9, 500.0),
-	    	(2, 10, 500.0),
-	    	(3, 11, 500.0),
-	    	(4, 12, 500.0),
-	    	(5, 13, 500.0),
-	    	(6, 14, 500.0),
-	    	(7, 15, 500.0),
-	    	(8, 16, 500.0),
-			(9, 1, 500.0),
-			(10, 2, 500.0),
-			(11, 3, 500.0),
-			(12, 4, 500.0),
-			(13, 5, 500.0),
-			(14, 6, 500.0),
-			(15, 7, 500.0),
-			(16, 8, 500.0),
-			# DC <-> DC
-	    	(10, 9, 1000.0), (9, 10, 1000.0),
-	    	(11, 10, 1000.0), (10, 11, 1000.0),
-	    	(12, 11, 1000.0), (11, 12, 1000.0),
-	    	(13, 12, 1000.0), (12, 13, 1000.0),
-	    	(14, 13, 1000.0), (13, 14, 1000.0),
-	    	(15, 14, 1000.0), (14, 15, 1000.0),
-	    	(16, 15, 1000.0), (15, 16, 1000.0),
-	    	(9, 16, 1000.0), (16, 9, 1000.0),
-			# LargeDC <-> DC			
-	    	(10, 17, 2000.0), (17, 10, 2000.0),
-	    	(12, 17, 2000.0), (17, 12, 2000.0),
-	    	(14, 17, 2000.0), (17, 14, 2000.0),
-	    	(16, 17, 2000.0), (17, 16, 2000.0),
-	    	(10, 18, 2000.0), (18, 10, 2000.0),
-	    	(12, 18, 2000.0), (18, 12, 2000.0),
-	    	(14, 18, 2000.0), (18, 14, 2000.0),
-	    	(16, 18, 2000.0), (18, 16, 2000.0),
-			# LargeDC <-> DC			
-	    	(17, 18, 10000.0), (18, 17, 10000.0),		
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(5000),
+            Node(5000),
         ],
-        users = users,
+        links=[
+            # MDC <-> DC
+            (1, 9, 500.0),
+            (2, 10, 500.0),
+            (3, 11, 500.0),
+            (4, 12, 500.0),
+            (5, 13, 500.0),
+            (6, 14, 500.0),
+            (7, 15, 500.0),
+            (8, 16, 500.0),
+            (9, 1, 500.0),
+            (10, 2, 500.0),
+            (11, 3, 500.0),
+            (12, 4, 500.0),
+            (13, 5, 500.0),
+            (14, 6, 500.0),
+            (15, 7, 500.0),
+            (16, 8, 500.0),
+            # DC <-> DC
+            (10, 9, 1000.0), (9, 10, 1000.0),
+            (11, 10, 1000.0), (10, 11, 1000.0),
+            (12, 11, 1000.0), (11, 12, 1000.0),
+            (13, 12, 1000.0), (12, 13, 1000.0),
+            (14, 13, 1000.0), (13, 14, 1000.0),
+            (15, 14, 1000.0), (14, 15, 1000.0),
+            (16, 15, 1000.0), (15, 16, 1000.0),
+            (9, 16, 1000.0), (16, 9, 1000.0),
+            # LargeDC <-> DC			
+            (10, 17, 2000.0), (17, 10, 2000.0),
+            (12, 17, 2000.0), (17, 12, 2000.0),
+            (14, 17, 2000.0), (17, 14, 2000.0),
+            (16, 17, 2000.0), (17, 16, 2000.0),
+            (10, 18, 2000.0), (18, 10, 2000.0),
+            (12, 18, 2000.0), (18, 12, 2000.0),
+            (14, 18, 2000.0), (18, 14, 2000.0),
+            (16, 18, 2000.0), (18, 16, 2000.0),
+            # LargeDC <-> DC			
+            (17, 18, 10000.0), (18, 17, 10000.0),
+        ],
+        users=users
     )
 end
 
 # ╔═╡ f3e65a88-87f1-4619-87f6-d196dfd96305
 # ╠═╡ show_logs = false
-pc6, dfc6 = simulate_and_plot(scenario_c6(), ShortestPath()); pc6
+pc6, dfc6 = simulate_and_plot(scenario_c6(), ShortestPath());
+pc6;
 
 # ╔═╡ 46e86b8e-2fba-4f16-bc71-91e1c05b00fd
 function scenario_c7()
-	duration = 100
-	
-	local_dc = 9:16
-	large_dc = 17:18
-	all_dc = 9:18
+    duration = 100
 
-	users_loc = 1:8
+    local_dc = 9:16
+    large_dc = 17:18
+    all_dc = 9:18
 
-	interactive() = job(1, 5, rand(all_dc), 5, 2)
-	data_intensive() = job(5, 10, rand(local_dc), 5, 1)
+    users_loc = 1:8
 
-	jobs = [data_intensive() for _ in 1:23]
-	types = Set()
-	reqs = Vector()
-	for j in jobs
-		push!(types, typeof(j))
-		reqs = vcat(reqs, steady(j, j.duration, 1, 150, 15))
-		reqs = vcat(reqs, steady(j, j.duration, 201, 800, 15))
-	end
-	j = data_intensive()
-	push!(types, typeof(j))
-	# reqs = vcat(reqs, Request(j, 200.))
-	# reqs = vcat(reqs, Request(j, 1000.))
-	reqs = vcat(reqs, spike(j, 250., 1000))
-	UT = Union{collect(types)...}
-	R = Vector{Request{UT}}()
-	foreach(r -> push!(R, r), reqs)
-	user1 = user(requests(R), 1)
+    interactive() = job(1, 5, rand(all_dc), 5, 2)
+    data_intensive() = job(5, 10, rand(local_dc), 5, 1)
 
-	jobs = [data_intensive() for _ in 1:23]
-	types = Set()
-	reqs = Vector()
-	for j in jobs
-		push!(types, typeof(j))
-		reqs = vcat(reqs, steady(j, j.duration, 51, 150, 15))
-		reqs = vcat(reqs, steady(j, j.duration, 401, 800, 15))
-	end
-	j = data_intensive()
-	push!(types, typeof(j))
-	reqs = vcat(reqs, spike(j, 450., 1000))
-	UT = Union{collect(types)...}
-	R = Vector{Request{UT}}()
-	foreach(r -> push!(R, r), reqs)
-	user2 = user(requests(R), 2)
+    jobs = [data_intensive() for _ in 1:23]
+    types = Set()
+    reqs = Vector()
+    for j in jobs
+        push!(types, typeof(j))
+        reqs = vcat(reqs, steady(j, j.duration, 1, 150, 15))
+        reqs = vcat(reqs, steady(j, j.duration, 201, 800, 15))
+    end
+    j = data_intensive()
+    push!(types, typeof(j))
+    # reqs = vcat(reqs, Request(j, 200.))
+    # reqs = vcat(reqs, Request(j, 1000.))
+    reqs = vcat(reqs, spike(j, 250.0, 1000))
+    UT = Union{collect(types)...}
+    R = Vector{Request{UT}}()
+    foreach(r -> push!(R, r), reqs)
+    user1 = user(requests(R), 1)
 
-	jobs = [data_intensive() for _ in 1:23]
-	types = Set()
-	reqs = Vector()
-	for j in jobs
-		push!(types, typeof(j))
-		reqs = vcat(reqs, steady(j, j.duration, 101, 150, 15))
-		reqs = vcat(reqs, steady(j, j.duration, 601, 800, 15))
-	end
-	j = data_intensive()
-	push!(types, typeof(j))
-	reqs = vcat(reqs, spike(j, 650., 1000))
-	UT = Union{collect(types)...}
-	R = Vector{Request{UT}}()
-	foreach(r -> push!(R, r), reqs)
-	user3 = user(requests(R), 3)
-	
-	s1 = scenario(;
+    jobs = [data_intensive() for _ in 1:23]
+    types = Set()
+    reqs = Vector()
+    for j in jobs
+        push!(types, typeof(j))
+        reqs = vcat(reqs, steady(j, j.duration, 51, 150, 15))
+        reqs = vcat(reqs, steady(j, j.duration, 401, 800, 15))
+    end
+    j = data_intensive()
+    push!(types, typeof(j))
+    reqs = vcat(reqs, spike(j, 450.0, 1000))
+    UT = Union{collect(types)...}
+    R = Vector{Request{UT}}()
+    foreach(r -> push!(R, r), reqs)
+    user2 = user(requests(R), 2)
+
+    jobs = [data_intensive() for _ in 1:23]
+    types = Set()
+    reqs = Vector()
+    for j in jobs
+        push!(types, typeof(j))
+        reqs = vcat(reqs, steady(j, j.duration, 101, 150, 15))
+        reqs = vcat(reqs, steady(j, j.duration, 601, 800, 15))
+    end
+    j = data_intensive()
+    push!(types, typeof(j))
+    reqs = vcat(reqs, spike(j, 650.0, 1000))
+    UT = Union{collect(types)...}
+    R = Vector{Request{UT}}()
+    foreach(r -> push!(R, r), reqs)
+    user3 = user(requests(R), 3)
+
+    s1 = scenario(;
         duration,
         nodes=[
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(5000),
-			Node(5000),
-		],
-        links=[
-			# MDC <-> DC
-	    	(1, 9, 500.0),
-	    	(2, 10, 500.0),
-	    	(3, 11, 500.0),
-	    	(4, 12, 500.0),
-	    	(5, 13, 500.0),
-	    	(6, 14, 500.0),
-	    	(7, 15, 500.0),
-	    	(8, 16, 500.0),
-			(9, 1, 500.0),
-			(10, 2, 500.0),
-			(11, 3, 500.0),
-			(12, 4, 500.0),
-			(13, 5, 500.0),
-			(14, 6, 500.0),
-			(15, 7, 500.0),
-			(16, 8, 500.0),
-			# DC <-> DC
-	    	(10, 9, 1000.0), (9, 10, 1000.0),
-	    	(11, 10, 1000.0), (10, 11, 1000.0),
-	    	(12, 11, 1000.0), (11, 12, 1000.0),
-	    	(13, 12, 1000.0), (12, 13, 1000.0),
-	    	(14, 13, 1000.0), (13, 14, 1000.0),
-	    	(15, 14, 1000.0), (14, 15, 1000.0),
-	    	(16, 15, 1000.0), (15, 16, 1000.0),
-	    	(9, 16, 1000.0), (16, 9, 1000.0),
-			# LargeDC <-> DC			
-	    	(10, 17, 2000.0), (17, 10, 2000.0),
-	    	(12, 17, 2000.0), (17, 12, 2000.0),
-	    	(14, 17, 2000.0), (17, 14, 2000.0),
-	    	(16, 17, 2000.0), (17, 16, 2000.0),
-	    	(10, 18, 2000.0), (18, 10, 2000.0),
-	    	(12, 18, 2000.0), (18, 12, 2000.0),
-	    	(14, 18, 2000.0), (18, 14, 2000.0),
-	    	(16, 18, 2000.0), (18, 16, 2000.0),
-			# LargeDC <-> DC			
-	    	(17, 18, 10000.0), (18, 17, 10000.0),		
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(5000),
+            Node(5000),
         ],
-        users = [
-			user1,
-			user2,
-			user3,
-		],
+        links=[
+            # MDC <-> DC
+            (1, 9, 500.0),
+            (2, 10, 500.0),
+            (3, 11, 500.0),
+            (4, 12, 500.0),
+            (5, 13, 500.0),
+            (6, 14, 500.0),
+            (7, 15, 500.0),
+            (8, 16, 500.0),
+            (9, 1, 500.0),
+            (10, 2, 500.0),
+            (11, 3, 500.0),
+            (12, 4, 500.0),
+            (13, 5, 500.0),
+            (14, 6, 500.0),
+            (15, 7, 500.0),
+            (16, 8, 500.0),
+            # DC <-> DC
+            (10, 9, 1000.0), (9, 10, 1000.0),
+            (11, 10, 1000.0), (10, 11, 1000.0),
+            (12, 11, 1000.0), (11, 12, 1000.0),
+            (13, 12, 1000.0), (12, 13, 1000.0),
+            (14, 13, 1000.0), (13, 14, 1000.0),
+            (15, 14, 1000.0), (14, 15, 1000.0),
+            (16, 15, 1000.0), (15, 16, 1000.0),
+            (9, 16, 1000.0), (16, 9, 1000.0),
+            # LargeDC <-> DC			
+            (10, 17, 2000.0), (17, 10, 2000.0),
+            (12, 17, 2000.0), (17, 12, 2000.0),
+            (14, 17, 2000.0), (17, 14, 2000.0),
+            (16, 17, 2000.0), (17, 16, 2000.0),
+            (10, 18, 2000.0), (18, 10, 2000.0),
+            (12, 18, 2000.0), (18, 12, 2000.0),
+            (14, 18, 2000.0), (18, 14, 2000.0),
+            (16, 18, 2000.0), (18, 16, 2000.0),
+            # LargeDC <-> DC			
+            (17, 18, 10000.0), (18, 17, 10000.0),
+        ],
+        users=[
+            user1,
+            user2,
+            user3,
+        ]
     )
 
-	s2 = scenario(;
+    s2 = scenario(;
         duration,
         nodes=[
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(5000),
-			Node(5000),
-		],
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(5000),
+            Node(5000),
+        ],
         links=(
-			ConvexLink,
-			[
-				# MDC <-> DC
-		    	(1, 9, 500.0),
-		    	(2, 10, 500.0),
-		    	(3, 11, 500.0),
-		    	(4, 12, 500.0),
-		    	(5, 13, 500.0),
-		    	(6, 14, 500.0),
-		    	(7, 15, 500.0),
-		    	(8, 16, 500.0),
-				(9, 1, 500.0),
-				(10, 2, 500.0),
-				(11, 3, 500.0),
-				(12, 4, 500.0),
-				(13, 5, 500.0),
-				(14, 6, 500.0),
-				(15, 7, 500.0),
-				(16, 8, 500.0),
-				# DC <-> DC
-		    	(10, 9, 1000.0), (9, 10, 1000.0),
-		    	(11, 10, 1000.0), (10, 11, 1000.0),
-		    	(12, 11, 1000.0), (11, 12, 1000.0),
-		    	(13, 12, 1000.0), (12, 13, 1000.0),
-		    	(14, 13, 1000.0), (13, 14, 1000.0),
-		    	(15, 14, 1000.0), (14, 15, 1000.0),
-		    	(16, 15, 1000.0), (15, 16, 1000.0),
-		    	(9, 16, 1000.0), (16, 9, 1000.0),
-				# LargeDC <-> DC			
-		    	(10, 17, 5000.0), (17, 10, 5000.0),
-		    	(12, 17, 5000.0), (17, 12, 5000.0),
-		    	(14, 17, 5000.0), (17, 14, 5000.0),
-		    	(16, 17, 5000.0), (17, 16, 5000.0),
-		    	(10, 18, 5000.0), (18, 10, 5000.0),
-		    	(12, 18, 5000.0), (18, 12, 5000.0),
-		    	(14, 18, 5000.0), (18, 14, 5000.0),
-		    	(16, 18, 5000.0), (18, 16, 5000.0),
-				# LargeDC <-> DC			
-		    	(17, 18, 10000.0), (18, 17, 10000.0),		
-	        ]
-		),
-        users = [
-			user1,
-			user2,
-			user3,
-		],
+            ConvexLink,
+            [
+                # MDC <-> DC
+                (1, 9, 500.0),
+                (2, 10, 500.0),
+                (3, 11, 500.0),
+                (4, 12, 500.0),
+                (5, 13, 500.0),
+                (6, 14, 500.0),
+                (7, 15, 500.0),
+                (8, 16, 500.0),
+                (9, 1, 500.0),
+                (10, 2, 500.0),
+                (11, 3, 500.0),
+                (12, 4, 500.0),
+                (13, 5, 500.0),
+                (14, 6, 500.0),
+                (15, 7, 500.0),
+                (16, 8, 500.0),
+                # DC <-> DC
+                (10, 9, 1000.0), (9, 10, 1000.0),
+                (11, 10, 1000.0), (10, 11, 1000.0),
+                (12, 11, 1000.0), (11, 12, 1000.0),
+                (13, 12, 1000.0), (12, 13, 1000.0),
+                (14, 13, 1000.0), (13, 14, 1000.0),
+                (15, 14, 1000.0), (14, 15, 1000.0),
+                (16, 15, 1000.0), (15, 16, 1000.0),
+                (9, 16, 1000.0), (16, 9, 1000.0),
+                # LargeDC <-> DC			
+                (10, 17, 5000.0), (17, 10, 5000.0),
+                (12, 17, 5000.0), (17, 12, 5000.0),
+                (14, 17, 5000.0), (17, 14, 5000.0),
+                (16, 17, 5000.0), (17, 16, 5000.0),
+                (10, 18, 5000.0), (18, 10, 5000.0),
+                (12, 18, 5000.0), (18, 12, 5000.0),
+                (14, 18, 5000.0), (18, 14, 5000.0),
+                (16, 18, 5000.0), (18, 16, 5000.0),
+                # LargeDC <-> DC			
+                (17, 18, 10000.0), (18, 17, 10000.0),
+            ]
+        ),
+        users=[
+            user1,
+            user2,
+            user3,
+        ]
     )
 
-		s3 = scenario(;
+    s3 = scenario(;
         duration,
         nodes=[
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(5000),
-			EqualLoadBalancingNode(5000),
-		],
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(5000),
+            EqualLoadBalancingNode(5000),
+        ],
         links=(
-			ConvexLink,
-			[
-				# MDC <-> DC
-		    	(1, 9, 500.0),
-		    	(2, 10, 500.0),
-		    	(3, 11, 500.0),
-		    	(4, 12, 500.0),
-		    	(5, 13, 500.0),
-		    	(6, 14, 500.0),
-		    	(7, 15, 500.0),
-		    	(8, 16, 500.0),
-				(9, 1, 500.0),
-				(10, 2, 500.0),
-				(11, 3, 500.0),
-				(12, 4, 500.0),
-				(13, 5, 500.0),
-				(14, 6, 500.0),
-				(15, 7, 500.0),
-				(16, 8, 500.0),
-				# DC <-> DC
-		    	(10, 9, 1000.0), (9, 10, 1000.0),
-		    	(11, 10, 1000.0), (10, 11, 1000.0),
-		    	(12, 11, 1000.0), (11, 12, 1000.0),
-		    	(13, 12, 1000.0), (12, 13, 1000.0),
-		    	(14, 13, 1000.0), (13, 14, 1000.0),
-		    	(15, 14, 1000.0), (14, 15, 1000.0),
-		    	(16, 15, 1000.0), (15, 16, 1000.0),
-		    	(9, 16, 1000.0), (16, 9, 1000.0),
-				# LargeDC <-> DC			
-		    	(10, 17, 5000.0), (17, 10, 5000.0),
-		    	(12, 17, 5000.0), (17, 12, 5000.0),
-		    	(14, 17, 5000.0), (17, 14, 5000.0),
-		    	(16, 17, 5000.0), (17, 16, 5000.0),
-		    	(10, 18, 5000.0), (18, 10, 5000.0),
-		    	(12, 18, 5000.0), (18, 12, 5000.0),
-		    	(14, 18, 5000.0), (18, 14, 5000.0),
-		    	(16, 18, 5000.0), (18, 16, 5000.0),
-				# LargeDC <-> DC			
-		    	(17, 18, 10000.0), (18, 17, 10000.0),		
-	        ]
-		),
-        users = [
-			user1,
-			user2,
-			user3,
-		],
+            ConvexLink,
+            [
+                # MDC <-> DC
+                (1, 9, 500.0),
+                (2, 10, 500.0),
+                (3, 11, 500.0),
+                (4, 12, 500.0),
+                (5, 13, 500.0),
+                (6, 14, 500.0),
+                (7, 15, 500.0),
+                (8, 16, 500.0),
+                (9, 1, 500.0),
+                (10, 2, 500.0),
+                (11, 3, 500.0),
+                (12, 4, 500.0),
+                (13, 5, 500.0),
+                (14, 6, 500.0),
+                (15, 7, 500.0),
+                (16, 8, 500.0),
+                # DC <-> DC
+                (10, 9, 1000.0), (9, 10, 1000.0),
+                (11, 10, 1000.0), (10, 11, 1000.0),
+                (12, 11, 1000.0), (11, 12, 1000.0),
+                (13, 12, 1000.0), (12, 13, 1000.0),
+                (14, 13, 1000.0), (13, 14, 1000.0),
+                (15, 14, 1000.0), (14, 15, 1000.0),
+                (16, 15, 1000.0), (15, 16, 1000.0),
+                (9, 16, 1000.0), (16, 9, 1000.0),
+                # LargeDC <-> DC			
+                (10, 17, 5000.0), (17, 10, 5000.0),
+                (12, 17, 5000.0), (17, 12, 5000.0),
+                (14, 17, 5000.0), (17, 14, 5000.0),
+                (16, 17, 5000.0), (17, 16, 5000.0),
+                (10, 18, 5000.0), (18, 10, 5000.0),
+                (12, 18, 5000.0), (18, 12, 5000.0),
+                (14, 18, 5000.0), (18, 14, 5000.0),
+                (16, 18, 5000.0), (18, 16, 5000.0),
+                # LargeDC <-> DC			
+                (17, 18, 10000.0), (18, 17, 10000.0),
+            ]
+        ),
+        users=[
+            user1,
+            user2,
+            user3,
+        ]
     )
-	return s1, s2, s3
+    return s1, s2, s3
 end
 
 # ╔═╡ c633899f-5719-44c8-ba8f-a71cdb2c3ab2
@@ -1253,335 +1268,338 @@ s7, s8, s9 = scenario_c7();
 
 # ╔═╡ 545262b9-fc38-4ea6-b3a6-90e8b96584a3
 # ╠═╡ show_logs = false
-pc7, dfc7 = simulate_and_plot(s7, ShortestPath()); pc7
+pc7, dfc7 = simulate_and_plot(s7, ShortestPath());
+pc7;
 
 # ╔═╡ dbbcc0fe-7019-4d40-b477-3ba76b687cb6
-pc7_nodes_areas = plot_nodes(dfc7; kind = :areaplot)
+pc7_nodes_areas = plot_nodes(dfc7; kind=:areaplot)
 
 # ╔═╡ 29294762-c083-4461-a3cf-0789972b97a8
-pc7_nodes_lines = plot_nodes(dfc7; kind = :plot)
+pc7_nodes_lines = plot_nodes(dfc7; kind=:plot)
 
 # ╔═╡ 91f5a063-d799-46c6-888e-7112f80435e9
-pc7_links_areas = plot_links(dfc7; kind = :areaplot)
+pc7_links_areas = plot_links(dfc7; kind=:areaplot)
 
 # ╔═╡ 083b99e2-cafb-465c-9da1-c4c325ff6038
-pc7_links_lines = plot_links(dfc7; kind = :plot)
+pc7_links_lines = plot_links(dfc7; kind=:plot)
 
 # ╔═╡ 4aac2e0b-2b6c-4845-a7a9-92ef60f5a0ba
 # ╠═╡ show_logs = false
-pc8, dfc8 = simulate_and_plot(s8, ShortestPath()); pc8
+pc8, dfc8 = simulate_and_plot(s8, ShortestPath());
+pc8;
 
 # ╔═╡ 640e31ac-f2a3-4036-a064-618e840dc009
-pc8_nodes_areas = plot_nodes(dfc8; kind = :areaplot)
+pc8_nodes_areas = plot_nodes(dfc8; kind=:areaplot)
 
 # ╔═╡ 8881283e-93a8-4aa0-b0cf-39bf501b5847
-pc8_nodes_lines = plot_nodes(dfc8; kind = :plot)
+pc8_nodes_lines = plot_nodes(dfc8; kind=:plot)
 
 # ╔═╡ ceef39d0-185e-496f-a2c1-9bffd3c1f619
-pc8_links_areas = plot_links(dfc8; kind = :areaplot)
+pc8_links_areas = plot_links(dfc8; kind=:areaplot)
 
 # ╔═╡ fb370e9f-65c3-44e9-b30e-3efd778b345a
-pc8_links_lines = plot_links(dfc8; kind = :plot)
+pc8_links_lines = plot_links(dfc8; kind=:plot)
 
 # ╔═╡ 53ef9168-042d-48b5-bcda-61b77db1000c
 # ╠═╡ show_logs = false
-pc9, dfc9 = simulate_and_plot(s9, ShortestPath()); pc9
+pc9, dfc9 = simulate_and_plot(s9, ShortestPath());
+pc9;
 
 # ╔═╡ a1047cd7-5683-4d37-91db-daec3ee7ddb4
-pc9_nodes_areas = plot_nodes(dfc9; kind = :areaplot)
+pc9_nodes_areas = plot_nodes(dfc9; kind=:areaplot)
 
 # ╔═╡ dc9885c4-f003-4f25-ab30-0cccbb855f9f
-pc9_nodes_lines = plot_nodes(dfc9; kind = :plot)
+pc9_nodes_lines = plot_nodes(dfc9; kind=:plot)
 
 # ╔═╡ 8140f3c6-b711-469b-9d71-33fcb9361e91
-pc9_links_areas = plot_links(dfc9; kind = :areaplot)
+pc9_links_areas = plot_links(dfc9; kind=:areaplot)
 
 # ╔═╡ 722eb58c-aa69-4371-b737-fcead002aa51
-pc9_links_lines = plot_links(dfc9; kind = :plot)
+pc9_links_lines = plot_links(dfc9; kind=:plot)
 
 # ╔═╡ ea4b5ab1-5b11-4bdd-b6e2-c7c8c5395f95
 function scenario_c10()
-	duration = 100
-	
-	local_dc = 9:16
-	large_dc = 17:18
-	all_dc = 9:18
+    duration = 100
 
-	users_loc = 1:8
+    local_dc = 9:16
+    large_dc = 17:18
+    all_dc = 9:18
 
-	# job duration normal law
-	# job distribution exponential law
+    users_loc = 1:8
 
-	function interactive(; μ = 5)
-		d_duration = truncated(Normal(μ); lower = 1.)
-		return job(1, 5, rand(all_dc), rand(d_duration), 2)
-	end
-	
-	function data_intensive(; μ = 5)
-		d_duration = truncated(Normal(μ); lower = 1.)
-		return job(5, 10, rand(local_dc), rand(d_duration), 1)
-	end
+    # job duration normal law
+    # job distribution exponential law
 
-	jobs = [data_intensive() for _ in 1:23]
-	types = Set()
-	reqs = Vector()
-	for j in jobs
-		push!(types, typeof(j))
-		reqs = vcat(reqs, steady(j, j.duration, 1, 150, 15))
-		reqs = vcat(reqs, steady(j, j.duration, 201, 800, 15))
-	end
-	j = data_intensive()
-	push!(types, typeof(j))
-	# reqs = vcat(reqs, Request(j, 200.))
-	# reqs = vcat(reqs, Request(j, 1000.))
-	reqs = vcat(reqs, spike(j, 250., 1000))
-	UT = Union{collect(types)...}
-	R = Vector{Request{UT}}()
-	foreach(r -> push!(R, r), reqs)
-	user1 = user(requests(R), 1)
+    function interactive(; μ=5)
+        d_duration = truncated(Normal(μ); lower=1.0)
+        return job(1, 5, rand(all_dc), rand(d_duration), 2)
+    end
 
-	jobs = [data_intensive() for _ in 1:23]
-	types = Set()
-	reqs = Vector()
-	for j in jobs
-		push!(types, typeof(j))
-		reqs = vcat(reqs, steady(j, j.duration, 51, 150, 15))
-		reqs = vcat(reqs, steady(j, j.duration, 401, 800, 15))
-	end
-	j = data_intensive()
-	push!(types, typeof(j))
-	reqs = vcat(reqs, spike(j, 450., 1000))
-	UT = Union{collect(types)...}
-	R = Vector{Request{UT}}()
-	foreach(r -> push!(R, r), reqs)
-	user2 = user(requests(R), 2)
+    function data_intensive(; μ=5)
+        d_duration = truncated(Normal(μ); lower=1.0)
+        return job(5, 10, rand(local_dc), rand(d_duration), 1)
+    end
 
-	jobs = [data_intensive() for _ in 1:23]
-	types = Set()
-	reqs = Vector()
-	for j in jobs
-		push!(types, typeof(j))
-		reqs = vcat(reqs, steady(j, j.duration, 101, 150, 15))
-		reqs = vcat(reqs, steady(j, j.duration, 601, 800, 15))
-	end
-	j = data_intensive()
-	push!(types, typeof(j))
-	reqs = vcat(reqs, spike(j, 650., 1000))
-	UT = Union{collect(types)...}
-	R = Vector{Request{UT}}()
-	foreach(r -> push!(R, r), reqs)
-	user3 = user(requests(R), 3)
-	
-	s1 = scenario(;
+    jobs = [data_intensive() for _ in 1:23]
+    types = Set()
+    reqs = Vector()
+    for j in jobs
+        push!(types, typeof(j))
+        reqs = vcat(reqs, steady(j, j.duration, 1, 150, 15))
+        reqs = vcat(reqs, steady(j, j.duration, 201, 800, 15))
+    end
+    j = data_intensive()
+    push!(types, typeof(j))
+    # reqs = vcat(reqs, Request(j, 200.))
+    # reqs = vcat(reqs, Request(j, 1000.))
+    reqs = vcat(reqs, spike(j, 250.0, 1000))
+    UT = Union{collect(types)...}
+    R = Vector{Request{UT}}()
+    foreach(r -> push!(R, r), reqs)
+    user1 = user(requests(R), 1)
+
+    jobs = [data_intensive() for _ in 1:23]
+    types = Set()
+    reqs = Vector()
+    for j in jobs
+        push!(types, typeof(j))
+        reqs = vcat(reqs, steady(j, j.duration, 51, 150, 15))
+        reqs = vcat(reqs, steady(j, j.duration, 401, 800, 15))
+    end
+    j = data_intensive()
+    push!(types, typeof(j))
+    reqs = vcat(reqs, spike(j, 450.0, 1000))
+    UT = Union{collect(types)...}
+    R = Vector{Request{UT}}()
+    foreach(r -> push!(R, r), reqs)
+    user2 = user(requests(R), 2)
+
+    jobs = [data_intensive() for _ in 1:23]
+    types = Set()
+    reqs = Vector()
+    for j in jobs
+        push!(types, typeof(j))
+        reqs = vcat(reqs, steady(j, j.duration, 101, 150, 15))
+        reqs = vcat(reqs, steady(j, j.duration, 601, 800, 15))
+    end
+    j = data_intensive()
+    push!(types, typeof(j))
+    reqs = vcat(reqs, spike(j, 650.0, 1000))
+    UT = Union{collect(types)...}
+    R = Vector{Request{UT}}()
+    foreach(r -> push!(R, r), reqs)
+    user3 = user(requests(R), 3)
+
+    s1 = scenario(;
         duration,
         nodes=[
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(5000),
-			Node(5000),
-		],
-        links=[
-			# MDC <-> DC
-	    	(1, 9, 500.0),
-	    	(2, 10, 500.0),
-	    	(3, 11, 500.0),
-	    	(4, 12, 500.0),
-	    	(5, 13, 500.0),
-	    	(6, 14, 500.0),
-	    	(7, 15, 500.0),
-	    	(8, 16, 500.0),
-			(9, 1, 500.0),
-			(10, 2, 500.0),
-			(11, 3, 500.0),
-			(12, 4, 500.0),
-			(13, 5, 500.0),
-			(14, 6, 500.0),
-			(15, 7, 500.0),
-			(16, 8, 500.0),
-			# DC <-> DC
-	    	(10, 9, 1000.0), (9, 10, 1000.0),
-	    	(11, 10, 1000.0), (10, 11, 1000.0),
-	    	(12, 11, 1000.0), (11, 12, 1000.0),
-	    	(13, 12, 1000.0), (12, 13, 1000.0),
-	    	(14, 13, 1000.0), (13, 14, 1000.0),
-	    	(15, 14, 1000.0), (14, 15, 1000.0),
-	    	(16, 15, 1000.0), (15, 16, 1000.0),
-	    	(9, 16, 1000.0), (16, 9, 1000.0),
-			# LargeDC <-> DC			
-	    	(10, 17, 2000.0), (17, 10, 2000.0),
-	    	(12, 17, 2000.0), (17, 12, 2000.0),
-	    	(14, 17, 2000.0), (17, 14, 2000.0),
-	    	(16, 17, 2000.0), (17, 16, 2000.0),
-	    	(10, 18, 2000.0), (18, 10, 2000.0),
-	    	(12, 18, 2000.0), (18, 12, 2000.0),
-	    	(14, 18, 2000.0), (18, 14, 2000.0),
-	    	(16, 18, 2000.0), (18, 16, 2000.0),
-			# LargeDC <-> DC			
-	    	(17, 18, 10000.0), (18, 17, 10000.0),		
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(5000),
+            Node(5000),
         ],
-        users = [
-			user1,
-			user2,
-			user3,
-		],
+        links=[
+            # MDC <-> DC
+            (1, 9, 500.0),
+            (2, 10, 500.0),
+            (3, 11, 500.0),
+            (4, 12, 500.0),
+            (5, 13, 500.0),
+            (6, 14, 500.0),
+            (7, 15, 500.0),
+            (8, 16, 500.0),
+            (9, 1, 500.0),
+            (10, 2, 500.0),
+            (11, 3, 500.0),
+            (12, 4, 500.0),
+            (13, 5, 500.0),
+            (14, 6, 500.0),
+            (15, 7, 500.0),
+            (16, 8, 500.0),
+            # DC <-> DC
+            (10, 9, 1000.0), (9, 10, 1000.0),
+            (11, 10, 1000.0), (10, 11, 1000.0),
+            (12, 11, 1000.0), (11, 12, 1000.0),
+            (13, 12, 1000.0), (12, 13, 1000.0),
+            (14, 13, 1000.0), (13, 14, 1000.0),
+            (15, 14, 1000.0), (14, 15, 1000.0),
+            (16, 15, 1000.0), (15, 16, 1000.0),
+            (9, 16, 1000.0), (16, 9, 1000.0),
+            # LargeDC <-> DC			
+            (10, 17, 2000.0), (17, 10, 2000.0),
+            (12, 17, 2000.0), (17, 12, 2000.0),
+            (14, 17, 2000.0), (17, 14, 2000.0),
+            (16, 17, 2000.0), (17, 16, 2000.0),
+            (10, 18, 2000.0), (18, 10, 2000.0),
+            (12, 18, 2000.0), (18, 12, 2000.0),
+            (14, 18, 2000.0), (18, 14, 2000.0),
+            (16, 18, 2000.0), (18, 16, 2000.0),
+            # LargeDC <-> DC			
+            (17, 18, 10000.0), (18, 17, 10000.0),
+        ],
+        users=[
+            user1,
+            user2,
+            user3,
+        ]
     )
 
-	s2 = scenario(;
+    s2 = scenario(;
         duration,
         nodes=[
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(100),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(500),
-			Node(5000),
-			Node(5000),
-		],
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(100),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(500),
+            Node(5000),
+            Node(5000),
+        ],
         links=(
-			ConvexLink,
-			[
-				# MDC <-> DC
-		    	(1, 9, 500.0),
-		    	(2, 10, 500.0),
-		    	(3, 11, 500.0),
-		    	(4, 12, 500.0),
-		    	(5, 13, 500.0),
-		    	(6, 14, 500.0),
-		    	(7, 15, 500.0),
-		    	(8, 16, 500.0),
-				(9, 1, 500.0),
-				(10, 2, 500.0),
-				(11, 3, 500.0),
-				(12, 4, 500.0),
-				(13, 5, 500.0),
-				(14, 6, 500.0),
-				(15, 7, 500.0),
-				(16, 8, 500.0),
-				# DC <-> DC
-		    	(10, 9, 1000.0), (9, 10, 1000.0),
-		    	(11, 10, 1000.0), (10, 11, 1000.0),
-		    	(12, 11, 1000.0), (11, 12, 1000.0),
-		    	(13, 12, 1000.0), (12, 13, 1000.0),
-		    	(14, 13, 1000.0), (13, 14, 1000.0),
-		    	(15, 14, 1000.0), (14, 15, 1000.0),
-		    	(16, 15, 1000.0), (15, 16, 1000.0),
-		    	(9, 16, 1000.0), (16, 9, 1000.0),
-				# LargeDC <-> DC			
-		    	(10, 17, 5000.0), (17, 10, 5000.0),
-		    	(12, 17, 5000.0), (17, 12, 5000.0),
-		    	(14, 17, 5000.0), (17, 14, 5000.0),
-		    	(16, 17, 5000.0), (17, 16, 5000.0),
-		    	(10, 18, 5000.0), (18, 10, 5000.0),
-		    	(12, 18, 5000.0), (18, 12, 5000.0),
-		    	(14, 18, 5000.0), (18, 14, 5000.0),
-		    	(16, 18, 5000.0), (18, 16, 5000.0),
-				# LargeDC <-> DC			
-		    	(17, 18, 10000.0), (18, 17, 10000.0),		
-	        ]
-		),
-        users = [
-			user1,
-			user2,
-			user3,
-		],
+            ConvexLink,
+            [
+                # MDC <-> DC
+                (1, 9, 500.0),
+                (2, 10, 500.0),
+                (3, 11, 500.0),
+                (4, 12, 500.0),
+                (5, 13, 500.0),
+                (6, 14, 500.0),
+                (7, 15, 500.0),
+                (8, 16, 500.0),
+                (9, 1, 500.0),
+                (10, 2, 500.0),
+                (11, 3, 500.0),
+                (12, 4, 500.0),
+                (13, 5, 500.0),
+                (14, 6, 500.0),
+                (15, 7, 500.0),
+                (16, 8, 500.0),
+                # DC <-> DC
+                (10, 9, 1000.0), (9, 10, 1000.0),
+                (11, 10, 1000.0), (10, 11, 1000.0),
+                (12, 11, 1000.0), (11, 12, 1000.0),
+                (13, 12, 1000.0), (12, 13, 1000.0),
+                (14, 13, 1000.0), (13, 14, 1000.0),
+                (15, 14, 1000.0), (14, 15, 1000.0),
+                (16, 15, 1000.0), (15, 16, 1000.0),
+                (9, 16, 1000.0), (16, 9, 1000.0),
+                # LargeDC <-> DC			
+                (10, 17, 5000.0), (17, 10, 5000.0),
+                (12, 17, 5000.0), (17, 12, 5000.0),
+                (14, 17, 5000.0), (17, 14, 5000.0),
+                (16, 17, 5000.0), (17, 16, 5000.0),
+                (10, 18, 5000.0), (18, 10, 5000.0),
+                (12, 18, 5000.0), (18, 12, 5000.0),
+                (14, 18, 5000.0), (18, 14, 5000.0),
+                (16, 18, 5000.0), (18, 16, 5000.0),
+                # LargeDC <-> DC			
+                (17, 18, 10000.0), (18, 17, 10000.0),
+            ]
+        ),
+        users=[
+            user1,
+            user2,
+            user3,
+        ]
     )
 
-		s3 = scenario(;
+    s3 = scenario(;
         duration,
         nodes=[
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(100),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(500),
-			EqualLoadBalancingNode(5000),
-			EqualLoadBalancingNode(5000),
-		],
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(100),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(500),
+            EqualLoadBalancingNode(5000),
+            EqualLoadBalancingNode(5000),
+        ],
         links=(
-			ConvexLink,
-			[
-				# MDC <-> DC
-		    	(1, 9, 500.0),
-		    	(2, 10, 500.0),
-		    	(3, 11, 500.0),
-		    	(4, 12, 500.0),
-		    	(5, 13, 500.0),
-		    	(6, 14, 500.0),
-		    	(7, 15, 500.0),
-		    	(8, 16, 500.0),
-				(9, 1, 500.0),
-				(10, 2, 500.0),
-				(11, 3, 500.0),
-				(12, 4, 500.0),
-				(13, 5, 500.0),
-				(14, 6, 500.0),
-				(15, 7, 500.0),
-				(16, 8, 500.0),
-				# DC <-> DC
-		    	(10, 9, 1000.0), (9, 10, 1000.0),
-		    	(11, 10, 1000.0), (10, 11, 1000.0),
-		    	(12, 11, 1000.0), (11, 12, 1000.0),
-		    	(13, 12, 1000.0), (12, 13, 1000.0),
-		    	(14, 13, 1000.0), (13, 14, 1000.0),
-		    	(15, 14, 1000.0), (14, 15, 1000.0),
-		    	(16, 15, 1000.0), (15, 16, 1000.0),
-		    	(9, 16, 1000.0), (16, 9, 1000.0),
-				# LargeDC <-> DC			
-		    	(10, 17, 5000.0), (17, 10, 5000.0),
-		    	(12, 17, 5000.0), (17, 12, 5000.0),
-		    	(14, 17, 5000.0), (17, 14, 5000.0),
-		    	(16, 17, 5000.0), (17, 16, 5000.0),
-		    	(10, 18, 5000.0), (18, 10, 5000.0),
-		    	(12, 18, 5000.0), (18, 12, 5000.0),
-		    	(14, 18, 5000.0), (18, 14, 5000.0),
-		    	(16, 18, 5000.0), (18, 16, 5000.0),
-				# LargeDC <-> DC			
-		    	(17, 18, 10000.0), (18, 17, 10000.0),		
-	        ]
-		),
-        users = [
-			user1,
-			user2,
-			user3,
-		],
+            ConvexLink,
+            [
+                # MDC <-> DC
+                (1, 9, 500.0),
+                (2, 10, 500.0),
+                (3, 11, 500.0),
+                (4, 12, 500.0),
+                (5, 13, 500.0),
+                (6, 14, 500.0),
+                (7, 15, 500.0),
+                (8, 16, 500.0),
+                (9, 1, 500.0),
+                (10, 2, 500.0),
+                (11, 3, 500.0),
+                (12, 4, 500.0),
+                (13, 5, 500.0),
+                (14, 6, 500.0),
+                (15, 7, 500.0),
+                (16, 8, 500.0),
+                # DC <-> DC
+                (10, 9, 1000.0), (9, 10, 1000.0),
+                (11, 10, 1000.0), (10, 11, 1000.0),
+                (12, 11, 1000.0), (11, 12, 1000.0),
+                (13, 12, 1000.0), (12, 13, 1000.0),
+                (14, 13, 1000.0), (13, 14, 1000.0),
+                (15, 14, 1000.0), (14, 15, 1000.0),
+                (16, 15, 1000.0), (15, 16, 1000.0),
+                (9, 16, 1000.0), (16, 9, 1000.0),
+                # LargeDC <-> DC			
+                (10, 17, 5000.0), (17, 10, 5000.0),
+                (12, 17, 5000.0), (17, 12, 5000.0),
+                (14, 17, 5000.0), (17, 14, 5000.0),
+                (16, 17, 5000.0), (17, 16, 5000.0),
+                (10, 18, 5000.0), (18, 10, 5000.0),
+                (12, 18, 5000.0), (18, 12, 5000.0),
+                (14, 18, 5000.0), (18, 14, 5000.0),
+                (16, 18, 5000.0), (18, 16, 5000.0),
+                # LargeDC <-> DC			
+                (17, 18, 10000.0), (18, 17, 10000.0),
+            ]
+        ),
+        users=[
+            user1,
+            user2,
+            user3,
+        ]
     )
-	return s1, s2, s3
+    return s1, s2, s3
 end
 
 # ╔═╡ f50c4351-1adb-4b08-b9fe-d6396a78776d
@@ -1589,51 +1607,52 @@ s10, s11, s12 = scenario_c10();
 
 # ╔═╡ 18bd8ac5-c709-49e3-a0cc-7e13c899fb14
 # ╠═╡ show_logs = false
-pc10, dfc10 = simulate_and_plot(s10, ShortestPath()); pc10
+pc10, dfc10 = simulate_and_plot(s10, ShortestPath());
+pc10;
 
 # ╔═╡ a96c1117-3692-4238-b72f-b5067a286a36
-pc10_nodes_areas = plot_nodes(dfc10; kind = :areaplot)
+pc10_nodes_areas = plot_nodes(dfc10; kind=:areaplot)
 
 # ╔═╡ 1fe7399c-f5d4-4924-b2fe-d8ea07f3704d
-pc10_nodes_lines = plot_nodes(dfc10; kind = :plot)
+pc10_nodes_lines = plot_nodes(dfc10; kind=:plot)
 
 # ╔═╡ 92d177a0-3389-4da2-934c-a93d4311bd4a
 # ╠═╡ show_logs = false
 begin
-	figures_c = [
-		pc1 => "complex1.pdf",
-		pc2 => "complex2.pdf",
-		pc3 => "complex3.pdf",
-		pc4 => "complex4.pdf",
-		pc5 => "complex5.pdf",
-		pc6 => "complex6.pdf",
-		pc7 => "complex7.pdf",
-		pc7_nodes_lines => "complex7_nodes_lines.pdf",
-		pc7_nodes_areas => "complex7_nodes_areas.pdf",
-		pc7_links_lines => "complex7_links_lines.pdf",
-		pc7_links_areas => "complex7_links_areas.pdf",
-		pc8 => "complex8.pdf",
-		pc8_nodes_lines => "complex8_nodes_lines.pdf",
-		pc8_nodes_areas => "complex8_nodes_areas.pdf",
-		pc8_links_lines => "complex8_links_lines.pdf",
-		pc8_links_areas => "complex8_links_areas.pdf",
-		pc9 => "complex9.pdf",
-		pc9_nodes_lines => "complex9_nodes_lines.pdf",
-		pc9_nodes_areas => "complex9_nodes_areas.pdf",
-		pc9_links_lines => "complex9_links_lines.pdf",
-		pc9_links_areas => "complex9_links_areas.pdf",
-		pc10 => "complex10.pdf",
-		pc9_nodes_lines => "complex10_nodes_lines.pdf",
-		pc9_nodes_areas => "complex10_nodes_areas.pdf",
-		# pc9_links_lines => "complex10_links_lines.pdf",
-		# pc9_links_areas => "complex10_links_areas.pdf",
-	]
-	foreach(p -> savefig(p.first, p.second), figures_c)
-	TikzPictures.save(PDF("complex_network"), complex_network())
-	CSV.write("complex7.csv", dfc7)
-	CSV.write("complex8.csv", dfc8)
-	CSV.write("complex9.csv", dfc9)
-	CSV.write("complex10.csv", dfc10)
+    figures_c = [
+        pc1 => "complex1.pdf",
+        pc2 => "complex2.pdf",
+        pc3 => "complex3.pdf",
+        pc4 => "complex4.pdf",
+        pc5 => "complex5.pdf",
+        pc6 => "complex6.pdf",
+        pc7 => "complex7.pdf",
+        pc7_nodes_lines => "complex7_nodes_lines.pdf",
+        pc7_nodes_areas => "complex7_nodes_areas.pdf",
+        pc7_links_lines => "complex7_links_lines.pdf",
+        pc7_links_areas => "complex7_links_areas.pdf",
+        pc8 => "complex8.pdf",
+        pc8_nodes_lines => "complex8_nodes_lines.pdf",
+        pc8_nodes_areas => "complex8_nodes_areas.pdf",
+        pc8_links_lines => "complex8_links_lines.pdf",
+        pc8_links_areas => "complex8_links_areas.pdf",
+        pc9 => "complex9.pdf",
+        pc9_nodes_lines => "complex9_nodes_lines.pdf",
+        pc9_nodes_areas => "complex9_nodes_areas.pdf",
+        pc9_links_lines => "complex9_links_lines.pdf",
+        pc9_links_areas => "complex9_links_areas.pdf",
+        pc10 => "complex10.pdf",
+        pc9_nodes_lines => "complex10_nodes_lines.pdf",
+        pc9_nodes_areas => "complex10_nodes_areas.pdf",
+        # pc9_links_lines => "complex10_links_lines.pdf",
+        # pc9_links_areas => "complex10_links_areas.pdf",
+    ]
+    foreach(p -> savefig(p.first, p.second), figures_c)
+    TikzPictures.save(PDF("complex_network"), complex_network())
+    CSV.write("complex7.csv", dfc7)
+    CSV.write("complex8.csv", dfc8)
+    CSV.write("complex9.csv", dfc9)
+    CSV.write("complex10.csv", dfc10)
 end;
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -3088,7 +3107,7 @@ version = "0.9.1+5"
 # ╠═e318bb27-bc9b-40c1-af63-9feccb5fcda7
 # ╟─73ab86d3-7ab6-4288-a1d0-ca30432da9fc
 # ╟─101246ef-1753-4174-ab16-109b425adbec
-# ╟─1c7238b6-6a2c-4123-8f9b-061820e74c98
+# ╠═1c7238b6-6a2c-4123-8f9b-061820e74c98
 # ╠═9ba5c4d2-6197-46ab-a2b6-ff81dd5175d5
 # ╠═3ee399d2-40fd-4994-b98b-7cb81c2fbf0e
 # ╠═6e597df8-6b06-4ef8-8f9f-212f72022f48

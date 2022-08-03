@@ -17,9 +17,6 @@ using Random
 using SimpleTraits
 using SparseArrays
 
-using .VizStatsPlots: simulate_and_plot, plot_links, plot_nodes, plot_resources
-using .VizMakie: show_pseudo_costs, show_simulation
-
 # SECTION - exports
 export job
 export job_distributions
@@ -103,6 +100,7 @@ include("simulate.jl")
 include("visualization/statsplots.jl")
 include("visualization/makie.jl")
 
-
+using .VizStatsPlots: simulate_and_plot, plot_links, plot_nodes, plot_resources
+using .VizMakie: show_pseudo_costs, show_simulation
 
 end
