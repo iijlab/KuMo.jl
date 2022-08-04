@@ -16,8 +16,6 @@ using ProgressMeter
 using Random
 using SimpleTraits
 using SparseArrays
-using StatsPlots
-using StatsPlots: grid
 
 # SECTION - exports
 export job
@@ -37,6 +35,8 @@ export requests
 export scenario
 export simulate
 export simulate_and_plot
+export show_pseudo_costs
+export show_simulation
 export smooth
 export spike
 export steady
@@ -63,6 +63,7 @@ export AdditiveNode
 export IdleStateNode
 
 export SCENARII
+export CONEXT2022
 
 ## SECTION - includes
 
@@ -88,7 +89,18 @@ include("paths.jl")
 include("topology.jl")
 include("scenario.jl")
 
+# scenarii (dictionaries)
+include("scenarii/basic.jl")
+include("scenarii/conext2022.jl")
+
 # simulation
 include("simulate.jl")
+
+# visualization
+include("visualization/statsplots.jl")
+include("visualization/makie.jl")
+
+using .VizStatsPlots: simulate_and_plot, plot_links, plot_nodes, plot_resources
+using .VizMakie: show_pseudo_costs, show_simulation
 
 end
