@@ -58,8 +58,7 @@ Plots after that takes the time of allocation/deallocation as parameter.
 
 # ╔═╡ 698ef7c5-1be3-43fe-bbf0-6c5fa1afef6f
 # ╠═╡ show_logs = false
-pa1, dfa1 = simulate_and_plot(SCENARII[:four_nodes], ShortestPath());
-pa1;
+pa1, dfa1 = simulate_and_plot(SCENARII[:four_nodes], ShortestPath()); pa1
 
 # ╔═╡ 12169dd2-6ea2-43a3-b6fd-94d55e23a568
 # Load of 87.5% (long duration, low request rate)
@@ -79,8 +78,7 @@ scenario2() = scenario(;
 
 # ╔═╡ d3da1adc-91a8-4a97-bb23-586582a31ad7
 # ╠═╡ show_logs = false
-pa2, dfa2 = simulate_and_plot(scenario2(), ShortestPath());
-pa2;
+pa2, dfa2 = simulate_and_plot(scenario2(), ShortestPath()); pa2
 
 # ╔═╡ c1a3e0fe-c63d-41eb-9ef4-6a9c68246dc0
 # Load of 87.5% (small duration, high request rate)
@@ -95,8 +93,7 @@ scenario3() = scenario(;
 
 # ╔═╡ 015b87d8-c652-41ea-8bd8-0634383afea9
 # ╠═╡ show_logs = false
-pa3, dfa3 = simulate_and_plot(scenario3(), ShortestPath());
-pa3;
+pa3, dfa3 = simulate_and_plot(scenario3(), ShortestPath()); pa3
 
 # ╔═╡ cd893c83-7f8d-486e-af73-e411e154e631
 # Load of 87.5% (small duration, high request rate, more users)
@@ -117,8 +114,7 @@ scenario4() = scenario(;
 
 # ╔═╡ 63f15cd5-fb1b-4f74-a287-8e2265ad5d9e
 # ╠═╡ show_logs = false
-pa4, dfa4 = simulate_and_plot(scenario4(), ShortestPath());
-pa4;
+pa4, dfa4 = simulate_and_plot(scenario4(), ShortestPath()); pa4
 
 # ╔═╡ e2144b8b-6b09-4f99-8bf3-819d0a7704f1
 function scenario5(;
@@ -159,8 +155,7 @@ end
 
 # ╔═╡ 83f8c3e1-9a29-4e86-9125-ace58b0ad794
 # ╠═╡ show_logs = false
-pa5, dfa5 = simulate_and_plot(scenario5(), ShortestPath());
-pa5;
+pa5, dfa5 = simulate_and_plot(scenario5(), ShortestPath()); pa5
 
 # ╔═╡ a67d8276-bd35-472b-afba-6f0eb3c07b93
 CSV.write("convex-monotonic.csv", dfa5);
@@ -210,8 +205,7 @@ end
 
 # ╔═╡ 4fbcbb5d-f320-432f-b6df-df5c72bb10a5
 # ╠═╡ show_logs = false
-pa6, dfa6 = simulate_and_plot(scenario6(), ShortestPath());
-pa6;
+pa6, dfa6 = simulate_and_plot(scenario6(), ShortestPath()); pa6
 
 # ╔═╡ d67ba4bd-a74f-4a4f-9aa8-ffbd93c4e4c8
 CSV.write("convex(add)-monotonic.csv", dfa6);
@@ -261,8 +255,7 @@ end
 
 # ╔═╡ 2454e123-aedc-4b7f-871f-4707e7c76b5c
 # ╠═╡ show_logs = false
-pa7, dfa7 = simulate_and_plot(scenario7(), ShortestPath());
-pa7;
+pa7, dfa7 = simulate_and_plot(scenario7(), ShortestPath()); pa7
 
 # ╔═╡ 8d79bfd6-9e51-47db-9e82-e4beee382b2b
 CSV.write("iddlestate-monotonic.csv", dfa7);
@@ -306,8 +299,7 @@ end
 
 # ╔═╡ 50b84495-921d-42c8-91fb-8b933cf3d7be
 # ╠═╡ show_logs = false
-pa8, dfa8 = simulate_and_plot(scenario8(), ShortestPath());
-pa8;
+pa8, dfa8 = simulate_and_plot(scenario8(), ShortestPath()); pa8
 
 # ╔═╡ 69cda46a-380f-45c2-b5f8-a491f7d362d6
 function scenario9(;

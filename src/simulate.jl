@@ -134,6 +134,8 @@ struct Unload
     lloads::SparseMatrixCSC{Float64,Int64}
 end
 
+Base.isless(x::Union{Load, Unload},y::Union{Load, Unload}) = isless(x.occ, y.occ)
+
 """
     inner_queue(
         g, u, j, nodes, capacities, state, algo::MinCostFlow, ii = 0;
@@ -517,7 +519,8 @@ function init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
     t0 = max(jr.start, 0.0)
     t1 = min(jr.stop, s.duration)
 
-    foreach(occ -> insert_sorted!(tasks, Load(occ, u.location, j)), t0:p:t1)
+    foreach(occ -> push!(tasks, Load(occ, u.location, j)), t0:p:t1)
+    sort!(tasks)
     # @info "debug PR" tasks
 end
 
@@ -531,7 +534,8 @@ Initialize user `u` non-periodic requests.
 - `tasks`: container of sorted tasks
 """
 function init_user(::Scenario, u::User, tasks, ::Requests)
-    foreach(r -> insert_sorted!(tasks, Load(r.start, u.location, r.job)), u.job_requests.requests)
+    foreach(r -> push!(tasks, Load(r.start, u.location, r.job)), u.job_requests.requests)
+    sort!(tasks)
     # @info "debug Rs" tasks
 end
 
@@ -550,7 +554,9 @@ function init_simulate(s, algo, tasks, start)
     times = Dict{String,Float64}()
     snapshots = Vector{SnapShot}()
 
+    @info "foreach init_user start" (time()-start)
     foreach(u -> init_user(s, u, tasks, u.job_requests), s.users)
+    @info "foreach init_user end" (time()-start)
 
     push!(times, "start_tasks" => time() - start)
     g, capacities = graph(s.topology, algo)
@@ -946,12 +952,15 @@ Simulate a scenario.
 function simulate(s::Scenario, algo; speed=0, output="", verbose=true)
     start = time()
 
+    @info "containers stuff start" (time()-start)
     # dispatched containers
     containers = init_simulate(Val(speed))
 
+    @info "args loop stuff start" (time()-start)
     # shared init
     args_loop = init_simulate(s, algo, containers[1], start)
 
+    @info "start simulation" (time()-start)
     # simulate loop
     simulate_loop(s, algo, speed, start, containers, args_loop, Val(speed))
 
