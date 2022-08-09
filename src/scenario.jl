@@ -9,10 +9,10 @@ Structure to store the information of a scenario.
 - `topology::Topology{N, L}`: network's topology
 - `users::Dictionary{Int, U}`: collection of users
 """
-struct Scenario{N<:AbstractNode,L<:AbstractLink,U<:User}
+struct Scenario{T<:AbstractTopology,U<:User}
     data::Dictionary{Int,Data}
     duration::Real
-    topology::Topology{N,L}
+    topology::T
     users::Dictionary{Int,U}
 end
 
@@ -107,10 +107,6 @@ function make_users(n::Int, rate, locations, jd, data)
 end
 
 function make_users(users, locations, data)
-    # types = Set{Type}()
-    # foreach(u -> push!(types, typeof(u).parameters[1]), users)
-    # UT = Union{collect(types)...}
-
     _users = Dictionary(users)
     for i in 1:length(users)
         set!(data, i, Data(rand(locations)))
@@ -118,7 +114,10 @@ function make_users(users, locations, data)
     return _users
 end
 
-function scenario(duration, links, nodes, users)
+make_topology(nodes, links, ::Val{true}) = DirectedTopology(nodes, links)
+make_topology(nodes, links, ::Val{false}) = Topology(nodes, links)
+
+function scenario(duration, links, nodes, users, directed)
     _nodes = make_nodes(nodes)
     _links = isnothing(links) ? make_links(links, length(_nodes)) : make_links(links)
     _data = Dictionary{Int,Data}()
@@ -126,12 +125,12 @@ function scenario(duration, links, nodes, users)
 
     _users = make_users(users, locations, _data)
 
-    topo = Topology(_nodes, _links)
+    topo = make_topology(_nodes, _links, Val(directed))
 
     return Scenario(_data, duration, topo, _users)
 end
 
-function scenario(duration, links, nodes, users, job_distribution, request_rate)
+function scenario(duration, links, nodes, users, job_distribution, request_rate, directed)
     _nodes = make_nodes(nodes)
     _links = isnothing(links) ? make_links(links, length(_nodes)) : make_links(links)
     _data = Dictionary{Int,Data}()
@@ -139,7 +138,7 @@ function scenario(duration, links, nodes, users, job_distribution, request_rate)
 
     _users = make_users(users, request_rate, locations, job_distribution, _data)
 
-    topo = Topology(_nodes, _links)
+    topo = make_topology(_nodes, _links, Val(directed))
 
     return Scenario(_data, duration, topo, _users)
 end
@@ -163,12 +162,13 @@ function scenario(;
     nodes,
     users,
     job_distribution=nothing,
-    request_rate=nothing
+    request_rate=nothing,
+    directed=true
 )
     if job_distribution === nothing || request_rate === nothing
-        scenario(duration, links, nodes, users)
+        scenario(duration, links, nodes, users, directed)
     else
-        scenario(duration, links, nodes, users, job_distribution, request_rate)
+        scenario(duration, links, nodes, users, job_distribution, request_rate, directed)
     end
 end
 

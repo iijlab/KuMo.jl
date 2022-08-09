@@ -24,7 +24,7 @@ const SCENARII = Dict(
         nodes=(4, 100),
         links=[
             (1, 2, 400.0), (2, 3, 400.0), (3, 4, 400.0), (4, 1, 400.0),
-            (2, 1, 400.0), (3, 2, 400.0), (4, 3, 400.0), (1, 4, 400.0),
+            # (2, 1, 400.0), (3, 2, 400.0), (4, 3, 400.0), (1, 4, 400.0),
         ],
         users=1,
         job_distribution=Dict(
@@ -34,6 +34,7 @@ const SCENARII = Dict(
             :duration => 400:400,
             :frontend => 1:1,
         ),
-        request_rate=1.0
+        request_rate=1.0,
+        directed=false
     )
 )

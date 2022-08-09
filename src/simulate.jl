@@ -18,6 +18,16 @@ struct State
     State(links, nodes) = new(links, nodes)
 end
 
+links(s::State) = s.links
+links(s, i, j, ::Val{true}) = s.links[i, j]
+
+links(s, i, j, directed=true) = links(s, i, j, Val(directed))
+
+function links(s, i, j, ::Val{false})
+    a, b = minmax(i, j)
+    return links(s, a, b)
+end
+
 """
     add_load!(state, links, containers, v, n)
 
@@ -30,9 +40,9 @@ Adds load to a given state.
 - `v`: node selected to execute a task
 - `n`: amount of available nodes
 """
-function add_load!(state, links, containers, v, n)
+function add_load!(state, _links, containers, v, n, g)
     for i in 1:n, j in 1:n
-        state.links[i, j] += links[i, j]
+        links(state, i, j, typeof(g) <: SimpleDiGraph) += _links[i, j]
     end
     state.nodes[v] += containers
 end
@@ -134,7 +144,7 @@ struct Unload
     lloads::SparseMatrixCSC{Float64,Int64}
 end
 
-Base.isless(x::Union{Load, Unload},y::Union{Load, Unload}) = isless(x.occ, y.occ)
+Base.isless(x::Union{Load,Unload}, y::Union{Load,Unload}) = isless(x.occ, y.occ)
 
 """
     inner_queue(
@@ -452,10 +462,12 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
         push!(entry, "solving_time" => s.solving_time)
         push!(entry, "instant" => s.instant)
 
-        foreach(p -> push!(entry, string(p.first) => p.second / capacity(topo.nodes[p.first])), pairs(s.state.nodes))
+        foreach(p -> push!(entry, string(p.first) => p.second / capacity(nodes(topo, p.first))), pairs(s.state.nodes))
+
+        @info "debug links" topo.links s.state.links entry snapshots[end]
 
         for (i, j) in keys(topo.links)
-            push!(entry, string((i, j)) => s.state.links[j, i] / capacity(topo.links[(j, i)]))
+            push!(entry, string((i, j)) => s.state.links[i, j] / capacity(links(topo, i, j)))
         end
 
         return entry
@@ -554,9 +566,9 @@ function init_simulate(s, algo, tasks, start)
     times = Dict{String,Float64}()
     snapshots = Vector{SnapShot}()
 
-    @info "foreach init_user start" (time()-start)
+    @info "foreach init_user start" (time() - start)
     foreach(u -> init_user(s, u, tasks, u.job_requests), s.users)
-    @info "foreach init_user end" (time()-start)
+    @info "foreach init_user end" (time() - start)
 
     push!(times, "start_tasks" => time() - start)
     g, capacities = graph(s.topology, algo)
@@ -638,7 +650,7 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)
 
             lock(lck)
             try
-                add_load!(state, best_links, j.containers, best_node, n)
+                add_load!(state, best_links, j.containers, best_node, n, g)
             finally
                 unlock(lck)
             end
@@ -799,7 +811,7 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
                 @debug "debug is_valid" task
                 j = task.job
                 # Add load
-                add_load!(state, best_links, j.containers, best_node, n)
+                add_load!(state, best_links, j.containers, best_node, n, g)
                 # if ii == ii_stop
                 #     @info "debug snapshots prior push" snapshots last_unload n
                 # end
@@ -860,7 +872,7 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
             j = task.job
 
             # Add load
-            add_load!(state, best_links, j.containers, best_node, n)
+            add_load!(state, best_links, j.containers, best_node, n, g)
 
             # Snap new state
             push_snap!(snapshots, state, 0, 0, 0, 0, task.occ, n)
@@ -925,6 +937,7 @@ Post-simulation process that covers cleaning the snapshots and producing an outp
 - `output`: output path
 """
 function post_simulate(s, snapshots, verbose, output)
+
     df_snaps = make_df(clean(snapshots), s.topology; verbose)
     # df_snaps = make_df(snapshots, s.topology; verbose)
     if !isempty(output)
@@ -949,20 +962,24 @@ Simulate a scenario.
 - `output`: path to save the output, if empty (default), nothing is saved
 - `verbose`: if set to true, prints information about the simulation
 """
-function simulate(s::Scenario, algo; speed=0, output="", verbose=true)
+function simulate(s::Scenario, algo=ShortestPath(); speed=0, output="", verbose=true)
     start = time()
 
-    @info "containers stuff start" (time()-start)
+    @info "containers stuff start" (time() - start)
     # dispatched containers
     containers = init_simulate(Val(speed))
 
-    @info "args loop stuff start" (time()-start)
+    @info "args loop stuff start" (time() - start)
     # shared init
     args_loop = init_simulate(s, algo, containers[1], start)
 
-    @info "start simulation" (time()-start)
+    @info "start simulation" (time() - start)
     # simulate loop
     simulate_loop(s, algo, speed, start, containers, args_loop, Val(speed))
+
+    @info "debug" args_loop[1] args_loop[2] args_loop[3]
+    @info "debug" args_loop[4] args_loop[5] args_loop[6]
+    @info "debug" args_loop[6].links
 
     # post-process
     return args_loop[1], post_simulate(s, args_loop[2], verbose, output), args_loop[2]
