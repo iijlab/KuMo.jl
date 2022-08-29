@@ -55,42 +55,54 @@ make_nodes(x::Tuple) = make_nodes(x...)
 
 Creates links.
 """
-function make_links(links)
+function make_links(links; directed=true)
     _links = Dictionary{Tuple{Int,Int},FreeLink}()
-    foreach(l -> set!(_links, (l[1], l[2]), FreeLink()), links)
+    for l in links
+        set!(_links, (l[1], l[2]), FreeLink())
+        directed || set!(_links, (l[2], l[1]), FreeLink())
+    end
     return _links
 end
 
-make_links(::Nothing, n::Int) = make_links(Iterators.product(1:n, 1:n))
+make_links(::Nothing, n::Int; directed=true) = make_links(Iterators.product(1:n, 1:n); directed)
 
-function make_links(links::Vector{Tuple{DataType,Int,Int,T}}) where {T<:Number}
+function make_links(links::Vector{Tuple{DataType,Int,Int,T}}; directed=true) where {T<:Number}
     types = Set{Type}()
     foreach(l -> push!(types, l[1]), links)
     UT = Union{collect(s)...}
     _links = Dictionary{Tuple{Int,Int},UT}()
-    foreach(l -> set!(_links, (l[2], l[3]), l[1](l[4])), links)
+    for l in links
+        set!(_links, (l[2], l[3]), l[1](l[4]))
+        directed || set!(_links, (l[3], l[2]), l[1](l[4]))
+    end
     return _links
 end
 
-function make_links(lt::DataType, links) where {T<:Number}
+function make_links(lt::DataType, links; directed=true) where {T<:Number}
     _links = Dictionary{Tuple{Int,Int},lt}()
-    foreach(l -> set!(_links, (l[1], l[2]), lt(l[3])), links)
+    for l in links
+        set!(_links, (l[1], l[2]), lt(l[3]))
+        directed || set!(_links, (l[2], l[1]), lt(l[3]))
+    end
     return _links
 end
 
-make_links(links::Vector{Tuple{Int,Int,T}}) where {T<:Number} = make_links(Link{T}, links)
+make_links(links::Vector{Tuple{Int,Int,T}}; directed=true) where {T<:Number} = make_links(Link{T}, links; directed)
 
-function make_links(lt::DataType, links, c)
+function make_links(lt::DataType, links, c; directed=true)
     _links = Dictionary{Tuple{Int,Int},lt}()
-    foreach(l -> set!(_links, (l[1], l[2]), lt(c)), links)
+    for l in links
+        set!(_links, (l[1], l[2]), lt(c))
+        directed || set!(_links, (l[2], l[1]), lt(c))
+    end
     return _links
 end
 
-make_links(links, c) = make_links(Link{typeof(c)}, links, c)
+make_links(links, c; directed=true) = make_links(Link{typeof(c)}, links, c; directed)
 
-make_links(n::Int, c) = make_links(Iterators.product(1:n, 1:n), c)
+make_links(n::Int, c; directed=true) = make_links(Iterators.product(1:n, 1:n), c; directed)
 
-make_links(x::Tuple) = make_links(x...)
+make_links(x::Tuple; directed=true) = make_links(x...; directed)
 
 """
     make_users(args...)
@@ -119,7 +131,7 @@ make_topology(nodes, links, ::Val{false}) = Topology(nodes, links)
 
 function scenario(duration, links, nodes, users, directed)
     _nodes = make_nodes(nodes)
-    _links = isnothing(links) ? make_links(links, length(_nodes)) : make_links(links)
+    _links = isnothing(links) ? make_links(links, length(_nodes); directed) : make_links(links; directed)
     _data = Dictionary{Int,Data}()
     locations = 1:length(_nodes)
 

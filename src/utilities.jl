@@ -19,3 +19,5 @@ function marks(df)
     end
     return a, b, c, d
 end
+
+cond_minmax(x, y, b) = b ? (x, y) : minmax(x, y)

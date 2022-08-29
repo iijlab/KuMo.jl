@@ -28,6 +28,13 @@ function links(s, i, j, ::Val{false})
     return links(s, a, b)
 end
 
+function increase!(s::State, i, j, val, directed)
+    s.links[i, j] += val
+    directed || (s.links[j, i] += val)
+end
+
+decrease!(s::State, i, j, val, directed) = increase!(s::State, i, j, -val, directed)
+
 """
     add_load!(state, links, containers, v, n)
 
@@ -42,7 +49,7 @@ Adds load to a given state.
 """
 function add_load!(state, _links, containers, v, n, g)
     for i in 1:n, j in 1:n
-        links(state, i, j, typeof(g) <: SimpleDiGraph) += _links[i, j]
+        increase!(state, i, j, _links[i, j], is_directed(g))
     end
     state.nodes[v] += containers
 end
@@ -59,9 +66,9 @@ Removes load from a given state.
 - `v`: node where a task is endind
 - `n`: amount of available nodes
 """
-function rem_load!(state, links, containers, v, n)
+function rem_load!(state, links, containers, v, n, g)
     for i in 1:n, j in 1:n
-        state.links[i, j] -= links[i, j]
+        decrease!(state, i, j, links[i, j], is_directed(g))
     end
     state.nodes[v] -= containers
 end
@@ -660,7 +667,7 @@ function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)
                 sleep(j.duration / speed)
                 lock(lck)
                 try
-                    rem_load!(state, best_links, j.containers, best_node, n)
+                    rem_load!(state, best_links, j.containers, best_node, n, g)
                     push_snap!(snapshots, state, 0, 0, 0, 0, time() - start, n)
                 finally
                     unlock(lck)
@@ -843,7 +850,7 @@ function simulate_loop(s, algo, _, start, containers, args_loop, ::Val{0})
 
             if next_task === nothing || unload.occ ≤ next_task[1].occ
                 v, c, ls = unload.node, unload.vload, unload.lloads
-                rem_load!(state, ls, c, v, n)
+                rem_load!(state, ls, c, v, n, g)
                 # if ii == ii_stop
                 #     @info "debug snapshots prior push" snapshots last_unload n
                 # end
