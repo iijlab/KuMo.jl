@@ -72,17 +72,19 @@ function make_links(links::Vector{Tuple{DataType,Int,Int,T}}; directed=true) whe
     UT = Union{collect(s)...}
     _links = Dictionary{Tuple{Int,Int},UT}()
     for l in links
-        set!(_links, (l[2], l[3]), l[1](l[4]))
-        directed || set!(_links, (l[3], l[2]), l[1](l[4]))
+        α, β = minmax(l[2], l[3])
+        set!(_links, (α, β), l[1](l[4]))
+        directed || set!(_links, (β, α), l[1](l[4]))
     end
     return _links
 end
 
-function make_links(lt::DataType, links; directed=true) where {T<:Number}
+function make_links(lt::DataType, links; directed=true)
     _links = Dictionary{Tuple{Int,Int},lt}()
     for l in links
-        set!(_links, (l[1], l[2]), lt(l[3]))
-        directed || set!(_links, (l[2], l[1]), lt(l[3]))
+        α, β = minmax(l[1], l[2])
+        set!(_links, (α, β), lt(l[3]))
+        directed || set!(_links, (β, α), lt(l[3]))
     end
     return _links
 end
@@ -221,5 +223,3 @@ function make_df(s::Scenario; verbose=true)
 
     return df
 end
-
-

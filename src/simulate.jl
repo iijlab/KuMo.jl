@@ -354,9 +354,9 @@ function inner_queue(
             unlock(lck)
         end
 
-        if ii == 50000
-            @info "debug shortest" data_costs user_costs node_costs
-        end
+        # if ii == 50000
+        #     @info "debug shortest" data_costs user_costs node_costs
+        # end
 
         paths_data = dijkstra_shortest_paths(
             g, j.data_location, data_costs;
@@ -471,7 +471,7 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
 
         foreach(p -> push!(entry, string(p.first) => p.second / capacity(nodes(topo, p.first))), pairs(s.state.nodes))
 
-        @info "debug links" topo.links s.state.links entry snapshots[end]
+        # @info "debug links" topo.links s.state.links entry snapshots[end] topo
 
         for (i, j) in keys(topo.links)
             push!(entry, string((i, j)) => s.state.links[i, j] / capacity(links(topo, i, j)))
@@ -744,10 +744,10 @@ Insert element in a sorted collection.
 - `it`: optional iterator
 """
 function insert_sorted!(w, val, it=iterate(w))
-    @debug "debug" w val it
+    # @debug "debug" w val it
     while it !== nothing
         (elt, state) = it
-        @debug "debug while" elt state elt.occ val.occ
+        # @debug "debug while" elt state elt.occ val.occ
         if elt.occ ≥ val.occ
             insert!(w, state - 1, val)
             return w
@@ -755,7 +755,7 @@ function insert_sorted!(w, val, it=iterate(w))
         it = iterate(w, state)
     end
     push!(w, val)
-    @debug "debug after insert" w val
+    # @debug "debug after insert" w val
     return w
 end
 
@@ -984,9 +984,9 @@ function simulate(s::Scenario, algo=ShortestPath(); speed=0, output="", verbose=
     # simulate loop
     simulate_loop(s, algo, speed, start, containers, args_loop, Val(speed))
 
-    @info "debug" args_loop[1] args_loop[2] args_loop[3]
-    @info "debug" args_loop[4] args_loop[5] args_loop[6]
-    @info "debug" args_loop[6].links
+    # @info "debug" args_loop[1] args_loop[2] args_loop[3]
+    # @info "debug" args_loop[4] args_loop[5] args_loop[6]
+    # @info "debug" args_loop[6].links
 
     # post-process
     return args_loop[1], post_simulate(s, args_loop[2], verbose, output), args_loop[2]
