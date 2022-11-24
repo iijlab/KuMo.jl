@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.9
+# v0.19.11
 
 using Markdown
 using InteractiveUtils
@@ -26,7 +26,7 @@ function scenario1(;)
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	# jd() = rand(norm_dist) 
+	# jd() = rand(norm_dist)
 	jd() = 4
 
 	λ = .1
@@ -58,7 +58,7 @@ function scenario1(;)
 			foreach(_ -> push!(reqs, Request(j, r - δ/2)), 1:k)
 		end
 	end
-	
+
 	# user1 - wave 2
 	t = 0.0
 	r = Float64(Δ1)
@@ -134,7 +134,7 @@ function scenario1(;)
 			foreach(_ -> push!(reqs, Request(j, r - δ/2 + 4Δ1)), 1:k)
 		end
 	end
-	
+
 	# user1 - wave 6
 	t = 0.0
 	r = Float64(Δ1)
@@ -161,7 +161,7 @@ function scenario1(;)
 	u1 = user(R, 1)
 
 
-	reqs = Vector{Request{<:KuMo.AbstractJob}}()	
+	reqs = Vector{Request{<:KuMo.AbstractJob}}()
 	types = Set()
 	k2 = 23
 	# user2 - wave 1
@@ -182,7 +182,7 @@ function scenario1(;)
 			foreach(_ -> push!(reqs, Request(j, r - δ/2)), 1:k)
 		end
 	end
-	
+
 	# user2 - wave 2
 	t = 0.0
 	r = Float64(Δ2)
@@ -243,10 +243,10 @@ function scenario1(;)
 	UT = Union{collect(types)...}
 	R = Vector{Request{UT}}()
 	foreach(r -> push!(R, r), reqs)
-	
+
 	u2 = user(R, 2)
 
-	
+
     scenario(;
         duration=1000,
         nodes=[
@@ -280,7 +280,7 @@ begin
 	for r in eachrow(df1)
 		if newstepa
 			empty!(acca)
-		end		
+		end
 		push!(acca, r)
 		if floor(r[:instant]) > lasta
 			lasta = floor(r[:instant])
@@ -300,7 +300,7 @@ begin
 
 	# df1_no_norm[!, 8:9] = df1[!,8:9] .* 1
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	df1_no_norm
 end;
 
@@ -312,7 +312,7 @@ begin
 
 	# df1_no_norm[!, 8:9] = df1[!,8:9] .* 1
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	dfa_no_norm
 end;
 
@@ -381,14 +381,14 @@ p0 = StatsPlots.plot(p13a, p12a, p11a; layout = (3,1), thickness_scaling = 1.5, 
 # ╔═╡ 0de8409c-aa08-45df-8d75-1f6167ef9f76
 function scenario2a(;)
     reqs = Vector{Request{<:KuMo.AbstractJob}}()
-	
+
 	types = Set()
 
 	Δ = 180
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	# jd() = rand(norm_dist) 
+	# jd() = rand(norm_dist)
 	jd() = 4
 
 	λ = 1.
@@ -398,7 +398,7 @@ function scenario2a(;)
 
 	interactive(data) = job(1, 1, data, jd(), 2)
 	data_intensive(data) = job(2, 1, data, jd(), 1)
-	
+
 
 	t = 0.0
 	r = Float64(Δ)
@@ -419,7 +419,7 @@ function scenario2a(;)
 		end
 	end
 
-	
+
 	# t = 120.0
 	# r = Float64(Δ) + 120.0
 	# for i in 121.:Δ/2+120.0
@@ -445,7 +445,7 @@ function scenario2a(;)
 
 	u1 = user(R, 1)
 
-	
+
     scenario(;
         duration=1000,
         nodes=[
@@ -477,21 +477,21 @@ begin
 
 	df2_no_norm[!, 8:9] = df2[!,8:9] .* 1
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	df2_no_norm
 end;
 
 # ╔═╡ 16ccae76-6591-4167-bab1-edc5ac931c96
 function scenario2b(;)
     reqs = Vector{Request{<:KuMo.AbstractJob}}()
-	
+
 	types = Set()
 
 	Δ = 180
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	# jd() = rand(norm_dist) 
+	# jd() = rand(norm_dist)
 	jd() = 4
 
 	λ = 1.
@@ -501,7 +501,7 @@ function scenario2b(;)
 
 	interactive(data) = job(1, 1, data, jd(), 2)
 	data_intensive(data) = job(2, 1, data, jd(), 1)
-	
+
 
 	t = 0.0
 	r = Float64(Δ)
@@ -528,7 +528,7 @@ function scenario2b(;)
 
 	u1 = user(R, 1)
 
-	
+
     scenario(;
         duration=1000,
         nodes=[
@@ -560,21 +560,21 @@ begin
 
 	df2b_no_norm[!, 8:9] = df2b[!,8:9] .* 1
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	df2b_no_norm
 end;
 
 # ╔═╡ 11a0c1d4-2230-4390-9853-e407b1398828
 function scenario2c(;)
     reqs = Vector{Request{<:KuMo.AbstractJob}}()
-	
+
 	types = Set()
 
 	Δ = 180
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	# jd() = rand(norm_dist) 
+	# jd() = rand(norm_dist)
 	jd() = 4
 
 	λ = 1.
@@ -584,7 +584,7 @@ function scenario2c(;)
 
 	interactive(data) = job(1, 1, data, jd(), 2)
 	data_intensive(data) = job(2, 1, data, jd(), 1)
-	
+
 
 	t = 0.0
 	r = Float64(Δ)
@@ -611,7 +611,7 @@ function scenario2c(;)
 
 	u1 = user(R, 1)
 
-	
+
     scenario(;
         duration=1000,
         nodes=[
@@ -643,21 +643,21 @@ begin
 
 	df2c_no_norm[!, 8:9] = df2c[!,8:9] .* 1
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	df2c_no_norm
 end;
 
 # ╔═╡ 7114f833-263e-41cf-9ca6-38d8700d4fa4
 function scenario2d(;)
     reqs = Vector{Request{<:KuMo.AbstractJob}}()
-	
+
 	types = Set()
 
 	Δ = 180
 	δ = 4.
 	σ = δ / 4
 	norm_dist = truncated(Normal(δ, σ); lower = eps())
-	# jd() = rand(norm_dist) 
+	# jd() = rand(norm_dist)
 	jd() = 4
 
 	λ = 1.
@@ -667,7 +667,7 @@ function scenario2d(;)
 
 	interactive(data) = job(250, 1, data, jd(), 2)
 	data_intensive(data) = job(2, 1, data, jd(), 1)
-	
+
 
 	t = 0.0
 	r = Float64(Δ)
@@ -694,7 +694,7 @@ function scenario2d(;)
 
 	u1 = user(R, 1)
 
-	
+
     scenario(;
         duration=1000,
         nodes=[
@@ -729,14 +729,14 @@ begin
 			df2[i,j] = 0.0
 		end
 	end
-	
+
 	df2_no_norm_final = deepcopy(df2)
 	df2_no_norm_final[!, 6:6] = df2[!,6:6] .* 1
 	df2_no_norm_final[!, 7:7] = df2[!,7:7] .* 10
 
 	df2_no_norm_final[!, 11:11] = df2[!,11:11] .* 10
 	# df7_no_norm[!, 33:48] = df7[!,33:48] .* 10
-	
+
 	df2_no_norm_final
 end;
 
@@ -822,7 +822,7 @@ begin
 	df7_no_norm[!, 24:32] = df8[!,24:32] .* 1
 	df7_no_norm[!, 33:48] = df8[!,33:48] .* 2
 	df7_no_norm[!, 49:end] = df8[!,49:end] .* 4
-	
+
 	df7_no_norm
 end;
 
@@ -880,7 +880,7 @@ begin
 	for r in eachrow(df9)
 		if newstep
 			empty!(acc)
-		end		
+		end
 		push!(acc, r)
 		if floor(r[:instant]) > last
 			last = floor(r[:instant])
@@ -929,7 +929,7 @@ begin
 end;
 
 # ╔═╡ 149ed59c-7d41-47ba-b5f9-d3d0e8418835
-begin 
+begin
 	@df df13 StatsPlots.plot(:instant, :ratio)
 	@df df12 StatsPlots.plot!(:instant, :ratio)
 
@@ -988,8 +988,9 @@ TikzPictures = "~3.4.2"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.3"
+julia_version = "1.8.0-rc3"
 manifest_format = "2.0"
+project_hash = "1ccb48f353ae499eaa667259525c95689cc22834"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1010,6 +1011,7 @@ version = "2.3.0"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.1.1"
 
 [[deps.ArnoldiMethod]]
 deps = ["LinearAlgebra", "Random", "StaticArrays"]
@@ -1140,6 +1142,7 @@ version = "3.45.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "0.5.2+0"
 
 [[deps.Contour]]
 git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
@@ -1242,6 +1245,7 @@ version = "0.8.6"
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
 uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
+version = "1.6.0"
 
 [[deps.DrWatson]]
 deps = ["Dates", "FileIO", "JLD2", "LibGit2", "MacroTools", "Pkg", "Random", "Requires", "Scratch", "UnPack"]
@@ -1564,10 +1568,12 @@ uuid = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
+version = "0.6.3"
 
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
+version = "7.83.1+1"
 
 [[deps.LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -1576,6 +1582,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
+version = "1.10.2+0"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -1684,6 +1691,7 @@ version = "1.1.2"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+version = "2.28.0+0"
 
 [[deps.Measures]]
 git-tree-sha1 = "e498ddeee6f9fdb4551ce855a46f54dbd900245f"
@@ -1701,6 +1709,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
+version = "2022.2.1"
 
 [[deps.MultivariateStats]]
 deps = ["Arpack", "LinearAlgebra", "SparseArrays", "Statistics", "StatsAPI", "StatsBase"]
@@ -1728,6 +1737,7 @@ version = "0.4.11"
 
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+version = "1.2.0"
 
 [[deps.Observables]]
 git-tree-sha1 = "dfd8d34871bc3ad08cd16026c1828e271d554db9"
@@ -1749,6 +1759,7 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.20+0"
 
 [[deps.OpenJpeg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libtiff_jll", "LittleCMS_jll", "Pkg", "libpng_jll"]
@@ -1759,6 +1770,7 @@ version = "2.4.0+0"
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
+version = "0.8.1+0"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1822,6 +1834,7 @@ version = "0.40.1+0"
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+version = "1.8.0"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
@@ -1947,6 +1960,7 @@ version = "0.3.0+0"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
 
 [[deps.Scratch]]
 deps = ["Dates"]
@@ -2055,6 +2069,7 @@ uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 [[deps.TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.0"
 
 [[deps.TableOperations]]
 deps = ["SentinelArrays", "Tables", "Test"]
@@ -2077,6 +2092,7 @@ version = "1.7.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+version = "1.10.0"
 
 [[deps.Tectonic]]
 deps = ["Pkg"]
@@ -2311,6 +2327,7 @@ version = "1.4.0+3"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.12+3"
 
 [[deps.Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2333,6 +2350,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.1.1+0"
 
 [[deps.libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2355,10 +2373,12 @@ version = "1.3.7+1"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
+version = "1.47.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
+version = "17.4.0+0"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2383,7 +2403,7 @@ version = "0.9.1+5"
 # ╠═eb7b42c0-f6b5-11ec-0d00-63b5a9ff3b25
 # ╠═da618257-92e7-4264-951e-180533e3a697
 # ╠═12104e66-852e-4226-bb6d-8c8627f08a0b
-# ╠═c0b650b6-48c4-4557-aebd-abd1987101cb
+# ╟─c0b650b6-48c4-4557-aebd-abd1987101cb
 # ╠═9c21d620-a684-4a44-8a96-f5c2e5c352c0
 # ╠═9387ce98-91d7-4915-88e4-af8256df84eb
 # ╠═f7d43c5a-dd86-4c79-9dd6-974ffc6a4afa

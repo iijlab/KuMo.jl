@@ -165,7 +165,7 @@ const DEFAULT_PSEUDO_COSTS = [
 ]
 
 function show_pseudo_costs(; interaction=:auto, pseudo_costs=[])
-    cb = string(Makie.current_backend.x)
+    cb = string(Makie.current_backend())
     is_static = occursin(CAIROMAKIE, cb) || occursin(RPRMAKIE, cb)
     if interaction ∈ [:static] || is_static
         aux = isempty(pseudo_costs) ? DEFAULT_PSEUDO_COSTS : pseudo_costs
@@ -377,7 +377,7 @@ function show_simulation(df, norms, select, ::Val{:static})
 end
 
 function show_simulation(df, norms; interaction=:auto, select=nothing)
-    cb = string(Makie.current_backend.x)
+    cb = string(Makie.current_backend())
     is_static = occursin(CAIROMAKIE, cb) || occursin(RPRMAKIE, cb)
     if interaction ∈ [:static] || is_static
         return show_simulation(df, norms, select, Val(:static))

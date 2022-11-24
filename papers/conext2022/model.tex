@@ -1,7 +1,7 @@
 
 \begin{figure}[tb]
   \begin{center}
-    \includegraphics[width=1.0\columnwidth]{system.pdf}
+    \includegraphics[width=1.0\columnwidth]{figure1-system.pdf}
     \vspace{-2.0ex}
     \caption{Simple system model for job assignment}
     \Description{A simple system model with 2 datacenters and 2 micro datacenters.}
@@ -37,9 +37,9 @@ Therefore, microservice is the enabler for this approach.
 \subsection{Micro-job Assignment}
 
 In this paper, we use a simple micro-job model that defines the
-required resources for a micro-job as $J(p, q, r, s)$ where 
-$p$ is the number of micro containers for computation, 
-$q$ is frontend communication with the user, 
+required resources for a micro-job as $J(p, q, r, s)$ where
+$p$ is the number of micro containers for computation,
+$q$ is frontend communication with the user,
 $r$ is backend communication with data objects (e.g., database), and
 $s$ is the number of time slots.
 The communication costs $q$ and $r$ are also a function of distance so
@@ -64,14 +64,14 @@ for $J$: $p$, $q$ and $r$ for duration $s$.
 The pseudo cost $E$ to host micro-job $j$ for a unit time at node $i$ for
 user $m$ and data object $o$ is:
 \begin{equation*}
-	E(j, i)     = H(j,i) + G(j,i,m,o)
+  E(j, i)     = H(j,i) + G(j,i,m,o)
 \end{equation*}
 here, $H(j, i)$ is the computing cost to run $j$ at $i$, and
 $G(j, i, m, o)$ is the communication cost to run $j$ at $i$
 between $m$ and $o$.
 \begin{eqnarray*}
-&&  H(j,i)      = p \cdot f(\rho_{i}) \\
-&&  G(j,i,m,o)  = q \cdot \smashoperator{\sum_{l \in path(m,i)}} f(\rho_{l}) + r \cdot \smashoperator{\sum_{l \in path(i,o)}} f(\rho_{l})
+  &&  H(j,i)      = p \cdot f(\rho_{i}) \\
+  &&  G(j,i,m,o)  = q \cdot \smashoperator{\sum_{l \in path(m,i)}} f(\rho_{l}) + r \cdot \smashoperator{\sum_{l \in path(i,o)}} f(\rho_{l})
 \end{eqnarray*}
 $f(\rho)$ is the cost function of a resource load, and $path(m,i)$ is a set
 of links from $m$ to $i$ (e.g., the shortest path weighted by cost).
@@ -79,7 +79,7 @@ of links from $m$ to $i$ (e.g., the shortest path weighted by cost).
 To assign micro-job $j$, the server simply finds the node that minimizes the
 cost:
 \begin{equation*}
-	argmin_{i} \: E(j, i)
+  argmin_{i} \: E(j, i)
 \end{equation*}
 
 \subsection{Pseudo Cost Functions}
@@ -108,7 +108,7 @@ A pseudo cost function in our model maps the load of a resource
 $\rho \in [0, 1]$ to the corresponding cost.
 The capacity limit is enforced by the cost function that rapidly grows
 as the load approaches $1.0$, which is known as a barrier function in
-optimization theory. 
+optimization theory.
 
 We use two types of pseudo cost functions: one is the monotonic cost
 function and the other is the convex cost function.
@@ -125,7 +125,7 @@ the cost functions in Sec.~\ref{sec:variation}.
 
 \begin{figure}[tb]
   \begin{center}
-    \includegraphics[width=0.9\columnwidth]{pseudo_costs.pdf}
+    \includegraphics[width=0.9\columnwidth]{figure2-standard_pseudo_costs.pdf}
     \vspace{-2.0ex}
     \caption{Standard cost functions}
     \Description{The standard convex cost function and standard
@@ -136,7 +136,7 @@ the cost functions in Sec.~\ref{sec:variation}.
 
 The standard convex cost function is defined as:
 \begin{equation*}
-	f(\rho) = \frac{(2\rho - 1)^{2}}{1 - \rho} + 1
+  f(\rho) = \frac{(2\rho - 1)^{2}}{1 - \rho} + 1
 \end{equation*}
 This function has the properties:
 $min\: f(\rho) = f(.5) = 1$, and $f(0) = f(.75) = 2$.
@@ -146,7 +146,7 @@ aiming at $\rho = .5$.
 
 The standard monotonic cost function is defined as:
 \begin{equation*}
-	f(\rho) = \frac{\rho^{4.5}}{1 - \rho} + 1
+  f(\rho) = \frac{\rho^{4.5}}{1 - \rho} + 1
 \end{equation*}
 to roughly match the standard convex cost function in $[.5, .75]$,
 the {\em working load range} explained in the next subsection.
@@ -163,10 +163,10 @@ Figure~\ref{fig:4node-ratio}.
 
 \begin{figure}[tb]
   \begin{center}
-    \includegraphics[width=1.0\columnwidth]{equivalent_nodes.pdf}
+    \includegraphics[width=1.0\columnwidth]{figure3-equivalent_nodes.pdf}
     \vspace{-2.0ex}
     \caption{Load distribution among 4 equivalent cost nodes:
-    the load of each resource (top) and the total load (bottom)}
+      the load of each resource (top) and the total load (bottom)}
     \Description{Simulation results with 4 nodes with the same cost function.}
     \label{fig:4node}
   \end{center}
@@ -182,7 +182,7 @@ resource.
 The initial system load $\sum \rho$ is $0$, and gradually increased up
 to $3.5$ until time 350. After time 450, the system load is gradually
 decreased back to $0$ until time 800.
-Here, load $1.0$ is the capacity of a single resource. 
+Here, load $1.0$ is the capacity of a single resource.
 Initially, all resources in the pool are idle, and their costs are
 all $f(0)= 2$.
 For the first job, one resource $r_{0}$ is randomly selected for allocation, and its
@@ -219,7 +219,7 @@ $[.5, .75]$, while keeping idle resources as much as possible.
 
 \begin{figure}
   \begin{center}
-    \includegraphics[width=1.0\columnwidth]{proportional_nodes.pdf}
+    \includegraphics[width=1.0\columnwidth]{figure4-proportional_nodes.pdf}
     \vspace{-2.0ex}
     \caption{Load distribution: 4 proportional cost nodes}
     \Description{Simulation results with 4 nodes with proportional cost functions.}
@@ -244,7 +244,7 @@ allocation is higher than $\rho = .75$ for the already
 active ones to match the cost $f(0)$ for the new one, but the load
 will not go much further as the slope of the cost function is steep.
 Similarly, when the most expensive one among active resources becomes
-idle, the load of the remaining ones stay at the matching cost 
+idle, the load of the remaining ones stay at the matching cost
 $f(.5)$ for the deactivating one.
 
 %%Note that our goal is not to achieve the theoretical optimum but to
@@ -282,7 +282,7 @@ resource pool with a single shift parameter.
 
 \begin{figure}[tb]
   \begin{center}
-    \includegraphics[width=0.9\columnwidth]{pseudo_costs_2.pdf}
+    \includegraphics[width=0.9\columnwidth]{figure5-custom_pseudo_costs.pdf}
     \vspace{-2.0ex}
     \caption{Manipulating convex cost functions}
     \Description{Variations of manipulated cost functions are shown.}
