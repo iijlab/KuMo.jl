@@ -65,15 +65,56 @@ function _edgesys2023()
         )
     end
 
-    # NOTE - Figure 6: Costs manipulation
+    #NOTE - edge computing scenario
+    function figure_edge()
+        max_load = 3.5
+        nodes = (4, 100)
+        rate = 0.01
+        j = job(0, 1, rand(1:4), 3.25, 0)
 
-    # NOTE - Figure 7: Mixed load 2DCs 2 MDCs
+        _requests = Vector{Request{typeof(j)}}()
 
-    # NOTE - Figure 8: Mixed load 18 DCs
+        r = rate
+        λ = max_load
+        n = nodes[1]
+        δ = j.duration
+
+        π1 = λ / r
+        π2 = (2n - λ) / r
+
+        for i in 0:π1+π2
+            for t in i:δ:π1+π2-i
+                i ≤ π1 && push!(_requests, Request(j, t))
+            end
+        end
+
+        duration = 1000
+        nodes=[
+            # Cloud Servers
+            Node(100000),
+
+            # Edge Server
+            Node(1000),
+
+            # Local Nodes
+            Node(10),
+            Node(10),
+            Node(10),
+            Node(10),
+        ]
+
+        return scenario(;
+            duration,
+            nodes,
+            users=[user(Requests(_requests), 1)],
+        )
+
+    end
 
     return Dict(
         :figure3 => figure3(),
         :figure4 => figure4(),
+        :edge => figure_edge(),
     )
 end
 
