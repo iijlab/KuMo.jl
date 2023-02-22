@@ -1,4 +1,4 @@
-function _conext2022()
+function _edgesys2023()
     # NOTE - Figure 3: 4 equivalent cost nodes
     function figure3()
         max_load = 3.50
@@ -77,4 +77,4 @@ function _conext2022()
     )
 end
 
-const CONEXT2022 = _conext2022()
+const EDGESYS2023 = _edgesys2023()
