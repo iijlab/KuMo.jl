@@ -89,7 +89,7 @@ function _edgesys2023()
         end
 
         duration = 1000
-        nodes=[
+        nodes = [
             # Cloud Servers
             Node(100000),
 
@@ -106,7 +106,7 @@ function _edgesys2023()
         return scenario(;
             duration,
             nodes,
-            users=[user(Requests(_requests), 1)],
+            users=[user(Requests(_requests), 1)]
         )
 
     end

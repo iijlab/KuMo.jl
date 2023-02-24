@@ -16,6 +16,8 @@ using ProgressMeter
 using Random
 using SimpleTraits
 using SparseArrays
+using TestItemRunner
+using TestItems
 
 # SECTION - exports
 export job

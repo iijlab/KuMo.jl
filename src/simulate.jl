@@ -302,7 +302,7 @@ function inner_queue(
             pairs(nodes)
         )
         user_costs = zeros(size(capacities))
-        for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
+        j.frontend == 0 || for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
             if (i, k) ∈ keys(links)
                 user_costs[i, k] =
                     pseudo_cost(links[(i, k)], state.links[i, k] + j.frontend)
@@ -317,10 +317,10 @@ function inner_queue(
     # end
 
     paths_user = dijkstra_shortest_paths(g, u, user_costs; trackvertices=true)
-    paths_user2 = dijkstra_shortest_paths(
-        g, u, transpose(user_costs);
-        trackvertices=true
-    )
+    # paths_user2 = dijkstra_shortest_paths(
+    #     g, u, transpose(user_costs);
+    #     trackvertices=true
+    # )
 
     # if ii == 50000
     #     @info "debug shortest" u paths_user.dists paths_user.parents
@@ -345,7 +345,7 @@ function inner_queue(
         lock(lck)
         try
             data_costs = zeros(size(capacities))
-            for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
+            j.backend == 0 || for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
                 if (i, k) ∈ keys(links)
                     data_costs[i, k] = pseudo_cost(links[(i, k)], charges[i, k] + j.backend)
                 end
@@ -363,10 +363,10 @@ function inner_queue(
             trackvertices=true
         )
 
-        paths_data2 = dijkstra_shortest_paths(
-            g, j.data_location, transpose(data_costs);
-            trackvertices=true
-        )
+        # paths_data2 = dijkstra_shortest_paths(
+        #     g, j.data_location, transpose(data_costs);
+        #     trackvertices=true
+        # )
 
         # if ii == 50000
         #     @info "debug shortest  123" j.data_location paths_data.dists paths_data.parents
@@ -393,7 +393,7 @@ function inner_queue(
     lock(lck)
     try
         data_costs = zeros(size(capacities))
-        for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
+        j.backend == 0 || for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
             if (i, k) ∈ keys(links)
                 data_costs[i, k] = pseudo_cost(links[(i, k)], state.links[i, k] + j.backend)
             end
@@ -415,7 +415,7 @@ function inner_queue(
         lock(lck)
         try
             user_costs = zeros(size(capacities))
-            for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
+            j.frontend == 0 || for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
                 if (i, k) ∈ keys(links)
                     user_costs[i, k] = pseudo_cost(links[(i, k)], charges[i, k] + j.frontend)
                 end
