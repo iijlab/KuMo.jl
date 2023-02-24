@@ -63,7 +63,7 @@ export AdditiveNode
 export IdleStateNode
 
 export SCENARII
-export CONEXT2022
+export EDGESYS2023
 
 ## SECTION - includes
 
@@ -91,7 +91,7 @@ include("scenario.jl")
 
 # scenarii (dictionaries)
 include("scenarii/basic.jl")
-include("scenarii/conext2022.jl")
+include("scenarii/edgesys2023.jl")
 
 # simulation
 include("simulate.jl")

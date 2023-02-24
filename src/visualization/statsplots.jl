@@ -17,7 +17,8 @@ function plot_nodes(df; kind=:plot)
     a, b, _, _ = marks(df)
     p = @df df eval(kind)(:instant,
         cols(a:b), xlabel="time", seriestype=:steppre,
-        ylabel="load", linestyle=:auto,
+        ylabel="load",
+        linestyle= kind==:plot ? :auto : :solid,
         w=1.25,
     )
     return p
@@ -35,7 +36,8 @@ function plot_links(df; kind=:plot)
     else
         p = @df df eval(kind)(:instant,
             cols(c:d), xlabel="time", seriestype=:steppre,
-            ylabel="load", linestyle=:auto,
+            ylabel="load",
+            linestyle= kind==:plot ? :auto : :solid,
             w=1.25,
         )
         return p
@@ -54,7 +56,8 @@ function plot_resources(df; kind=:plot)
     else
         p = @df df eval(kind)(:instant,
             cols(a:d), xlabel="time", seriestype=:steppre,
-            ylabel="load", linestyle=:auto,
+            ylabel="load",
+            linestyle= kind==:plot ? :auto : :solid,
             w=1.25,
         )
         return p
