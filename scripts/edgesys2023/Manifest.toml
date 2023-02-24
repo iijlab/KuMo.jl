@@ -2,7 +2,7 @@
 
 julia_version = "1.9.0-beta4"
 manifest_format = "2.0"
-project_hash = "70be09f041d00d0f49184418dbdcd189cfb2b409"
+project_hash = "23afd49f08a7b174641f7c5c62087851f4bb25ef"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -719,7 +719,7 @@ version = "0.6.5"
 
 [[deps.KuMo]]
 deps = ["CSV", "Colors", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "GraphMakie", "Graphs", "JuMP", "Makie", "MathOptInterface", "PGFPlotsX", "PackageCompatUI", "PrettyTables", "ProgressMeter", "Random", "RecipesBase", "SimpleTraits", "SparseArrays", "StatsPlots", "TestItemRunner", "TestItems"]
-path = "/home/azzaare/.julia/dev/KuMo"
+path = "C:\\Users\\jeanf\\.julia\\dev\\KuMo"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
 version = "0.1.32"
 

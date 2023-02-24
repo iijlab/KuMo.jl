@@ -94,62 +94,58 @@ end
 simulate_and_plot(KuMo.figure_edge_1(), ShortestPath())[1]
 
 #NOTE - edge computing scenario
-function figure_edge_2()
-    j = job(0,1,4,1.,1.)
+function figure_edge_2(;
+    drones = 10,
+    duration = 20,
+    σ = 1.,
+    seed = 42,
+    )
+    Random.seed!(seed)
+
+    nodes = (3, 100)
+    j = job(0,1,1,1.,1.)
 
     c = 100
 
-    R = map(_ -> Vector{Request{typeof(j)}}(), 1:4)
 
-    rate = 0.01
+    R = map(_ -> Vector{Request{typeof(j)}}(), 1:nodes[1])
 
-    duration = 20
-    δ1 = duration * 1 / 4 - 1/2 * rate
-    δ2 = duration * 2 / 4 - 1/4 * rate
-    δ3 = duration * 3 / 4 - 3/4 * rate
+    rate = 0.1
 
+    N = nodes[1] + 1
+    μ1 = duration * 1 / N
+    μ2 = duration * 2 / N
+    μ3 = duration * 3 / N
 
+    d1 = truncated(Normal(μ1,σ); lower = 0, upper = duration)
+    d2 = truncated(Normal(μ2,σ); lower = 0, upper = duration)
+    d3 = truncated(Normal(μ3,σ); lower = 0, upper = duration)
+    D = [d1, d2, d3]
 
-    for t in 0:rate:δ1
-        push!(R[1], Request(j, t))
+    P = [rand(d) for _ in 1:drones, d in D]
+
+    for τ in 0:rate:duration, u in 1:drones
+        t = τ + rate / drones * (u - 1)
+        p = findfirst(x -> t < x, P[u, :])
+        if isnothing(p)
+            push!(R[1], Request(j, t))
+            push!(R[nodes[1]], Request(j, t))
+        else
+            push!(R[p], Request(j, t))
+        end
     end
 
-    for t in δ1:rate:δ2
-        push!(R[4], Request(j, t))
-    end
-    for t in δ2:rate:δ3
-        push!(R[3], Request(j, t))
-    end
-    for t in δ3:rate:duration-rate
-        push!(R[1], Request(j, t))
-        push!(R[3], Request(j, t))
-    end
-
-
-    nodes = (4, 100)
-    users = map(i -> user(R[i], i), 1:4)
+    users = map(i -> user(R[i], i), 1:nodes[1])
     links = [
         (1, 2, c),
         (1, 3, c),
-        (1, 4, c),
         (2, 3, c),
-        (2, 4, c),
-        (3, 4, c),
-
-        # (2, 1, 100),
-        # (3, 1, 100),
-        # (4, 1, 100),
-        # (3, 2, 100),
-        # (4, 2, 100),
-        # (4, 3, 100),
     ]
     directed = false
 
     return scenario(; duration, nodes, users, links, directed)
 end
 
-p, df = simulate_and_plot(figure_edge_2(), ShortestPath(); target=:all)
-
-p
+p, df = simulate_and_plot(figure_edge_2(; σ = 2.), ShortestPath(); target=:all); p
 
 df
