@@ -4,7 +4,9 @@ using DrWatson
 using Pkg
 Pkg.instantiate()
 
+using Distributions
 using KuMo
+using Random
 using StatsPlots
 using PGFPlotsX
 
