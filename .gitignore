@@ -5,6 +5,7 @@
 *.jl.mem
 /Manifest.toml
 test/Manifest.toml
+script/*/Manifest.toml
 /docs/build/
 
 # TeX
