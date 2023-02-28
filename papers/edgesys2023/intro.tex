@@ -1,9 +1,9 @@
 \subsection{Autonomous Edge Clouds}
 
 %% Edge computing and edge cloud
-In edge computing~\cite{Lopez-2015},
-computing resources are placed at locations closer to the users or
-data, to reduce latencies or to store sensitive data on premise.
+In edge computing, computing resources are placed at locations close
+to the users or data, so as to reduce latencies or to store sensitive
+data on premise~\cite{Lopez-2015}.
 A possible future direction of edge computing is distributed cloud
 computing that utilizes diverse and geographically scattered computing
 resources at the edge, and make them act as part of the cloud.
@@ -15,12 +15,12 @@ However, computing resources could be abundant in the future environment,
 if it becomes easier to utilize available computing resources.
 Furthermore, we might be able to exploit idle computing resources at
 home for a cloud, similar to the way in-house solar power systems are
-connected to a local utility grid.
+connected to an electrical grid.
 Once there are enough edge resources, they do not need to be
 micromanaged and can be used for general purposes.
 
 %% microservice is a driving factor
-A driving factor to exploit available computing resources for cloud
+A driving factor for exploiting available computing resources for cloud
 services is the shift to microservices~\cite{nadareishvili2016microservice}
 and serverless computing~\cite{Shafiei-2022},
 in which a cloud service is composed of a collection of loosely-coupled
@@ -28,21 +28,17 @@ lightweight services.
 Each microservice is ephemeral and short-lived, and can be executed
 in a stateless container,
 which enables flexible and efficient use of underlying cloud
-resources.
+resources including smaller edge resources.
 %The concept has something in common with early packet switching so
 %that it might open up new possibilities to apply packet switching
 %techniques to handling microservice jobs.
 
 %% central control to autonomous management
-For such an edge cloud, cloud management also needs to change from
-the current central control to distributed control.
-Local requests should be handled by local edge nodes, without
-being instructed by the central controller.
-An autonomous management model is necessary.
-
-%% energy saving?
-In addition, we should take energy saving into consideration as it is
-essential for future clouds~\cite{Mastelic-2015,masanet2020recalibrating}.
+In such an edge cloud, local requests should be handled by local edge
+nodes, without being instructed by the central controller.
+Thus, cloud management also needs to change from the current central
+control to a distributed autonomous model, which requires a
+fundamental change to the cloud management model.
 
 \subsection{Cloud Morphing Vision}
 
@@ -78,7 +74,7 @@ automatically evicted from the resource pool.
 
 From the operational perspective, it can be viewed as virtualization
 of cloud infrastrcuture.
-Currently, cloud system operators manually manage phisical servers and
+Currently, cloud system operators manually manage physical servers and
 network switches to meet the overall demands.
 By decoupling physical resource management from service management,
 cloud service operators are liberated from hardware resource management.
@@ -102,6 +98,9 @@ To realize such systems, it requires various technical advances across
 many fields.  Among other things, new autonomous resource management
 model is needed for distributed diverse resources,
 which is the topic of this paper.
+%% energy saving?
+We also take energy saving into consideration as it is
+essential for future clouds~\cite{Mastelic-2015,masanet2020recalibrating}.
 
 \subsection{Resource Management}
 
@@ -119,7 +118,8 @@ It also reserves a sufficient margin essential for the performance of
 statistically multiplexing services.
 We use pseudo cost for manipulating resource allocation.
 Here, pseudo cost is not an actual monetary charge, but it is used to
-control resource utilization.
+control resource utilization; it should not be confused with service
+fees for customers.
 There exists a large body of literature formulating resource allocation
 as optimization problems.
 In this paper, we use terms and expressions borrowed from optimization
