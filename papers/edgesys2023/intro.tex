@@ -1,19 +1,18 @@
-\subsection{Autonomous Edge Clouds}
+%%\subsection{Autonomous Edge Clouds}
 
 %% Edge computing and edge cloud
-In edge computing, computing resources are placed at locations close
-to the users or data, so as to reduce latencies or to store sensitive
-data on premise~\cite{Lopez-2015}.
+%In edge computing, computing resources are placed at locations close
+%to the users or data, so as to reduce latencies or to store sensitive
+%data on premise~\cite{Lopez-2015}.
 A possible future direction of edge computing is distributed cloud
 computing that utilizes diverse and geographically scattered computing
-resources at the edge, and make them act as part of the cloud.
-
+resources at the edge as part of the cloud.
 %% edge: from specific purpose to general purpose
 Currently, most edge devices are resource-limited, and thus, designed
 and used for specific purposes.
 However, computing resources could be abundant in the future environment,
-if it becomes easier to utilize available computing resources.
-Furthermore, we might be able to exploit idle computing resources at
+by means of utilizing various available computing resources.
+For example, we might be able to exploit idle computing resources at
 home for a cloud, similar to the way in-house solar power systems are
 connected to an electrical grid.
 Once there are enough edge resources, they do not need to be
@@ -22,7 +21,7 @@ micromanaged and can be used for general purposes.
 %% microservice is a driving factor
 A driving factor for exploiting available computing resources for cloud
 services is the shift to microservices~\cite{nadareishvili2016microservice}
-and serverless computing~\cite{Shafiei-2022},
+%%and serverless computing~\cite{Shafiei-2022},
 in which a cloud service is composed of a collection of loosely-coupled
 lightweight services.
 Each microservice is ephemeral and short-lived, and can be executed
@@ -40,13 +39,13 @@ Thus, cloud management also needs to change from the current central
 control to a distributed autonomous model, which requires a
 fundamental change to the cloud management model.
 
-\subsection{Cloud Morphing Vision}
+%%\subsection{Cloud Morphing Vision}
 
 \begin{figure}[tb]
   \begin{center}
-    \includegraphics[width=0.8\columnwidth]{morphing-concept.pdf}
+    \includegraphics[width=0.7\columnwidth]{morphing-concept.pdf}
     \vspace{-2.0ex}
-    \caption{Cloud morphing concept: the shape of a cloud follows the
+    \caption{Cloud morphing: the shape of a cloud dynamically follows the
       usage pattern}
     \Description{Clouds dynamically change their shapes.}
     \label{fig:concept}
@@ -102,15 +101,16 @@ which is the topic of this paper.
 We also take energy saving into consideration as it is
 essential for future clouds~\cite{Mastelic-2015,masanet2020recalibrating}.
 
-\subsection{Resource Management}
+%%\subsection{Resource Management}
 
 %% resource allocation problems are NP-hard
 %% even harder for distributed heterogeneous resources
-Resource allocation in distributed clouds is a non-trivial
-optimization problem, and it is even harder when distributed
-management is assumed.
+%Resource allocation in distributed clouds is a non-trivial
+%optimization problem, and it is even harder when distributed
+%management is assumed.
 %% our idea: use congestion pricing mechanism for automatic load management
-To this end, we employ dynamic pricing for decentralized resource
+%To this end,
+We employ dynamic pricing for decentralized resource
 allocation which works as backpressure against congestion.
 By design, serious congestion never happens in the system as long as
 some resources remain available in the resource pool.
