@@ -1,6 +1,6 @@
 function edge_scenario(nodes, links;
     drones=10,
-    duration=30,
+    duration=35,
     rate=0.1,
     σ=1.75,
     seed=68987354
@@ -8,21 +8,8 @@ function edge_scenario(nodes, links;
     Random.seed!(seed)
     j = job(0, 1, 1, 1.0, 1.0)
     R = map(_ -> Vector{Request{typeof(j)}}(), 0:length(nodes))
-
     N = length(nodes) + 3
-    μ1 = duration * 1 / N
-    μ2 = duration * 2 / N
-    μ3 = duration * 3 / N
-    μ4 = duration * 4 / N
-    μ5 = duration * 5 / N
-
-    d1 = truncated(Normal(μ1, σ); lower=0, upper=duration)
-    d2 = truncated(Normal(μ2, σ); lower=0, upper=duration)
-    d3 = truncated(Normal(μ3, σ); lower=0, upper=duration)
-    d4 = truncated(Normal(μ4, σ); lower=0, upper=duration)
-    d5 = truncated(Normal(μ5, σ); lower=0, upper=duration)
-    D = [d1, d2, d3, d4, d5]
-
+    D = [truncated(Normal(duration * i / N, σ); lower=0, upper=duration) for i in 1:(N-1)]
     P = [rand(d) for _ in 1:drones, d in D]
 
     for τ in 0:rate:duration, u in 1:drones
