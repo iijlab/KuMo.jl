@@ -6,6 +6,22 @@ the settings are described in the simulation tool.
 
 \subsection{Basic Behaviors}
 
+Figure\ref{fig:edge} shows a simple scenario in which
+flocks of drones move over 3 edge nodes.
+A flock of 10 drones start arriving at edge 1.
+The flock moves to edge 2, and then, to edge 3.
+At time 15, another flock of 10 drones arrive.
+
+\begin{figure}[tb]
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{figure-edge.pdf}
+    \vspace{-2.0ex}
+    \caption{Flocks of drone --- edge scenario placeholder}
+    \Description{Flocks of drone --- edge scenario placeholder}
+    \label{fig:edge}
+  \end{center}
+\end{figure}
+
 The effects of manipulating the cost function and the resource weight
 for a job is illustrated in Figure~\ref{fig:lowering} using the
 topology in Figure~\ref{fig:system}.
@@ -31,6 +47,20 @@ third wave.
 In the fourth wave, the weight for the backend communication is
 increased, and all jobs are assigned to the node that has the object
 (DC3).
+
+\begin{figure}[tb]
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{figure6-costs_manipulation.pdf}
+    \vspace{-2.0ex}
+    \caption{Cost manipulations: shifting the load +.2,
+      +.4 and raising the weight for data access}
+    \smallskip
+    \raggedright
+    \small
+    \Description{Simulation results to illustrate the effects of cost manipulations.}
+    \label{fig:lowering}
+  \end{center}
+\end{figure}
 
 \subsection{Mixed Behaviors}
 
@@ -112,16 +142,6 @@ and how jobs for MDCs can be offloaded to upstream DCs.
 % the loads of the leaf-DCs stay at around $.75$ while they are
 % active, except a short transient overshoot during the surge from time
 % 680.
-
-\begin{figure}[tb]
-  \begin{center}
-    \includegraphics[width=1.0\columnwidth]{figure-edge.pdf}
-    \vspace{-2.0ex}
-    \caption{Flocks of drone --- edge scenario placeholder}
-    \Description{Flocks of drone --- edge scenario placeholder}
-    \label{fig:edge}
-  \end{center}
-\end{figure}
 
 Overall, the simulation results illustrate the basic behaviors of the
 idle-resource pooling,

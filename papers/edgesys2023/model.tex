@@ -1,7 +1,7 @@
 
 \begin{figure}[tb]
   \begin{center}
-    \includegraphics[width=1.0\columnwidth]{figure1-system.pdf}
+    \includegraphics[width=0.7\columnwidth]{figure1-system.pdf}
     \vspace{-2.0ex}
     \caption{Simple system model for job assignment}
     \Description{A simple system model with 2 datacenters and 2 micro datacenters.}
@@ -48,12 +48,14 @@ the data.
 For simplicity, we do not distinguish directions of
 communications for $q$ and $r$, and assume only one user and one data
 object per micro-job in this paper.
+
 A micro-job is specified by a service provider, optionally associated with
 weights, e.g., a service provider may raise the weight for the
 frontend communication to place the job close to the user.
 In this manner, cloud service providers can specify which
 type of resources have priority for a specific service without
 overclaiming required resources.
+
 To instantiate a micro-job requested from a user, the service
 server finds the best node to allocate the required resource
 for $J$: $p$, $q$ and $r$ for duration $s$.
@@ -65,7 +67,7 @@ between $m$ and $o$.
   &&  H(j,i)      = p \cdot f(\rho_{i}) \\
   &&  G(j,i,m,o)  = q \cdot \smashoperator{\sum_{l \in path(m,i)}} f(\rho_{l}) + r \cdot \smashoperator{\sum_{l \in path(i,o)}} f(\rho_{l})
 \end{eqnarray*}
-$f(\rho)$ is the cost function of a resource load, and $path(m,i)$ is a set
+$f(\rho)$ is the cost function of a resource load $\rho$, and $path(m,i)$ is a set
 of links from $m$ to $i$ (e.g., the shortest path weighted by cost).
 To assign micro-job $j$, the server simply finds the node that minimizes the
 cost: \(argmin_{i} \: E(j, i)\).
@@ -79,21 +81,25 @@ function of load, and uses it for load control and also as
 backpressure against congestion.
 Micro-jobs are naturally gravitated to the most cost-efficient
 location.
+
 %% model: cost function: congestion pricing combined with idle-resource pooling
 The proposed model is based on congestion pricing in which the cost of
 a resource dynamically changes according to the load of the resource.
 It works as a barrier function for optimization; the capacity
 constraint is enforced by a penalizing cost when approaching the full
 capacity.
+
 Another key idea is {\em idle-resource pooling} that tries to put resources
 into an idle state when possible for energy saving.
 We proposed a convex cost function that enables idle-resource pooling
 as part of the congestion pricing mechanism.
+
 A pseudo cost function in our model maps the load of a resource
 $\rho \in [0, 1]$ to the corresponding cost.
 The capacity limit is enforced by the cost function that rapidly grows
 as the load approaches $1.0$, which is known as a barrier function in
 optimization theory.
+
 We use two types of pseudo cost functions: one is the monotonic cost
 function and the other is the convex cost function.
 The monotonic cost function is a simple barrier function that
@@ -102,6 +108,7 @@ The convex cost function is also a barrier function but also for
 idle-resource pooling.
 In this paper, the monotonic form is used for network links as
 energy-saving-by-idling is not common for network links.
+
 The standard forms that have the minimum cost of $1.0$ are
 shown in Figure~\ref{fig:std_costfunc}. We will show how to manipulate
 the cost functions in Sec.~\ref{sec:variation}.
@@ -174,6 +181,7 @@ where the third resource $r_{2}$ kicks in.
 It repeats for $r_{3}$, but no more idle resource is available
 when $\sum \rho$ reaches $3.0$ so that the loads grow beyond $.75$
 up to $\sum \rho = 3.5$ with $\rho = .875$ for each.
+
 When the system load decreases, the process is reversed.
 After reaching $\rho = .5$ for all,
 one resource with the lowest load $\rho < .5$ becomes more expensive
@@ -181,6 +189,7 @@ than the others.
 This one is less preferred for subsequent assignments, and quickly
 loses the load until it becomes idle again, while the other 3 keep
 $\rho$ in $[.5, .75]$. It repeats for the remaining ones.
+
 It is easy to see how the number of active resources changes when
 there are more resources.
 When the number of active resources is increasing, the load of each
@@ -212,6 +221,7 @@ To activate $r_{1}$, the load of $r_{0}$ goes up to $.84$ to satisfy:
 $f_{r1}(0) = 4 = f_{r0}(.84)$.
 When $r_{1}$ is moving towards idle after time 700, the load
 of $r_{0}$ is $.75$ to satisfy: $f_{r1}(.5) = 2 = f_{r0}(.75)$
+
 For unequal resources in general, the required load to trigger a new
 allocation is higher than $\rho = .75$ for the already
 active ones to match the cost $f(0)$ for the new one, but the load
@@ -240,6 +250,7 @@ To make {\bf idle-resource pooling more aggressive},
 one can raise the cost at $\rho = 0$:
 e.g., to raise the cost at $\rho = 0$ by a factor of $(n+1)/2$,
 $f'(\rho) = n (2\rho - 1)^{2}/(1 - \rho^{n}) + 1$.
+
 A {\bf premium service} can be realized by shifting the load
 in the same way as lowering the load level
 but for specific users or jobs (not for a specific resource) so as to
