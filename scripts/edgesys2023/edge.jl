@@ -104,7 +104,7 @@ function final_edge(
     p3, _ = simulate_and_plot(s3, ShortestPath(); target=:nodes, plot_type=:areaplot)
 
     for (i, p) in enumerate([p1, p2, p3])
-        savefig(p, "final_edge_$i")
+        savefig(p, "final_edge_$i.pdf")
     end
 end
 
