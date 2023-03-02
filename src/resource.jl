@@ -109,7 +109,7 @@ struct FlatNode{T1<:Number,T2<:Number} <: AbstractNode
     param::T2
 end
 
-pseudo_cost(r::FlatNode, charge) = charge ≥ r.capacity ? Inf : 0.0
+pseudo_cost(r::FlatNode, _) = param(r)
 
 abstract type AbstractLink <: AbstractResource end
 
