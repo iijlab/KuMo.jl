@@ -99,6 +99,18 @@ end
 
 pseudo_cost(r::EqualLoadBalancingNode, charge) = pseudo_cost(capacity(r), charge, :equal_load_balancing)
 
+"""
+    FlatNode{T <: Number} <: AbstractNode
+
+Node structure with a constant pseudo-cost function.
+"""
+struct FlatNode{T1<:Number,T2<:Number} <: AbstractNode
+    capacity::T1
+    param::T2
+end
+
+pseudo_cost(r::FlatNode, charge) = charge ≥ r.capacity ? Inf : 0.0
+
 abstract type AbstractLink <: AbstractResource end
 
 """
@@ -128,6 +140,18 @@ pseudo_cost(::FreeLink, x...) = 0.0
 
 Link structure with a convex pseudo-cost function.
 """
-struct ConvexLink <: KuMo.AbstractLink
-	capacity::Float64
+struct ConvexLink{T<:Number} <: AbstractLink
+    capacity::T
 end
+
+"""
+    FlatLink <: KuMo.AbstractLink
+
+Link structure with a constant pseudo-cost function.
+"""
+struct FlatLink{T1<:Number,T2<:Number} <: AbstractLink
+    capacity::T1
+    param::T2
+end
+
+pseudo_cost(r::FlatLink, _) = param(r)

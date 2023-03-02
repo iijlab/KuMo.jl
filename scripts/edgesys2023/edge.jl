@@ -1,27 +1,38 @@
 function edge_scenario(nodes, links;
-    drones=10,
-    duration=35,
+    flock1=(10, 1),
+    flock2=(5, 5),
+    duration=40,
     rate=0.1,
     σ=1.75,
     seed=68987354
 )
     Random.seed!(seed)
+    drones = flock1[1] + flock2[1]
     j = job(0, 1, 1, 1.0, 1.0)
     R = map(_ -> Vector{Request{typeof(j)}}(), 0:length(nodes))
-    N = length(nodes) + 3
+    n = length(nodes)
+    N = n + 4
     D = [truncated(Normal(duration * i / N, σ); lower=0, upper=duration) for i in 1:(N-1)]
-    P = [rand(d) for _ in 1:drones, d in D]
+    P = fill(Inf, drones, length(D))
+    for i in 1:drones, (k, d) in enumerate(D)
+        if k == N - 1 || (i ≤ flock1[1] && k ≥ flock1[2]) || k ≥ flock2[2]
+            P[i, k] = rand(d)
+        end
+    end
 
+    acc = Set{Int}()
+
+    # Flock 1
     for τ in 0:rate:duration, u in 1:drones
         t = τ + rate / drones * (u - 1)
-        p = findfirst(x -> t < x, P[u, :])
-        if isnothing(p)
-            continue
-        elseif P[u, 4] ≤ t ≤ P[u, 5]
-            push!(R[1], Request(j, t))
-            push!(R[length(nodes)], Request(j, t))
-        elseif P[u, 1] ≤ t
-            push!(R[p-1], Request(j, t))
+        p = findlast(x -> t ≥ x, P[u, :])
+        if !isnothing(p)
+            i = (p + n - (u < flock1[1] ? 1 : 2)) % n + 1
+            if p ∉ acc
+                @info "debug" p n (p + n - 1) i P[u, :] t
+                push!(acc, p)
+            end
+            push!(R[i], Request(j, t))
         end
     end
 
@@ -31,26 +42,14 @@ function edge_scenario(nodes, links;
     return scenario(; duration, nodes, links, users, directed)
 end
 
-struct FlatNode{T<:Number} <: KuMo.AbstractNode
-    capacity::T
-end
-
-pseudo_cost(r::FlatNode, charge) = charge ≥ r.capacity ? Inf : 0.0
-
-struct ConstantLink{T<:Number} <: KuMo.AbstractLink
-    capacity::T
-    param::T
-end
-
-pseudo_cost(r::ConstantLink, _) = param(r)
-
-function final_edge(
+function final_edge(;
     c=100.0,
-    drones=10,
-    duration=30,
+    flock1=(10, 1),
+    flock2=(6, 5),
+    duration=40,
     rate=0.1,
     σ=1.75,
-    seed=68987354,
+    seed=68987354
 )
 
     # scenario 1: FlatNode -- ConstantLink
@@ -64,7 +63,7 @@ function final_edge(
         (1, 3, ConstantLink(c, 1.0)),
         (2, 3, ConstantLink(c, 1.0)),
     ]
-    s1 = edge_scenario(nodes_1, links_1; drones, duration, rate, σ, seed)
+    s1 = edge_scenario(nodes_1, links_1; flock1, flock2, duration, rate, σ, seed)
     p1, _ = simulate_and_plot(s1, ShortestPath(); target=:nodes, plot_type=:areaplot)
 
     # scenario 2: ConvexNode -- MonotonicLink
@@ -78,7 +77,7 @@ function final_edge(
         (1, 3, c),
         (2, 3, c),
     ]
-    s2 = edge_scenario(nodes_2, links_2_3; drones, duration, rate, σ, seed)
+    s2 = edge_scenario(nodes_2, links_2_3; flock1, flock2, duration, rate, σ, seed)
     p2, _ = simulate_and_plot(s2, ShortestPath(); target=:nodes, plot_type=:areaplot)
 
     # scenario 3: MonotonicNode -- MonotonicLink
@@ -87,12 +86,12 @@ function final_edge(
         EqualLoadBalancingNode(c),
         EqualLoadBalancingNode(c),
     ]
-    s3 = edge_scenario(nodes_3, links_2_3; drones, duration, rate, σ, seed)
+    s3 = edge_scenario(nodes_3, links_2_3; flock1, flock2, duration, rate, σ, seed)
     p3, _ = simulate_and_plot(s3, ShortestPath(); target=:nodes, plot_type=:areaplot)
 
     for (i, p) in enumerate([p1, p2, p3])
-        savefig(p, "final_edge_$i.pdf")
+        savefig(p, "final_edge_$i")
     end
 end
 
-final_edge()
+final_edge(; seed=42)
