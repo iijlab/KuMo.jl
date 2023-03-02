@@ -1634,6 +1634,7 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 KuMo = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+PGFPlotsX = "8314cec4-20b6-5062-9cdb-752b83310925"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 TikzGraphs = "b4f28e30-c73f-5eaf-a395-8a9db949a742"
 TikzPictures = "37f6aa50-8035-52d0-81c2-5a1d08754b2d"
@@ -1645,6 +1646,7 @@ Distributions = "~0.25.62"
 Graphs = "~1.7.1"
 KuMo = "~0.1.24"
 LaTeXStrings = "~1.3.0"
+PGFPlotsX = "~1.5.0"
 StatsPlots = "~0.14.34"
 TikzGraphs = "~1.4.0"
 TikzPictures = "~3.4.2"
@@ -1656,7 +1658,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.0-beta4"
 manifest_format = "2.0"
-project_hash = "a0015e2c9652acad578fa57e0b3fbfe293ae09d4"
+project_hash = "7be72885afadd3b2486664d1984a0ffed204cc46"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -3082,6 +3084,7 @@ version = "0.9.1+5"
 # ╟─d3221f99-adcc-457c-82f5-95aaa2a9e197
 # ╠═61189540-e578-11ec-3030-c3ebb611c28b
 # ╠═21639215-1463-46ff-80a0-f1f2028c7558
+# ╠═bc72d307-12f7-47c6-b90a-062814186978
 # ╠═217a9755-f4d6-4b13-b47b-9ad08430cffd
 # ╠═a575616a-81d4-4829-ae89-41eee625ad9b
 # ╟─6eff9ab6-620a-4a31-833d-8b8ec2b399a6
