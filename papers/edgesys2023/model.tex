@@ -1,8 +1,8 @@
 
 \begin{figure}[tb]
   \begin{center}
-    \includegraphics[width=0.7\columnwidth]{figure1-system.pdf}
-    \vspace{-2.0ex}
+    \includegraphics[width=0.8\columnwidth]{figure1-system.pdf}
+    \vspace{-1.0ex}
     \caption{Simple system model for job assignment}
     \Description{A simple system model with 2 datacenters and 2 micro datacenters.}
     \label{fig:system}
@@ -25,8 +25,8 @@ between the user and the data object.
 The load of a resource can be measured in a number of ways.  Most
 resources have some form of load report functions built-in.
 When the load of a resource fluctuates too rapidly,
-a smoothing filter (e.g., exponentially weighted moving average)
-can be used to stabilize the behavior.
+a smoothing filter (e.g., EWMA)
+should be used to stabilize the behavior.
 A load value does not need to be precise, and a rough approximation is
 enough for loose resource management.
 Still, if each allocation is not small enough both in size and in
@@ -53,8 +53,7 @@ A micro-job is specified by a service provider, optionally associated with
 weights, e.g., a service provider may raise the weight for the
 frontend communication to place the job close to the user.
 In this manner, cloud service providers can specify which
-type of resources have priority for a specific service without
-overclaiming required resources.
+type of resources have priority for a specific service.
 
 To instantiate a micro-job requested from a user, the service
 server finds the best node to allocate the required resource
@@ -89,7 +88,7 @@ It works as a barrier function for optimization; the capacity
 constraint is enforced by a penalizing cost when approaching the full
 capacity.
 
-Another key idea is {\em idle-resource pooling} that tries to put resources
+Another key idea is {\bf idle-resource pooling} that tries to put resources
 into an idle state when possible for energy saving.
 We proposed a convex cost function that enables idle-resource pooling
 as part of the congestion pricing mechanism.
@@ -103,21 +102,21 @@ optimization theory.
 We use two types of pseudo cost functions: one is the monotonic cost
 function and the other is the convex cost function.
 The monotonic cost function is a simple barrier function that
-monotonically grows with load, up to infinite as $\rho \to 1$.
+monotonically grows with load, up to infinity as $\rho \to 1$.
 The convex cost function is also a barrier function but also for
 idle-resource pooling.
 In this paper, the monotonic form is used for network links as
 energy-saving-by-idling is not common for network links.
 
 The standard forms that have the minimum cost of $1.0$ are
-shown in Figure~\ref{fig:std_costfunc}. We will show how to manipulate
-the cost functions in Sec.~\ref{sec:variation}.
+shown as bold lines in Figure~\ref{fig:std_costfunc}. We will show how
+to manipulate the cost functions in Sec.~\ref{sec:variation}.
 
 \begin{figure}[tb]
   \begin{center}
     \includegraphics[width=0.9\columnwidth]{figure2-pseudo_costs.pdf}
     \vspace{-2.0ex}
-    \caption{Standard cost functions and variations}
+    \caption{Standard cost functions and variants}
     \Description{The standard convex cost function and standard
       monotonic cost function.}
     \label{fig:std_costfunc}
@@ -125,14 +124,14 @@ the cost functions in Sec.~\ref{sec:variation}.
 \end{figure}
 
 The standard convex cost function is defined as:
-\(f(\rho) = \frac{(2\rho - 1)^{2}}{1 - \rho} + 1\)
+\(f(\rho) = (2\rho - 1)^{2}/(1 - \rho) + 1\)
 This function has the properties:
 $min\: f(\rho) = f(.5) = 1$, and $f(0) = f(.75) = 2$.
 The cost grows rapidly when $\rho > .75$.
 The system automatically tries to keep $\rho \le .75$,
 aiming at $\rho = .5$.
 The standard monotonic cost function is defined as
-\( f(\rho) = \frac{\rho^{4.5}}{1 - \rho} + 1\)
+\( f(\rho) = \rho^{4.5}/(1 - \rho) + 1\)
 to roughly match the standard convex cost function in $[.5, .75]$,
 the {\em working load range} explained in the next subsection.
 Note that the standard forms are defined just for convenience, and
@@ -147,14 +146,24 @@ Figure~\ref{fig:4node-ratio}.
 
 \begin{figure}[tb]
   \begin{center}
-    \includegraphics[width=1.0\columnwidth]{figure3-equivalent_proportional_nodes.pdf}
-    \vspace{-2.0ex}
+    \includegraphics[width=1.0\columnwidth]{figure3-equivalent_nodes.pdf}
+    \vspace{-5.0ex}
     \caption{Load distribution among 4 equivalent cost nodes:
       the load of each resource (top) and the total load (bottom)}
     \Description{Simulation results with 4 nodes with the same cost function.}
     \label{fig:4node}
   \end{center}
   \hspace{0.8\columnsep}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{figure4-proportional_nodes.pdf}
+    \vspace{-5.0ex}
+    \caption{Load distribution: 4 proportional cost nodes}
+    \Description{Simulation results with 4 nodes with proportional cost function}
+    \label{fig:4node-ratio}
+  \end{center}
 \end{figure}
 
 First, assume a pool of 4 equivalent resources with the standard convex
@@ -180,7 +189,7 @@ Both loads rise again until $\rho_{r0} = \rho_{r1} = .75$,
 where the third resource $r_{2}$ kicks in.
 It repeats for $r_{3}$, but no more idle resource is available
 when $\sum \rho$ reaches $3.0$ so that the loads grow beyond $.75$
-up to $\sum \rho = 3.5$ with $\rho = .875$ for each.
+up to $\rho = .875$ and $\sum \rho = 3.5$.
 
 When the system load decreases, the process is reversed.
 After reaching $\rho = .5$ for all,
@@ -200,21 +209,13 @@ In short, when all resources are equal, the system tries to maintain
 the load of active resources in the {\em working load range}
 $[.5, .75]$, while keeping idle resources as much as possible.
 
-% \begin{figure}
-%   \begin{center}
-%     \includegraphics[width=1.0\columnwidth]{figure4-proportional_nodes.pdf}
-%     \vspace{-2.0ex}
-%     \caption{Load distribution: 4 proportional cost nodes}
-%     \Description{Simulation results with 4 nodes with proportional cost functions.}
-%     \label{fig:4node-ratio}
-%   \end{center}
-% \end{figure}
-
-When resources are not equal, the behavior becomes more complex, but
-the underlying mechanisms are the same.
-Let's take a look at a case of 4 resources in Figure~\ref{fig:4node-ratio}
-with the cost ratio $1:2:4:8$,
+The usage of a resource can be controlled by manipulating the cost
+function.
+%When resources are not equal, the behavior becomes more complex, but
+%the underlying mechanisms are the same.
+Let's change the costs of the 4 resources with the ratio $1:2:4:8$,
 that is $8 f_{r0} = 4 f_{r1} = 2 f_{r2} = f_{r3}$.
+Figure~\ref{fig:4node-ratio} shows the load distribution.
 Here, we focus on the interaction between $r_{0}$ and $r_{1}$ since
 the other interactions are similar.
 To activate $r_{1}$, the load of $r_{0}$ goes up to $.84$ to satisfy:
@@ -237,25 +238,25 @@ $f(.5)$ for the deactivating one.
 \label{sec:variation}
 
 The utilization of a resource can be manipulated by modifying the cost
-function of the resource as shown in Figure~\ref{fig:costfunc3}.
-One can {\bf lower or raise the load level} of a resource by shifting
+function of the resource as the variants in Figure~\ref{fig:costfunc3}.
+One can {\em lower or raise the load level} of a resource by shifting
 the load in the cost function and adjusting the target load,
 $f'(\rho) = f(\rho + \Delta)$.
-To {\bf change the activation order} in the idle-resource pooling,
+To {\em change the activation order} in the idle-resource pooling,
 one can raise or lower the cost,
 e.g., by making the cost  $n$ times more expensive, $f'(\rho) = n f(\rho)$.
 For minor adjustment, one can use an additive form,
 $f'(\rho) = f(\rho) + \Delta$.
-To make {\bf idle-resource pooling more aggressive},
+To make {\em idle-resource pooling more aggressive},
 one can raise the cost at $\rho = 0$:
 e.g., to raise the cost at $\rho = 0$ by a factor of $(n+1)/2$,
 $f'(\rho) = n (2\rho - 1)^{2}/(1 - \rho^{n}) + 1$.
 
-A {\bf premium service} can be realized by shifting the load
+A {\em premium service} can be realized by shifting the load
 in the same way as lowering the load level
 but for specific users or jobs (not for a specific resource) so as to
 have premium jobs always being assigned to less loaded resources.
-Similarly, an {\bf economy service} that allows to be assigned to more
+Similarly, an {\em economy service} that allows to be assigned to more
 loaded resources can be made by a negative shift.
 It could be appealing as a business model to enable multiple classes using a single
 resource pool with a single shift parameter.

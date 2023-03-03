@@ -19,8 +19,8 @@ Once there are enough edge resources, they do not need to be
 micromanaged and can be used for general purposes.
 
 %% microservice is a driving factor
-A driving factor for exploiting available smaller computing resources for cloud
-services is the shift to microservices~\cite{nadareishvili2016microservice}
+A driving factor for exploiting smaller computing resources
+is the shift to microservices~\cite{nadareishvili2016microservice}
 %%and serverless computing~\cite{Shafiei-2022},
 in which a cloud service is composed of a collection of loosely-coupled
 lightweight services.
@@ -45,7 +45,7 @@ fundamental change to the cloud management model.
 \begin{figure}[tb]
   \begin{center}
     \includegraphics[width=0.7\columnwidth]{morphing-concept.pdf}
-    \vspace{-2.0ex}
+%%    \vspace{-2.0ex}
     \caption{Cloud morphing: the shape of a cloud dynamically follows the
       usage pattern}
     \Description{Clouds dynamically change their shapes.}
@@ -53,14 +53,14 @@ fundamental change to the cloud management model.
   \end{center}
 \end{figure}
 
-{\em Cloud Morphing} is our vision for edge clouds in the future.
+{\bf Cloud Morphing} is our vision for edge clouds in the future.
 By dynamically allocating microservices over distributed
 heterogeneous resources, a cloud service instance emerges at the best
 location and, as the usage pattern changes, the service instance also
 transforms the locations of the resources and their connections
 (Figure \ref{fig:concept}).
 
-Microservice jobs are assigned so as to reduce the overall exececution
+Microservice jobs are assigned so as to reduce the overall execution
 cost that includes computing, communication with the user, and access
 to database.
 For examples, an interactive task will follow the user when the user
@@ -93,14 +93,13 @@ It requires loose management of resources, as small parties cannot
 afford dedicated skilled operators.
 The utilization of each resource needs to be easily manipulated,
 without affecting the stability of the system.
+%% energy saving?
+Also, energy saving could be more critical for edge resources.
 
 To realize such systems, it requires various technical advances across
 many fields.  Among other things, new autonomous resource management
 model is needed for distributed diverse resources,
 which is the topic of this paper.
-%% energy saving?
-We also take energy saving into consideration as it is
-essential for future clouds~\cite{Mastelic-2015,masanet2020recalibrating}.
 
 %%\subsection{Resource Management}
 
