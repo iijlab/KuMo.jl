@@ -49,20 +49,22 @@ export Scenario
 export MinCostFlow
 export ShortestPath
 
-export PeriodicRequests
 export Request
 export Requests
+export PeriodicRequests
 
 export Link
-export FreeLink
 export ConvexLink
+export FlatLink
+export FreeLink
 
 export Node
-export PremiumNode
-export EqualLoadBalancingNode
-export MultiplicativeNode
 export AdditiveNode
+export EqualLoadBalancingNode
+export FlatNode
 export IdleStateNode
+export MultiplicativeNode
+export PremiumNode
 
 export SCENARII
 export EDGESYS2023

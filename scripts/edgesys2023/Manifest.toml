@@ -727,9 +727,9 @@ version = "0.6.5"
 
 [[deps.KuMo]]
 deps = ["CSV", "Colors", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "GraphMakie", "Graphs", "JuMP", "Makie", "MathOptInterface", "PGFPlotsX", "PackageCompatUI", "PrettyTables", "ProgressMeter", "Random", "RecipesBase", "SimpleTraits", "SparseArrays", "StatsPlots", "TestItemRunner", "TestItems"]
-git-tree-sha1 = "a4739c515117e94d723915bae957f520a6642f53"
+git-tree-sha1 = "51687c083570cd63c7dd9f07126eb9dc7eb94340"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.33"
+version = "0.1.35"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
