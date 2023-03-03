@@ -19,14 +19,15 @@ Once there are enough edge resources, they do not need to be
 micromanaged and can be used for general purposes.
 
 %% microservice is a driving factor
-A driving factor for exploiting available computing resources for cloud
+A driving factor for exploiting available smaller computing resources for cloud
 services is the shift to microservices~\cite{nadareishvili2016microservice}
 %%and serverless computing~\cite{Shafiei-2022},
 in which a cloud service is composed of a collection of loosely-coupled
 lightweight services.
 Each microservice is ephemeral and short-lived, and can be executed
-in a stateless container,
-which enables flexible and efficient use of underlying cloud
+in a stateless container.
+It allows us to use much smaller resource units than virtual machines
+or containers, and enables flexible and efficient use of underlying cloud
 resources including smaller edge resources.
 %The concept has something in common with early packet switching so
 %that it might open up new possibilities to apply packet switching
@@ -59,9 +60,9 @@ location and, as the usage pattern changes, the service instance also
 transforms the locations of the resources and their connections
 (Figure \ref{fig:concept}).
 
-Microservice jobs are assigned to efficiently use required resources
-such as computing, communication with the user, access to
-database, and other factors.
+Microservice jobs are assigned so as to reduce the overall exececution
+cost that includes computing, communication with the user, and access
+to database.
 For examples, an interactive task will follow the user when the user
 moves, while a data-intensive task will stay close to the data
 regardless of the user location.
@@ -71,17 +72,17 @@ Moreover, services are inherently fault-tolerant and resilient
 against outages or disasters since faulty resources are
 automatically evicted from the resource pool.
 
-From the operational perspective, it can be viewed as virtualization
-of cloud infrastrcuture.
-Currently, cloud system operators manually manage physical servers and
-network switches to meet the overall demands.
-By decoupling physical resource management from service management,
-cloud service operators are liberated from hardware resource management.
-
-Moreover, it is not enough to shift responsibility to operators of the
-new lower infrastructure layer. We need a new self-managing
-infrastructure layer which does not require human operators.
-The physical resource management becomes simpler with a resource pool.
+%From the operational perspective, it can be viewed as virtualization
+%of cloud infrastrcuture.
+%Currently, cloud system operators manually manage physical servers and
+%network switches to meet the overall demands.
+%By decoupling physical resource management from service management,
+%cloud service operators are liberated from hardware resource management.
+%Moreover, it is not enough to shift responsibility to operators of the
+%new lower infrastructure layer. We need a new self-managing
+%infrastructure layer which does not require human operators.
+From the operational perspective, the physical resource management
+becomes simpler with a larger pool of small resources.
 Physical nodes can be easily attached to or detached from the resource pool.
 When there is a consistent hotspot, it can be alleviated or solved by
 placing new resources close to the hotspot and then attaching them to
@@ -120,6 +121,7 @@ We use pseudo cost for manipulating resource allocation.
 Here, pseudo cost is not an actual monetary charge, but it is used to
 control resource utilization; it should not be confused with service
 fees for customers.
+
 There exists a large body of literature formulating resource allocation
 as optimization problems.
 In this paper, we use terms and expressions borrowed from optimization
