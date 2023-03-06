@@ -105,8 +105,9 @@ The monotonic cost function is a simple barrier function that
 monotonically grows with load, up to infinity as $\rho \to 1$.
 The convex cost function is also a barrier function but also for
 idle-resource pooling.
-In this paper, the monotonic form is used for network links as
-energy-saving-by-idling is not common for network links.
+We use the convex form for computing but the monotonic form
+is used for network links as energy-saving-by-idling is not common for
+network links.
 
 The standard forms that have the minimum cost of $1.0$ are
 shown as bold lines in Figure~\ref{fig:std_costfunc}. We will show how
@@ -124,7 +125,7 @@ to manipulate the cost functions in Sec.~\ref{sec:variation}.
 \end{figure}
 
 The standard convex cost function is defined as:
-\(f(\rho) = (2\rho - 1)^{2}/(1 - \rho) + 1\)
+$f(\rho) = (2\rho - 1)^{2}/(1 - \rho) + 1$.
 This function has the properties:
 $min\: f(\rho) = f(.5) = 1$, and $f(0) = f(.75) = 2$.
 The cost grows rapidly when $\rho > .75$.
@@ -141,8 +142,7 @@ purposes.
 \subsection{Idle-Resource Pooling in Action}
 
 The behavior of idle-resource pooling by the convex cost function is
-illustrated by the following examples in Figure~\ref{fig:4node} and
-Figure~\ref{fig:4node-ratio}.
+illustrated by the following example in Figure~\ref{fig:4node}.
 
 \begin{figure}[tb]
   \begin{center}
@@ -238,7 +238,7 @@ $f(.5)$ for the deactivating one.
 \label{sec:variation}
 
 The utilization of a resource can be manipulated by modifying the cost
-function of the resource as the variants in Figure~\ref{fig:costfunc3}.
+function of the resource as the variants in Figure~\ref{figure2-pseudo_costs.pdf}.
 One can {\em lower or raise the load level} of a resource by shifting
 the load in the cost function and adjusting the target load,
 $f'(\rho) = f(\rho + \Delta)$.
