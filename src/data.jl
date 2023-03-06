@@ -6,8 +6,18 @@ struct Data
     location::Int
 end
 
-data(location = 0) = Data(location)
+"""
+    data(location::Int = 0)
 
+Construct data at `location`
+"""
+data(location=0) = Data(location)
+
+"""
+    location(d::Data)
+
+Returns the location of the data `d`.
+"""
 location(d::Data) = d.location
 
 # location(d::Data, location) = d.location = location
