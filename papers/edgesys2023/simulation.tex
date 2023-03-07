@@ -6,15 +6,14 @@ the settings are described in the simulation tool.
 
 %%\subsection{Basic Behaviors}
 
-The first scenario compares the behaviors of baseline, monotonic and
+The first scenario compares the behaviors of constant (baseline), monotonic and
 convex functions with a simple scenario: a flock of drones move
 over 3 edge nodes in Figure~\ref{fig:edge}.
 A flock of 10 drones start at edge 1, move to edge 2 during time
 $(t1, t2)$, and then, to edge 3 $(t2, t3)$, and back to edge 1 $(t3, t4)$.
 The CPU capacity of edge 3 is only $.5$ of edge 1 and 2.
-The baseline assigns drones to the nearest available edge (an extreme
-case of the monotonic with $f(\rho) = 0$ for $\rho$ in $[0,1)$ and
-$f(\rho) = \infty$ for $\rho = 1$).
+The constant assigns drones to the nearest available edge (an extreme
+case of the monotonic with $f(\rho) = 1$ for $\rho$ in $[0,1)$.
 The monotonic case tries to use a less loaded edge. As a result,
 the assignment tends to fluctuate more with minor noise.
 While the convex case tries to stabilize the load of the edges.
