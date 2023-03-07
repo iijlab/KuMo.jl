@@ -64,17 +64,18 @@ function make_links(links; directed=true)
     return _links
 end
 
-make_links(::Nothing, n::Int; directed=true) = make_links(Iterators.product(1:n, 1:n); directed)
-
-function make_links(links::Vector{Tuple{DataType,Int,Int,T}}; directed=true) where {T<:Number}
+function make_links(::Nothing, n::Int; directed=true)
+    make_links(Iterators.product(1:n, 1:n); directed)
+end
+function make_links(links::Vector{Tuple{Int,Int,T}}; directed=true) where {T<:AbstractLink}
     types = Set{Type}()
-    foreach(l -> push!(types, l[1]), links)
-    UT = Union{collect(s)...}
+    foreach(l -> push!(types, typeof(l[3])), links)
+    UT = Union{collect(types)...}
     _links = Dictionary{Tuple{Int,Int},UT}()
     for l in links
-        α, β = minmax(l[2], l[3])
-        set!(_links, (α, β), l[1](l[4]))
-        directed || set!(_links, (β, α), l[1](l[4]))
+        α, β = minmax(l[1], l[2])
+        set!(_links, (α, β), l[3])
+        directed || set!(_links, (β, α), l[3])
     end
     return _links
 end
@@ -89,8 +90,9 @@ function make_links(lt::DataType, links; directed=true)
     return _links
 end
 
-make_links(links::Vector{Tuple{Int,Int,T}}; directed=true) where {T<:Number} = make_links(Link{T}, links; directed)
-
+function make_links(links::Vector{Tuple{Int,Int,T}}; directed=true) where {T<:Number}
+    make_links(Link{T}, links; directed)
+end
 function make_links(lt::DataType, links, c; directed=true)
     _links = Dictionary{Tuple{Int,Int},lt}()
     for l in links
@@ -100,12 +102,15 @@ function make_links(lt::DataType, links, c; directed=true)
     return _links
 end
 
-make_links(links, c; directed=true) = make_links(Link{typeof(c)}, links, c; directed)
-
-make_links(n::Int, c; directed=true) = make_links(Iterators.product(1:n, 1:n), c; directed)
-
-make_links(x::Tuple; directed=true) = make_links(x...; directed)
-
+function make_links(links, c; directed=true)
+    make_links(Link{typeof(c)}, links, c; directed)
+end
+function make_links(n::Int, c; directed=true)
+    make_links(Iterators.product(1:n, 1:n), c; directed)
+end
+function make_links(x::Tuple; directed=true)
+    make_links(x...; directed)
+end
 """
     make_users(args...)
 

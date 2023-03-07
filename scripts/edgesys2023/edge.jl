@@ -125,7 +125,6 @@ function small_edge_scenario(nodes, links;
         if !isnothing(p)
             i = (p + n - 1) % n + 1
             if p ∉ acc
-                @info "debug" p n (p + n - 1) i P[u, :] t
                 push!(acc, p)
             end
             push!(R[i], Request(j, t))
@@ -207,3 +206,121 @@ links_1 = [
 s1 = small_edge_scenario(nodes_1, links_1)
 p1, df1 = simulate_and_plot(s1, ShortestPath(); target=:all, plot_type=:all)
 p1
+
+nodes_2 = [
+    FlatNode(c, 0.1),
+    FlatNode(c, 0.1),
+    FlatNode(c, 0.1),
+]
+links_2 = [
+    #     (1, 2),
+    #     (1, 3),
+    #     (2, 3),
+    (1, 2, FlatLink(c, 0.1)),
+    (1, 3, FlatLink(c, 0.1)),
+    (2, 3, FlatLink(c, 0.1)),
+]
+s2 = small_edge_scenario(nodes_2, links_2; rate=25, drones=1)
+p2, df2 = simulate_and_plot(s2, ShortestPath(); target=:all, plot_type=:all)
+p2
+
+function mini_edge_scenario(nodes, links;
+    drones=10,
+    duration=100,
+    phase=20,
+    rate=0.01,
+    jd=1.0
+)
+    j = job(0, 1, 1, jd, 1.0)
+    R = map(_ -> Vector{Request{KuMo.Job}}(), 1:3)
+
+    for τ in 0:rate:duration, u in 1:drones
+        t = τ + rate / drones * (u - 1)
+        i = 0
+        if 5 ≤ t < 10
+            i = 1
+        elseif 10 ≤ t < 30
+            i = t < 10 + phase / drones * (u - 1) ? 1 : 2
+        elseif 30 ≤ t < 50
+            i = t < 30 + phase / drones * (u - 1) ? 2 : 3
+        elseif 50 ≤ t < 75
+            i = t ≤ 50 + phase / drones * (u - 1) ? 3 : 1
+        end
+        i == 0 || push!(R[i], Request(j, t))
+    end
+
+    users = map(i -> user(R[i], i), 1:length(nodes))
+    directed = false
+
+    return scenario(; duration, nodes, links, users, directed)
+end
+
+function mini_final_edge(;
+    c=100.0,
+    drones=10,
+    duration=100,
+    phase=20,
+    rate=0.1,
+    jd=1.0
+)
+
+    # scenario 1: FlatNode -- FlatLink
+    nodes_1 = [
+        FlatNode(c, 1.0),
+        FlatNode(c, 1.0),
+        FlatNode(c, 1.0),
+    ]
+    links_1_4_5 = [
+        (1, 2, FlatLink(c, 1.0)),
+        (1, 3, FlatLink(c, 1.0)),
+        (2, 3, FlatLink(c, 1.0)),
+    ]
+    s1 = mini_edge_scenario(nodes_1, links_1_4_5; duration, rate, jd, drones, phase)
+    title = "scenario 1: FlatNode -- FlatLink"
+    p1, _ = simulate_and_plot(s1, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+
+    # scenario 2: ConvexNode -- MonotonicLink
+    nodes_2_4 = [
+        Node(c),
+        Node(c),
+        Node(c),
+    ]
+    links_2_3 = [
+        (1, 2, c),
+        (1, 3, c),
+        (2, 3, c),
+    ]
+    s2 = mini_edge_scenario(nodes_2_4, links_2_3; duration, rate, jd, drones, phase)
+    title = "scenario 2: ConvexNode -- MonotonicLink"
+    p2, _ = simulate_and_plot(s2, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+
+    # scenario 3: MonotonicNode -- MonotonicLink
+    nodes_3_5 = [
+        EqualLoadBalancingNode(c),
+        EqualLoadBalancingNode(c),
+        EqualLoadBalancingNode(c),
+    ]
+    s3 = mini_edge_scenario(nodes_3_5, links_2_3; duration, rate, jd, drones, phase)
+    title = "scenario 3: MonotonicNode -- MonotonicLink"
+    p3, _ = simulate_and_plot(s3, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+
+    # scenario 4: ConvexNode -- FlatLink
+    s4 = mini_edge_scenario(nodes_2_4, links_1_4_5; duration, rate, jd, drones, phase)
+    title = "scenario 4: ConvexNode -- FlatLink"
+    p4, _ = simulate_and_plot(s4, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+
+    # scenario 5: MonotonicNode -- FlatLink
+    s5 = mini_edge_scenario(nodes_3_5, links_1_4_5; duration, rate, jd, drones, phase)
+    title = "scenario 5: MonotonicNode -- FlatLink"
+    p5, _ = simulate_and_plot(s5, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+
+    for (i, p) in enumerate([p1, p2, p3, p4, p5])
+        savefig(p, "mini_final_edge_$i")
+    end
+
+    return p1, p2, p3, p4, p5
+end
+
+P = mini_final_edge(; drones=10, rate=0.1, jd=1.0)
+# P = mini_final_edge(; drones=100, rate=0.1, jd=0.1)
+P[1]

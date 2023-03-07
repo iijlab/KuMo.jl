@@ -154,7 +154,4 @@ struct FlatLink{T1<:Number,T2<:Number} <: AbstractLink
     param::T2
 end
 
-function pseudo_cost(r::FlatLink, c)
-    @info "debug link" r c param(r)
-    param(r)
-end
+pseudo_cost(r::FlatLink, _) = param(r)

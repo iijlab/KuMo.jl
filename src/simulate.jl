@@ -290,10 +290,11 @@ function inner_queue(
     data_path = Vector{Pair{Int,Int}}()
     user_path = Vector{Pair{Int,Int}}()
 
-    if ii == 5
-        @info "debug shortest" state.links state.nodes j
-        @info "edges" collect(edges(g))
-    end
+    # if ii >= 0
+    #     @info "debug shortest: start" ii state.links state.nodes j
+    #     @info "edges" collect(edges(g))
+    # end
+
     # computing shortest paths starting with frontend (user)
     lock(lck)
     try
@@ -303,7 +304,10 @@ function inner_queue(
         )
         user_costs = zeros(size(capacities))
         j.frontend == 0 || for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
+            # @info "entered loop" i k user_costs
+
             if (i, k) ∈ keys(links)
+                # @info "debug pseudo cost" j.frontend state.links[i, k] links[(i, k)] pseudo_cost(links[(i, k)], state.links[i, k] + j.frontend)
                 user_costs[i, k] =
                     pseudo_cost(links[(i, k)], state.links[i, k] + j.frontend)
             end
@@ -312,22 +316,22 @@ function inner_queue(
         unlock(lck)
     end
 
-    if ii == 5
-        @info "debug shortest" user_costs
-    end
+    # if ii >= 0
+    #     @info "debug shortest: frontend" user_costs
+    # end
 
     paths_user = dijkstra_shortest_paths(g, u, user_costs; trackvertices=true)
-    paths_user2 = dijkstra_shortest_paths(
-        g, u, transpose(user_costs);
-        trackvertices=true
-    )
+    # paths_user2 = dijkstra_shortest_paths(
+    #     g, u, transpose(user_costs);
+    #     trackvertices=true
+    # )
 
-    if ii == 5
-        @info "debug shortest" u paths_user.dists paths_user.parents
-        @info "retriev path" retrieve_path(u, 3, paths_user)
-        @info "debug shortest" u paths_user2.dists paths_user2.parents
-        @info "retriev path" retrieve_path(u, 3, paths_user2)
-    end
+    # if ii >= 0
+    #     @info "debug shortest" u paths_user.dists paths_user.parents
+    #     @info "retriev path" retrieve_path(u, 3, paths_user)
+    #     @info "debug shortest" u paths_user2.dists paths_user2.parents
+    #     @info "retriev path" retrieve_path(u, 3, paths_user2)
+    # end
 
     for v in keys(node_costs)
         current_path = retrieve_path(u, v, paths_user)
@@ -338,9 +342,9 @@ function inner_queue(
             charges[a, b] = j.frontend
         end
 
-        if ii == 5
-            @info "debug shortest" u v current_path charges
-        end
+        # if ii >= 0
+        #     @info "debug shortest" u v current_path charges
+        # end
 
         lock(lck)
         try
@@ -354,32 +358,32 @@ function inner_queue(
             unlock(lck)
         end
 
-        if ii == 5
-            @info "debug shortest" data_costs user_costs node_costs
-        end
+        # if ii >= 0
+        #     @info "debug shortest" data_costs user_costs node_costs
+        # end
 
         paths_data = dijkstra_shortest_paths(
             g, j.data_location, data_costs;
             trackvertices=true
         )
 
-        paths_data2 = dijkstra_shortest_paths(
-            g, j.data_location, transpose(data_costs);
-            trackvertices=true
-        )
+        # paths_data2 = dijkstra_shortest_paths(
+        #     g, j.data_location, transpose(data_costs);
+        #     trackvertices=true
+        # )
 
-        if ii == 5
-            @info "debug shortest  123" j.data_location paths_data.dists paths_data.parents
-            @info "retriev path" retrieve_path(j.data_location, v, paths_data)
-            # @info "debug shortest" j.data_location paths_data2.dists paths_data2.parents
-            # @info "retriev path" retrieve_path(j.data_location, v, paths_data2)
-        end
+        # if ii >= 0
+        #     @info "debug shortest  123" j.data_location paths_data.dists paths_data.parents
+        #     @info "retriev path" retrieve_path(j.data_location, v, paths_data)
+        #     # @info "debug shortest" j.data_location paths_data2.dists paths_data2.parents
+        #     # @info "retriev path" retrieve_path(j.data_location, v, paths_data2)
+        # end
 
         current_cost = paths_user.dists[v] + paths_data.dists[v] + node_costs[v]
 
-        if ii == 5
-            @info "debug shortest" current_cost paths_user.dists[v] paths_data.dists[v] node_costs[v]
-        end
+        # if ii >= 0
+        #     @info "debug shortest" current_cost paths_user.dists[v] paths_data.dists[v] node_costs[v]
+        # end
 
         if current_cost ≤ total_cost
             total_cost = current_cost
@@ -441,9 +445,9 @@ function inner_queue(
     foreach(p -> best_links[p.first, p.second] = j.frontend, user_path)
     foreach(p -> best_links[p.first, p.second] += j.backend, data_path)
 
-    if ii == 5
-        @info "debug shortest" best_links total_cost best_node
-    end
+    # if ii >= 0
+    #     @info "debug shortest" best_links total_cost best_node
+    # end
 
 
     return best_links, total_cost, best_node
