@@ -1,6 +1,12 @@
+% \def \Comments{}
+\def \NewInsteadOfOld{}
+
 \documentclass[10pt,sigconf,letterpaper,nonacm]{acmart}
 \usepackage{mathtools}
 \usepackage{subcaption}
+
+\usepackage{xcolor}
+\usepackage{xspace}
 
 \graphicspath{{../../figures/edgesys2023/}}
 
@@ -15,25 +21,39 @@
 %%\email{jf@baffier.fr}
 \affiliation{\institution{IIJ Research Laboratory}\city{}\country{}}
 
+
+\ifdefined\Comments
+\newcommand{\old}[1]{\noindent{\color{red}Old : #1}\xspace}
+\newcommand{\new}[1]{\noindent{\color{blue}New : #1}\xspace}
+\else
+\ifdefined\NewInsteadOfOld
+\newcommand{\new}[1]{#1\xspace}
+\newcommand{\old}[1]{}
+\else
+\newcommand{\new}[1]{}
+\newcommand{\old}[1]{#1\xspace}
+\fi
+\fi
+
 \begin{document}
 
 
 \begin{abstract}
 
-    In this paper, we envision future edge clouds with
-    abundant heterogeneous computing resources,
-    and propose an autonomous resource management model with dynamic pricing;
-    the pseudo cost of a resource is a function of the
-    load, and the required resources for a job are allocated by a simple
-    cost minimization algorithm.
-    We introduce a convex cost function that enables autonomous
-    load-balancing and idle-resource pooling within the cloud, and allows
-    stakeholders to loosely control the utilization of each resource by
-    manipulating the cost function or the resource weights of micro-jobs.
-    We examine different cost tuning methods for adjusting
-    utilization, and illustrate their behaviors by simulation.
+    \new{This paper proposes an autonomous resource management model for future edge clouds with abundant and diverse computing resources. The model utilizes a pseudo cost function to allocate resources based on load, and a convex cost function to enable load balancing and idle-resource pooling. Stakeholders can manipulate the cost function or resource weights for micro-jobs to control resource utilization. We explore various cost tuning methods and present their performance through simulations.}
 
-    % This paper envisions future distributed cloud services with abundant heterogeneous computing resources, and proposes dynamic pricing to a responsive model for distributed resource management. In this model, the pseudo cost of a resource is a function of the load, and the required resources for a job are allocated by a simple cost minimization algorithm. We introduce a convex cost function that enables autonomous load-balancing and idle-resource pooling within the cloud, and allows stakeholders to loosely control the utilization of each resource by  manipulating the cost function or the resource weights of micro-jobs. We examine different cost tuning methods for adjusting utilization, and illustrate their behaviors by simulation.
+    \old{In this paper, we envision future edge clouds with
+        abundant heterogeneous computing resources,
+        and propose an autonomous resource management model with dynamic pricing;
+        the pseudo cost of a resource is a function of the
+        load, and the required resources for a job are allocated by a simple
+        cost minimization algorithm.
+        We introduce a convex cost function that enables autonomous
+        load-balancing and idle-resource pooling within the cloud, and allows
+        stakeholders to loosely control the utilization of each resource by
+        manipulating the cost function or the resource weights of micro-jobs.
+        We examine different cost tuning methods for adjusting
+        utilization, and illustrate their behaviors by simulation.}
 \end{abstract}
 
 \maketitle
