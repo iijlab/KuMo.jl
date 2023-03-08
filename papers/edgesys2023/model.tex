@@ -9,67 +9,92 @@
   \end{center}
 \end{figure}
 
-Our resource management model is explained using a simple system
-configuration with 2 datacenters (DCs) and 2 micro-datacenters~\cite{Greenberg-2009} (MDCs)
-shown in Figure~\ref{fig:system}.
-When a user requests a service to a nearby service allocation server,
-the service server instantiates the requested service into a series of
-microservice jobs.
-The server obtains the required resource information for each job,
-identifies the locations of the user and the required data object,
-asks nearby resource agents for available resources and their current costs,
-and assigns the job to the node that minimizes the total cost for the
-job.
-The area for cost inquiry could be within proximity along the path
-between the user and the data object.
-The load of a resource can be measured in a number of ways.  Most
-resources have some form of load report functions built-in.
-When the load of a resource fluctuates too rapidly,
-a smoothing filter (e.g., EWMA)
-should be used to stabilize the behavior.
-A load value does not need to be precise, and a rough approximation is
-enough for loose resource management.
-Still, if each allocation is not small enough both in size and in
-duration, the load may not converge as expected.
-Therefore, microservice is the enabler for this approach.
+\old{
+  Our resource management model is explained using a simple system
+  configuration with 2 datacenters (DCs) and 2 micro-datacenters~\cite{Greenberg-2009} (MDCs)
+  shown in Figure~\ref{fig:system}.
+  When a user requests a service to a nearby service allocation server,
+  the service server instantiates the requested service into a series of
+  microservice jobs.
+  The server obtains the required resource information for each job,
+  identifies the locations of the user and the required data object,
+  asks nearby resource agents for available resources and their current costs,
+  and assigns the job to the node that minimizes the total cost for the
+  job.
+  The area for cost inquiry could be within proximity along the path
+  between the user and the data object.
+  The load of a resource can be measured in a number of ways.  Most
+  resources have some form of load report functions built-in.
+  When the load of a resource fluctuates too rapidly,
+  a smoothing filter (e.g., EWMA)
+  should be used to stabilize the behavior.
+  A load value does not need to be precise, and a rough approximation is
+  enough for loose resource management.
+  Still, if each allocation is not small enough both in size and in
+  duration, the load may not converge as expected.
+  Therefore, microservice is the enabler for this approach.
+}
+
+\new{
+  Our resource management model can be explained through a simplified system configuration consisting of two datacenters (DCs) and two micro-datacenters (MDCs), as depicted in Figure~\ref{fig:system} and presented in Greenberg et al.~\cite{Greenberg-2009}. When a user initiates a service request to a nearby service allocation server, the server creates a series of microservice jobs to fulfill the request. The server obtains the necessary resource information for each job and assesses the availability and current costs of nearby resources by querying resource agents. The server obtains the necessary resource information for each job, identifies the locations of the user and the required data object, and asks nearby resource agents for available resources and their current costs. The job is then allocated to the node that minimizes the overall cost for the service.
+  The area for cost inquiry could be within proximity along the path between the user and the data object.
+  The load of a resource can be measured in various ways, and most resources have built-in load report functions. In cases of rapidly fluctuating resource load, a smoothing filter (e.g., EWMA) should be used to stabilize the behavior. While a precise load value is not necessary, a rough estimate suffices for loose resource management. However, if the allocation is not sufficiently small in both size and duration, the load may not converge as expected. Therefore, the microservice architecture enables this approach.
+}
 
 \subsection{Micro-job Assignment}
 
-In this paper, we use a simple micro-job model that defines the
-required resources for a micro-job as $J(p, q, r, s)$ where
-$p$ is the number of micro containers for computation,
-$q$ is frontend communication with the user,
-$r$ is backend communication with data objects (e.g., database), and
-$s$ is the number of time slots.
-The communication costs $q$ and $r$ are also a function of distance so
-that an interactive job with $q \gg r$ will be placed close to the
-user and a data-intensive jobs with $q \ll r$ will be placed close to
-the data.
-For simplicity, we do not distinguish directions of
-communications for $q$ and $r$, and assume only one user and one data
-object per micro-job in this paper.
+\old{
+  In this paper, we use a simple micro-job model that defines the
+  required resources for a micro-job as $J(p, q, r, s)$ where
+  $p$ is the number of micro containers for computation,
+  $q$ is frontend communication with the user,
+  $r$ is backend communication with data objects (e.g., database), and
+  $s$ is the number of time slots.
+  The communication costs $q$ and $r$ are also a function of distance so
+  that an interactive job with $q \gg r$ will be placed close to the
+  user and a data-intensive jobs with $q \ll r$ will be placed close to
+  the data.
+  For simplicity, we do not distinguish directions of
+  communications for $q$ and $r$, and assume only one user and one data
+  object per micro-job in this paper.
 
-A micro-job is specified by a service provider, optionally associated with
-weights, e.g., a service provider may raise the weight for the
-frontend communication to place the job close to the user.
-In this manner, cloud service providers can specify which
-type of resources have priority for a specific service.
+  A micro-job is specified by a service provider, optionally associated with
+  weights, e.g., a service provider may raise the weight for the
+  frontend communication to place the job close to the user.
+  In this manner, cloud service providers can specify which
+  type of resources have priority for a specific service.
 
-To instantiate a micro-job requested from a user, the service
-server finds the best node to allocate the required resource
-for $J$: $p$, $q$ and $r$ for duration $s$.
-The pseudo cost $E$ to host micro-job $j$ for a unit time at node $i$ for
-user $m$ and data object $o$ is \(E(j, i)     = H(j,i) + G(j,i,m,o)\) where $H(j, i)$ is the computing cost to run $j$ at $i$, and
-$G(j, i, m, o)$ is the communication cost to run $j$ at $i$
-between $m$ and $o$.
-\begin{eqnarray*}
-  &&  H(j,i)      = p \cdot f(\rho_{i}) \\
-  &&  G(j,i,m,o)  = q \cdot \smashoperator{\sum_{l \in path(m,i)}} f(\rho_{l}) + r \cdot \smashoperator{\sum_{l \in path(i,o)}} f(\rho_{l})
-\end{eqnarray*}
-$f(\rho)$ is the cost function of a resource load $\rho$, and $path(m,i)$ is a set
-of links from $m$ to $i$ (e.g., the shortest path weighted by cost).
-To assign micro-job $j$, the server simply finds the node that minimizes the
-cost: \(argmin_{i} \: E(j, i)\).
+  To instantiate a micro-job requested from a user, the service
+  server finds the best node to allocate the required resource
+  for $J$: $p$, $q$ and $r$ for duration $s$.
+  The pseudo cost $E$ to host micro-job $j$ for a unit time at node $i$ for
+  user $m$ and data object $o$ is \(E(j, i)     = H(j,i) + G(j,i,m,o)\) where $H(j, i)$ is the computing cost to run $j$ at $i$, and
+  $G(j, i, m, o)$ is the communication cost to run $j$ at $i$
+  between $m$ and $o$.
+  \begin{eqnarray*}
+    &&  H(j,i)      = p \cdot f(\rho_{i}) \\
+    &&  G(j,i,m,o)  = q \cdot \smashoperator{\sum_{l \in path(m,i)}} f(\rho_{l}) + r \cdot \smashoperator{\sum_{l \in path(i,o)}} f(\rho_{l})
+  \end{eqnarray*}
+  $f(\rho)$ is the cost function of a resource load $\rho$, and $path(m,i)$ is a set
+  of links from $m$ to $i$ (e.g., the shortest path weighted by cost).
+  To assign micro-job $j$, the server simply finds the node that minimizes the
+  cost: \(argmin_{i} \: E(j, i)\).
+}
+
+\new{
+  In this paper, we employ a straightforward micro-job model that defines as $J(p, q, r, s)$ the requisite resources for a micro-job. Here, $p$ denotes the number of micro containers for computation, $q$ refers to frontend communication with the user, $r$ pertains to backend communication with data objects (such as databases), and $s$ is the number of time slots. The communication costs $q$ and $r$ are also distance-dependent, with an interactive job having $q \gg r$ being allocated closer to the user, and a data-intensive job with $q \ll r$ being located closer to the data. For the sake of simplicity, we do not differentiate the directions of communication for $q$ and $r$, and assume only one user and one data object per micro-job in this paper.
+
+  A micro-job is specified by a service provider, who can optionally associate weights with it. For instance, a service provider may assign a higher weight to frontend communication to ensure the job is placed closer to the user. In this manner, cloud service providers can prioritize which type of resources should be used for a specific service.
+
+  To instantiate a micro-job requested by a user, the service server identifies the optimal node to allocate the required resources for $J$: $p$, $q$, and $r$ for a duration $s$. The pseudo cost $E$ to host micro-job $j$ for a unit of time at node $i$ for user $m$ and data object $o$ is calculated as follows: $E(j, i) = H(j, i) + G(j, i, m, o)$, where $H(j, i)$ represents the computing cost to run $j$ at $i$, and $G(j, i, m, o)$ denotes the communication cost to run $j$ at $i$ between $m$ and $o$.
+
+  \begin{eqnarray*}
+    && H(j,i)      = p \cdot f(\rho_{i}) \\
+    && G(j,i,m,o)  = q \cdot \smashoperator{\sum_{l \in path(m,i)}} f(\rho_{l}) + r \cdot \smashoperator{\sum_{l \in path(i,o)}} f(\rho_{l})
+  \end{eqnarray*}
+  $f(\rho)$ is the cost function of a resource load $\rho$, and $path(m,i)$ is a set
+  of links from $m$ to $i$ (e.g., the shortest path weighted by cost). To assign micro-job $j$, the server selects the node that minimizes the cost, as expressed by $argmin_{i} : E(j, i)$.
+}
 
 \subsection{Pseudo Cost Functions}
 
