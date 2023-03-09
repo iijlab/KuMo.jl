@@ -278,7 +278,7 @@ function mini_final_edge(;
     ]
     s1 = mini_edge_scenario(nodes_1, links_1_4_5; duration, rate, jd, drones, phase)
     title = "scenario 1: FlatNode -- FlatLink"
-    p1, _ = simulate_and_plot(s1, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    p1, df1 = simulate_and_plot(s1, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
 
     # scenario 2: ConvexNode -- MonotonicLink
     nodes_2_4 = [
@@ -293,7 +293,7 @@ function mini_final_edge(;
     ]
     s2 = mini_edge_scenario(nodes_2_4, links_2_3; duration, rate, jd, drones, phase)
     title = "scenario 2: ConvexNode -- MonotonicLink"
-    p2, _ = simulate_and_plot(s2, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    p2, df2 = simulate_and_plot(s2, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
 
     # scenario 3: MonotonicNode -- MonotonicLink
     nodes_3_5 = [
@@ -303,27 +303,27 @@ function mini_final_edge(;
     ]
     s3 = mini_edge_scenario(nodes_3_5, links_2_3; duration, rate, jd, drones, phase)
     title = "scenario 3: MonotonicNode -- MonotonicLink"
-    p3, _ = simulate_and_plot(s3, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    p3, df3 = simulate_and_plot(s3, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
 
     # scenario 4: ConvexNode -- FlatLink
     s4 = mini_edge_scenario(nodes_2_4, links_1_4_5; duration, rate, jd, drones, phase)
     title = "scenario 4: ConvexNode -- FlatLink"
-    p4, _ = simulate_and_plot(s4, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    p4, df4 = simulate_and_plot(s4, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
 
     # scenario 5: MonotonicNode -- FlatLink
     s5 = mini_edge_scenario(nodes_3_5, links_1_4_5; duration, rate, jd, drones, phase)
     title = "scenario 5: MonotonicNode -- FlatLink"
-    p5, _ = simulate_and_plot(s5, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    p5, df5 = simulate_and_plot(s5, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
 
     # scenario 6: ConvexNode -- FreeLink
     s6 = mini_edge_scenario(nodes_2_4; duration, rate, jd, drones, phase)
     title = "scenario 6: ConvexNode -- FreeLink"
-    p6, _ = simulate_and_plot(s6, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    p6, df6 = simulate_and_plot(s6, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
 
     # scenario 7: MonotonicNode -- FreeLink
     s7 = mini_edge_scenario(nodes_3_5; duration, rate, jd, drones, phase)
     title = "scenario 7: MonotonicNode -- FreeLink"
-    p7, _ = simulate_and_plot(s7, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    p7, df7 = simulate_and_plot(s7, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
 
 
     # scenario 8: AdditiveNode -- MonotonicLink
@@ -334,7 +334,7 @@ function mini_final_edge(;
     ]
     s8 = mini_edge_scenario(nodes_8, links_1_4_5; duration, rate, jd, drones, phase)
     title = "scenario 8: AdditiveNode -- MonotonicLink"
-    p8, _ = simulate_and_plot(s8, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    p8, df8 = simulate_and_plot(s8, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
 
     # scenario 9: AdditiveNode -- ConvexLink
     links_9 = [
@@ -344,7 +344,7 @@ function mini_final_edge(;
     ]
     s9 = mini_edge_scenario(nodes_2_4, links_9; duration, rate, jd, drones, phase)
     title = "scenario 9: ConvexNode -- ConvexLink"
-    p9, _ = simulate_and_plot(s9, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    p9, df9 = simulate_and_plot(s9, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
 
     # scenario 10: Mix Nodes -- MonotonicLink
     nodes_10 = [
@@ -359,19 +359,34 @@ function mini_final_edge(;
     ]
     s10 = mini_edge_scenario(nodes_10, links_2_3; duration, rate, jd, drones, phase)
     title = "scenario 10: Mix Nodes -- MonotonicLink"
-    p10, _ = simulate_and_plot(s10, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    p10, df10 = simulate_and_plot(s10, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
 
     P = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10]
     S = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10]
+    DF = [df1, df2, df3, df4, df5, df6, df7, df8, df9, df10]
 
     # for (i, p) in enumerate(P)
     #     savefig(p, "mini_final_edge_$i")
     # end
 
-    return P, S
+    title = ""
+    π1, _ = simulate_and_plot(s1, ShortestPath(); target=:nodes, plot_type=:areaplot, title)
+    π2, _ = simulate_and_plot(s2, ShortestPath(); target=:nodes, plot_type=:plot, title)
+    π3, _ = simulate_and_plot(s2, ShortestPath(); target=:links, plot_type=:areaplot, title)
+    π4, _ = simulate_and_plot(s3, ShortestPath(); target=:nodes, plot_type=:plot, title)
+    π5, _ = simulate_and_plot(s3, ShortestPath(); target=:links, plot_type=:areaplot, title)
+
+    Π = [π1, π2, π3, π4, π5]
+    for (i, p) in enumerate(Π)
+        savefig(p, "micro_final_edge_$i.pdf")
+    end
+
+    return P, S, DF, Π
 end
 
 # P, S = mini_final_edge(; drones=10, rate=0.1, jd=1.0)
-P, S = mini_final_edge(; drones=100, rate=0.1, jd=0.1, flat=1.125, c=75)
+P, S, DF, Π = mini_final_edge(; drones=20, rate=0.1, jd=0.5, flat=1.125, c=100)
 
-show_simulation(S[3])
+# show_simulation(S[1])
+
+p = StatsPlots.plot(Π...)
