@@ -6,6 +6,7 @@ the settings are described in the simulation tool.
 
 %%\subsection{Basic Behaviors}
 
+\old{
 The first scenario compares the behaviors of constant (baseline), monotonic and
 convex functions with a simple scenario: a flock of drones move
 over 3 edge nodes in Figure~\ref{fig:edge}.
@@ -23,12 +24,19 @@ explanations, more explanations, more explanations, more explanations,
 explanations, more explanations, more explanations, more explanations,
 explanations, more explanations, more explanations, more explanations,
 more explanations.)
+}
+
+
+
+\new{
+  In the first scenario, Figure~\ref{fig:edge}, a group of drones moves in a cyclic pattern through a series of interconnected nodes or routers. The drones move seamlessly and uniformly through the 20-unit cycle, gradually transitioning from one node to the next. This scenario showcases the longer stability phases in the convex case with fewer active resources (nodes and links) at a time. The other significant difference is observed at the end of a cycle when the drones begin transitioning, causing a shift in the extra loads.
+}
 
 \begin{figure}[tb]
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{placeholder.pdf}
     \vspace{-4.0ex}
-    \caption{Comparing (a) baseline, (b) convex and (c) monotomic behaviros with
+    \caption{Comparing (a) baseline, (b) convex and (c) monotonic behaviors with
       a flock of drone scenario}
     \smallskip
     \raggedright

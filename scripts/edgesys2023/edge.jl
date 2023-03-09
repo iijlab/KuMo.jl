@@ -390,3 +390,5 @@ P, S, DF, Π = mini_final_edge(; drones=20, rate=0.1, jd=0.5, flat=1.125, c=100)
 # show_simulation(S[1])
 
 p = StatsPlots.plot(Π...)
+
+savefig(p, "micro.tikz")
