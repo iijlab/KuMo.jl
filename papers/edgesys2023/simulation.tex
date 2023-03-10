@@ -33,7 +33,7 @@ more explanations.)
 The different cost models are used for the nodes while the same monotonic cost is used for the links.
 With the constant costs, each drone is assigned to the nearest node. In the other cases, the load of each node does not go up beyond $.75$, with the difference in the assignment of the remaining load.
 The monotonic costs try to make the remaining load equally shared, while the convex costs try to shift the remaining load to one node. At time $20$ in (c), the remaining load starts to shift from node~1 to node~3 and, once it hits the balancing point, all the remaining load moves to node~3.
-This behavior leads to the stability in turbulence with convex costs.
+This behavior leads to the stability with convex costs in case of turbulence.
 %In the convex case, the drones exhibit longer stability phases compared to the monotonic case, with fewer active resources (nodes and links) being utilized at any given time. Another significant difference is observed at the end of a cycle, such as at time $20$, when the drones begin to transition, leading to a shift in the extra loads.
 }
 
