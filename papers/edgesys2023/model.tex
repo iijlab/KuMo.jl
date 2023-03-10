@@ -114,7 +114,7 @@ constraint is enforced by a penalizing cost when approaching the full
 capacity.
 
 Another key idea is {\bf idle-resource pooling} that tries to put resources
-into an idle state when possible for energy saving.
+into an idle state for energy saving.
 We propose a convex cost function that enables idle-resource pooling
 as part of the congestion pricing mechanism.
 
@@ -131,7 +131,7 @@ monotonically grows with load, up to infinity as $\rho \to 1$.
 The convex cost function is also a barrier function but also for
 idle-resource pooling.
 We use the convex form for computing but the monotonic form
-is used for network links as energy-saving-by-idling is not common for
+for network links as energy-saving-by-idling is not common for
 network links.
 
 The standard forms that have the minimum cost of $1.0$ are
@@ -160,36 +160,13 @@ The standard monotonic cost function is defined as
 \( f(\rho) = \rho^{4.5}/(1 - \rho) + 1\)
 to roughly match the standard convex cost function in $[.5, .75]$,
 the {\em working load range} explained in the next subsection.
-Note that the standard forms are defined just for convenience, and
-other functions with a similar shape in $[0,1]$ also work for our
-purposes.
+Note that the standard forms are defined for convenience, and
+other functions with a similar shape also work for our purposes.
 
 \subsection{Idle-Resource Pooling in Action}
 
 The behavior of idle-resource pooling by the convex cost function is
 illustrated by the following example in Figure~\ref{fig:4node}.
-
-\begin{figure}[tb]
-  \begin{center}
-    \includegraphics[width=1.0\columnwidth]{figure3-equivalent_nodes.pdf}
-    \vspace{-5.0ex}
-    \caption{Load distribution among 4 equivalent cost nodes:
-      the load of each resource (top) and the total load (bottom)}
-    \Description{Simulation results with 4 nodes with the same cost function.}
-    \label{fig:4node}
-  \end{center}
-  \hspace{0.8\columnsep}
-\end{figure}
-
-\begin{figure}
-  \begin{center}
-    \includegraphics[width=1.0\columnwidth]{figure4-proportional_nodes.pdf}
-    \vspace{-5.0ex}
-    \caption{Load distribution: 4 proportional cost nodes}
-    \Description{Simulation results with 4 nodes with proportional cost function}
-    \label{fig:4node-ratio}
-  \end{center}
-\end{figure}
 
 First, assume a pool of 4 equivalent resources with the standard convex
 cost function.
@@ -223,6 +200,28 @@ than the others.
 This one is less preferred for subsequent assignments, and quickly
 loses the load until it becomes idle again, while the other 3 keep
 $\rho$ in $[.5, .75]$. It repeats for the remaining ones.
+
+\begin{figure}[tb]
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{figure3-equivalent_nodes.pdf}
+    \vspace{-5.0ex}
+    \caption{Load distribution among 4 equivalent cost nodes:
+      the load of each resource (top) and the total load (bottom)}
+    \Description{Simulation results with 4 nodes with the same cost function.}
+    \label{fig:4node}
+  \end{center}
+  \hspace{0.8\columnsep}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=1.0\columnwidth]{figure4-proportional_nodes.pdf}
+    \vspace{-5.0ex}
+    \caption{Load distribution: 4 proportional cost nodes}
+    \Description{Simulation results with 4 nodes with proportional cost function}
+    \label{fig:4node-ratio}
+  \end{center}
+\end{figure}
 
 It is easy to see how the number of active resources changes when
 there are more resources.
