@@ -36,9 +36,9 @@
 }
 
 \new{
-  Our resource management model can be explained through a simplified system configuration consisting of two datacenters (DCs) and two micro-datacenters (MDCs), as depicted in Figure~\ref{fig:system} and presented in Greenberg et al.~\cite{Greenberg-2009}. When a user initiates a service request to a nearby service allocation server, the server creates a series of microservice jobs to fulfill the request. The server obtains the necessary resource information for each job and assesses the availability and current costs of nearby resources by querying resource agents. The server obtains the necessary resource information for each job, identifies the locations of the user and the required data object, and asks nearby resource agents for available resources and their current costs. The job is then allocated to the node that minimizes the overall cost for the service.
+  Our resource management model can be explained through a simplified system configuration consisting of two datacenters (DCs) and two micro-datacenters (MDCs)~\cite{Greenberg-2009}, as depicted in Figure~\ref{fig:system}. When a user initiates a service request to a nearby service allocation server, the server creates a series of microservice jobs to fulfill the request. The server obtains the necessary resource information for each job, identifies the locations of the user and the required data object, and asks nearby resource agents for available resources and their current costs. The job is then allocated to the node that minimizes the overall cost for the service.
   The area for cost inquiry could be within proximity along the path between the user and the data object.
-  The load of a resource can be measured in various ways, and most resources have built-in load report functions. In cases of rapidly fluctuating resource load, a smoothing filter (e.g., EWMA) should be used to stabilize the behavior. While a precise load value is not necessary, a rough estimate suffices for loose resource management. However, if the allocation is not sufficiently small in both size and duration, the load may not converge as expected. Therefore, the microservice architecture enables this approach.
+  The load of a resource can be measured in various ways, and most resources have built-in load report functions. If the load of a resource fluctuates too fast, a smoothing filter (e.g., EWMA) should be used to stabilize the behavior. A precise load value is not necessary and a rough estimate suffices for loose resource management. Still, if the allocation is not sufficiently small in both size and duration, the load may not converge as expected. Therefore, microservice is a key enabler for our approach.
 }
 
 \subsection{Micro-job Assignment}
@@ -82,9 +82,9 @@
 }
 
 \new{
-  In this paper, we employ a straightforward micro-job model that defines as $J(p, q, r, s)$ the requisite resources for a micro-job. Here, $p$ denotes the number of micro containers for computation, $q$ refers to frontend communication with the user, $r$ pertains to backend communication with data objects (such as databases), and $s$ is the number of time slots. The communication costs $q$ and $r$ are also distance-dependent, with an interactive job having $q \gg r$ being allocated closer to the user, and a data-intensive job with $q \ll r$ being located closer to the data. For the sake of simplicity, we do not differentiate the directions of communication for $q$ and $r$, and assume only one user and one data object per micro-job in this paper.
+  In this paper, we employ a simple micro-job model that defines the required resources for a micro-job as $J(p, q, r, s)$. Here, $p$ denotes the number of micro containers for computation, $q$ denotes frontend communication with the user, $r$ denotes backend communication with data objects (such as databases), and $s$ is the number of time slots. The communication costs $q$ and $r$ are distance-dependent so that an interactive job having $q \gg r$ will be placed close to the user, and a data-intensive job with $q \ll r$ will be placed closer to the data. For the sake of simplicity, we do not differentiate the directions of communication for $q$ and $r$, and assume only one user and one data object per micro-job in this paper.
 
-  A micro-job is specified by a service provider, who can optionally associate weights with it. For instance, a service provider may assign a higher weight to frontend communication to ensure the job is placed closer to the user. In this manner, cloud service providers can prioritize which type of resources should be used for a specific service.
+  A micro-job is specified by a service provider, who can optionally associate weights with it. For instance, a service provider may assign a higher weight to frontend communication to ensure the job is placed close to the user. In this manner, cloud service providers can prioritize which type of resources should be used for a specific service.
 
   To instantiate a micro-job requested by a user, the service server identifies the optimal node to allocate the required resources for $J$: $p$, $q$, and $r$ for a duration $s$. The pseudo cost $E$ to host micro-job $j$ for a unit of time at node $i$ for user $m$ and data object $o$ is calculated as follows: $E(j, i) = H(j, i) + G(j, i, m, o)$, where $H(j, i)$ represents the computing cost to run $j$ at $i$, and $G(j, i, m, o)$ denotes the communication cost to run $j$ at $i$ between $m$ and $o$.
 
@@ -115,7 +115,7 @@ capacity.
 
 Another key idea is {\bf idle-resource pooling} that tries to put resources
 into an idle state when possible for energy saving.
-We proposed a convex cost function that enables idle-resource pooling
+We propose a convex cost function that enables idle-resource pooling
 as part of the congestion pricing mechanism.
 
 A pseudo cost function in our model maps the load of a resource
@@ -263,7 +263,7 @@ $f(.5)$ for the deactivating one.
 \label{sec:variation}
 
 The utilization of a resource can be manipulated by modifying the cost
-function of the resource as the variants in Figure~\ref{figure2-pseudo_costs.pdf}.
+function of the resource as the variants in Figure~\ref{fig:std_costfunc}.
 One can {\em lower or raise the load level} of a resource by shifting
 the load in the cost function and adjusting the target load,
 $f'(\rho) = f(\rho + \Delta)$.
@@ -283,7 +283,7 @@ but for specific users or jobs (not for a specific resource) so as to
 have premium jobs always being assigned to less loaded resources.
 Similarly, an {\em economy service} that allows to be assigned to more
 loaded resources can be made by a negative shift.
-It could be appealing as a business model to enable multiple classes using a single
+It would be appealing as a business model to enable multiple classes using a single
 resource pool with a single shift parameter.
 
 % \begin{figure}[tb]
