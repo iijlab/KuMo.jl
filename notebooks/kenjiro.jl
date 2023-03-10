@@ -68,11 +68,15 @@ p = plot(
     layout=(3, 1),
     thickness_scaling=1.5,
     w=0.5,
-    size=(600, 600)
+    size=(600, 600),
+	legendfontsize=12,
+    # legendtitlefontsize=12,
+    labelfontsize=17,
+    tickfontsize=15,
 )
 
 # ╔═╡ 8c416094-3710-42a2-8651-0bbbf10909c3
-savefig(p, "../papers/conext2022/simu2.pdf")
+savefig(p, "../figures/edgesys2023/figure7-mixed_load_4nodes.pdf")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """

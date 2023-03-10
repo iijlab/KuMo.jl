@@ -502,8 +502,12 @@ p2 = plot(
     layout=(3, 1),
     title=["(a) constant pseudo-costs" "(b) convex pseudo-costs" "(c) monotonic pseudo-costs"],
     titlelocation=:center,
-    titlefontsize=11,
-    size=(600, 600)
+    titlefontsize=18,
+    size=(600, 600),
+    legendfontsize=18,
+    # legendtitlefontsize=21,
+    labelfontsize=20,
+    tickfontsize=18
 )
 
 savefig(joinpath(figuresdir(), "placeholder.pdf"))
