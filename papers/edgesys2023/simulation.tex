@@ -29,14 +29,36 @@ more explanations.)
 
 
 \new{
-  In the first scenario, Figure~\ref{fig:edge}, a group of drones moves in a cyclic pattern through a series of interconnected nodes or routers. The drones move seamlessly and uniformly through the 20-unit cycle, gradually transitioning from one node to the next. This scenario showcases the longer stability phases in the convex case with fewer active resources (nodes and links) at a time. The other significant difference is observed at the end of a cycle when the drones begin transitioning, causing a shift in the extra loads.
+  The first scenario, depicted in Figure~\ref{fig:edge}, involves a group of drones that move cyclically through a network of interconnected nodes or routers. The drones move smoothly and uniformly through the cycle, gradually transitioning from one node to the next.
+
+  This scenario highlights the differences between the monotonic and convex cases, with the behavior for constant pseudo-costs presented as a reference. In the convex case, the drones exhibit longer stability phases compared to the monotonic case, with fewer active resources (nodes and links) being utilized at any given time. Another significant difference is observed at the end of a cycle, such as at time $20$, when the drones begin to transition, leading to a shift in the extra loads.
+
 }
+
+% This is a comment
+% This code is used to plot the results of the simulation
+% The results are stored in the "results" variable
+% The variable "results" is a 4x4 matrix
+% The first row is for the constant behavior
+% The second row is for the convex behavior
+% The third row is for the monotonic behavior
+% The fourth row is for the linear behavior
+% The first column is for the average cost
+% The second column is for the average number of collisions
+% The third column is for the average number of vehicles
+% The fourth column is for the average number of drones
+% The first row is for the scenario with 10 vehicles and 25 drones
+% The second row is for the scenario with 20 vehicles and 50 drones
+% The third row is for the scenario with 30 vehicles and 75 drones
+% The fourth row is for the scenario with 40 vehicles and 100 drones
+% The following code plots the average number of drones
+plot(results(:,4))
 
 \begin{figure}[tb]
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{placeholder.pdf}
     \vspace{-4.0ex}
-    \caption{Comparing (a) baseline, (b) convex and (c) monotonic behaviors with
+    \caption{Comparing (a) constant, (b) convex and (c) monotonic behaviors with
       a flock of drone scenario}
     \smallskip
     \raggedright

@@ -469,8 +469,8 @@ p_convex_monotonic2 = @df DF2[3] plot(
     :instant,
     cols(6:8),
     seriestype=:steppre,
-    linestyle=:auto,
-    w=0.5,
+    linestyle=:solid,
+    w=1,
     ylabel="load",
 )
 
@@ -480,8 +480,8 @@ p_monotonic_monotonic2 = @df DF2[1] plot(
     :instant,
     cols(6:8),
     seriestype=:steppre,
-    linestyle=:auto,
-    w=0.5,
+    linestyle=:solid,
+    w=1,
     ylabel="load",
     xlabel="time",
 )
@@ -492,7 +492,7 @@ p_flat_flat2 = @df DF2[2] areaplot(
     cols(6:8),
     seriestype=:steppre,
     linestyle=:solid,
-    w=0.1,
+    w=0.01,
     ylabel="total load",
 )
 
@@ -502,7 +502,8 @@ p2 = plot(
     layout=(3, 1),
     title=["(a) constant pseudo-costs" "(b) convex pseudo-costs" "(c) monotonic pseudo-costs"],
     titlelocation=:center,
-    titlefontsize=11
+    titlefontsize=11,
+    size=(600, 600)
 )
 
 savefig(joinpath(figuresdir(), "placeholder.pdf"))
