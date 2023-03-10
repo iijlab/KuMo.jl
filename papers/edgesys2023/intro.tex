@@ -21,7 +21,7 @@
 
 \new{
   A possible future direction of edge computing is distributed cloud
-  computing, which leverages diverse and geographically scattered computing resources at the edge as part of the cloud. While most edge devices today are designed for specific purposes due to their limited resources, future environments may have abundant computing resources through utilization of various available resources. For example, idle computing resources at home could be exploited for a cloud, similar to how in-house solar power systems are connected to an electrical grid. Once there are enough edge resources, they can be used for general purposes without tight management.
+  computing, leveraging diverse and geographically scattered computing resources at the edge as part of the cloud. While most edge devices today are designed for specific purposes due to their limited resources, future environments may have abundant computing resources through utilization of various available resources. For example, idle computing resources at home could be exploited for a cloud, similar to how in-house solar power systems are connected to an electrical grid. Once there are enough edge resources, they can be used for general purposes without tight management.
 }
 
 \old{
@@ -42,7 +42,7 @@
 }
 
 \new{
-  Microservices are a driving force behind the exploitation of smaller computing resources~\cite{nadareishvili2016microservice}. A cloud service composed of loosely-coupled lightweight services allows for ephemeral and short-lived microservices to be executed in stateless containers. This enables the use of much smaller resource units than virtual machines or containers, facilitating flexible and efficient use of underlying cloud resources, including smaller edge resources.
+  Microservices~\cite{nadareishvili2016microservice} are a driving force behind the exploitation of smaller computing resources; a cloud service is composed of a collection of loosely-coupled lightweight services, and each microservice is ephemeral and short-lived. This enables the use of much smaller resource units than virtual machines or containers, facilitating flexible and efficient use of underlying cloud resources, including smaller edge resources.
 }
 
 \old{
@@ -81,11 +81,8 @@
 }
 
 \new{
-  {\bf Cloud Morphing} is our vision for edge clouds in the future which dynamically allocates microservices across distributed and heterogeneous resources to optimize the location and connections of a cloud service instance. As usage patterns change, the service instance adapts by transforming the locations of the resources and their connections (Figure \ref{fig:concept}).
-}
-
-\new{
-  In Cloud Morphing, microservice jobs are assigned to minimize the overall execution cost, which includes computing, communication with the user, and database access. For instance, interactive tasks follow the user's location while data-intensive tasks remain close to the data, regardless of user location. Edge computing is formed automatically by allocating resources close to the users. Furthermore, services are inherently fault-tolerant and resilient against outages or disasters since faulty resources are automatically evicted from the resource pool.
+  {\bf Cloud Morphing} is our vision for future edge clouds, where a cloud service instance adapts to usage patterns, transforming the locations of the resources and their connections by dynamically allocating microservices across distributed and heterogeneous resources (Figure~\ref{fig:concept}).
+Microservice jobs are assigned to minimize the overall execution cost that includes computing, communication with the user, and database access. For instance, interactive tasks follow the user's location while data-intensive tasks remain close to the data, regardless of user location. Edge computing is formed automatically by allocating resources close to the users. Furthermore, services are inherently fault-tolerant and resilient against outages or disasters since faulty resources are automatically evicted from the resource pool.
 }
 
 \old{
@@ -121,7 +118,7 @@
 }
 
 \new{
-  A larger pool of small resources simplifies physical resource management from an operational perspective. Physical nodes can be easily attached to or detached from the resource pool. When there is a consistent hotspot, new resources can be placed close to the hotspot and attached to the resource pool at a convenient time to alleviate or solve the issue.
+  A larger pool of small resources simplifies physical resource management from an operational perspective. Physical nodes can be easily attached to or detached from the resource pool. When there is a consistent hotspot, new resources can be placed close to the hotspot and attached to the resource pool at a convenient time.
 }
 
 \old{
@@ -135,7 +132,7 @@
 }
 
 \new{
-  In Cloud Morphing, diverse resources are owned and managed by different parties. This requires loose management of resources as small parties cannot afford dedicated skilled operators. The utilization of each resource must be easily manipulable without compromising system stability. Furthermore, energy savings could be crucial for edge resources.
+  Diverse resources would be owned and managed by different parties. This requires loose management of resources as small parties cannot afford dedicated skilled operators. The utilization of each resource must be easily manipulable without compromising system stability. Furthermore, energy savings could be crucial for edge resources.
 }
 
 \old{
@@ -172,7 +169,7 @@
 }
 
 \new{
-  We utilize dynamic pricing for decentralized resource allocation, which acts as backpressure against congestion. The system is designed to avoid serious congestion, provided that some resources remain available in the resource pool. Cloud Morphing also reserves a sufficient margin essential for the performance of statistically multiplexing services. To manipulate resource allocation, we use pseudo cost, which should not be confused with service fees for customers. Pseudo cost is not an actual monetary charge; rather, it is used to control resource utilization.
+  We utilize dynamic pricing for decentralized resource allocation, which acts as backpressure against congestion. The system is designed to avoid serious congestion, provided that some resources remain available in the resource pool. This mechanism also reserves a sufficient margin essential for the performance of statistically multiplexing services. To manipulate resource allocation, we use pseudo cost, which should not be confused with service fees for customers. Pseudo cost is not an actual monetary charge; rather, it is used to control resource utilization.
 }
 
 \old{
