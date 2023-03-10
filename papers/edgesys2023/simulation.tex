@@ -1,6 +1,6 @@
 
 We have developed a simple simulation tool to evaluate the model
-that is publicly available\footnote{https://github.com/xxx/}.
+that is publicly available\footnote{https://github.com/Azzaare/KuMo.jl}.
 We omit the details of the simulation settings in this paper but all
 the settings are described in the simulation tool.
 
@@ -29,7 +29,7 @@ more explanations.)
 
 
 \new{
-  The first scenario, depicted in Figure~\ref{fig:edge}, involves a group of drones that move cyclically through a network of interconnected nodes or routers. The drones move smoothly and uniformly through the cycle, gradually transitioning from one node to the next.
+  The first scenario, depicted in Figure~\ref{fig:edge}, involves a group of drones that move cyclically through a network of interconnected nodes or routers. The drones move smoothly and uniformly through the cycle, gradually transitioning from one node to the next. They periodically request interactive jobs as they traverse the network.
 
   This scenario highlights the differences between the monotonic and convex cases, with the behavior for constant pseudo-costs presented as a reference. In the convex case, the drones exhibit longer stability phases compared to the monotonic case, with fewer active resources (nodes and links) being utilized at any given time. Another significant difference is observed at the end of a cycle, such as at time $20$, when the drones begin to transition, leading to a shift in the extra loads.
 
@@ -52,7 +52,7 @@ more explanations.)
 % The third row is for the scenario with 30 vehicles and 75 drones
 % The fourth row is for the scenario with 40 vehicles and 100 drones
 % The following code plots the average number of drones
-plot(results(:,4))
+% plot(results(:,4))
 
 \begin{figure}[tb]
   \begin{center}
