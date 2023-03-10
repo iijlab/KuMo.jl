@@ -29,10 +29,12 @@ more explanations.)
 
 
 \new{
-  The first scenario, depicted in Figure~\ref{fig:edge}, involves a group of drones that move cyclically through a network of interconnected nodes or routers. The drones move smoothly and uniformly through the cycle, gradually transitioning from one node to the next. They periodically request interactive jobs as they traverse the network.
-
-  This scenario highlights the differences between the monotonic and convex cases, with the behavior for constant pseudo-costs presented as a reference. In the convex case, the drones exhibit longer stability phases compared to the monotonic case, with fewer active resources (nodes and links) being utilized at any given time. Another significant difference is observed at the end of a cycle, such as at time $20$, when the drones begin to transition, leading to a shift in the extra loads.
-
+  The first scenario, depicted in Figure~\ref{fig:edge}, involves a group of drones that move cyclically through a network of interconnected nodes. The drones move through the cycle, gradually transitioning from one node to the next. The total load is kept constant ($1.0$) with interactive jobs.
+The different cost models are used for the nodes while the same monotonic cost is used for the links.
+With the constant costs, each drone is assigned to the nearest node. In the other cases, the load of each node does not go up beyound $.75$, with the difference in the assignment of the remaining load.
+The monotonic costs try to make the remaining load equally shared, while the convex costs try to shift the remaining load to one node. At time $20$ in (c), the remaining load starts to shift from node~1 to node~3 and, once it hits the balancing point, all the remaining load moves to node~3.
+This behavior leads to the stability in turbulence with convex costs.
+%In the convex case, the drones exhibit longer stability phases compared to the monotonic case, with fewer active resources (nodes and links) being utilized at any given time. Another significant difference is observed at the end of a cycle, such as at time $20$, when the drones begin to transition, leading to a shift in the extra loads.
 }
 
 % This is a comment
@@ -58,7 +60,7 @@ more explanations.)
   \begin{center}
     \includegraphics[width=1.0\columnwidth]{placeholder.pdf}
     \vspace{-4.0ex}
-    \caption{Comparing (a) constant, (b) convex and (c) monotonic behaviors with
+    \caption{Comparing (a) constant, (b) monotonic and (c) convex behaviors with
       a flock of drone scenario}
     \smallskip
     \raggedright
@@ -105,8 +107,7 @@ respectively. As a result, the peak load of MDC0 is
 reduced from $.74$ to $.54$ in the second wave, and then, to $.33$ in the
 third wave.
 In the fourth wave, the weight for the backend communication is
-increased, and all jobs are assigned to the node that has the object
-(DC3).
+raised, and all jobs are assigned to DC3 that has the object.
 
 \begin{figure}[tb]
   \begin{center}
