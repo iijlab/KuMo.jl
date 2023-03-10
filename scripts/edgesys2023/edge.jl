@@ -237,14 +237,12 @@ function mini_edge_scenario(nodes, links=nothing;
     for τ in 0:rate:duration, u in 1:drones
         t = τ + rate / drones * (u - 1)
         i = 0
-        if 5 ≤ t < 10
-            i = 1
-        elseif 10 ≤ t < 30
-            i = t < 10 + phase / drones * (u - 1) ? 1 : 2
-        elseif 30 ≤ t < 50
-            i = t < 30 + phase / drones * (u - 1) ? 2 : 3
-        elseif 50 ≤ t < 75
-            i = t ≤ 50 + phase / drones * (u - 1) ? 3 : 1
+        if 0 ≤ t < 20
+            i = t < 0 + phase / drones * (u - 1) ? 1 : 2
+        elseif 20 ≤ t < 40
+            i = t < 20 + phase / drones * (u - 1) ? 2 : 3
+            # elseif 50 ≤ t < 75
+            #     i = t ≤ 50 + phase / drones * (u - 1) ? 3 : 1
         end
         i == 0 || push!(R[i], Request(j, t))
     end
@@ -472,7 +470,7 @@ p_convex_monotonic2 = @df DF2[3] plot(
     cols(6:8),
     seriestype=:steppre,
     linestyle=:auto,
-    w=1,
+    w=0.5,
     ylabel="load",
 )
 
@@ -483,8 +481,9 @@ p_monotonic_monotonic2 = @df DF2[1] plot(
     cols(6:8),
     seriestype=:steppre,
     linestyle=:auto,
-    w=1,
+    w=0.5,
     ylabel="load",
+    xlabel="time",
 )
 
 # flat flat
@@ -495,10 +494,15 @@ p_flat_flat2 = @df DF2[2] areaplot(
     linestyle=:solid,
     w=0.1,
     ylabel="total load",
-    xlabel="time",
 )
 
 # all
-p2 = plot(p_flat_flat2, p_convex_monotonic2, p_monotonic_monotonic2; layout=(3, 1))
+p2 = plot(
+    p_flat_flat2, p_convex_monotonic2, p_monotonic_monotonic2;
+    layout=(3, 1),
+    title=["(a) constant pseudo-costs" "(b) convex pseudo-costs" "(c) monotonic pseudo-costs"],
+    titlelocation=:center,
+    titlefontsize=11
+)
 
 savefig(joinpath(figuresdir(), "placeholder.pdf"))

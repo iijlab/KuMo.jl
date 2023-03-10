@@ -9,15 +9,15 @@ idle_cost_pc = x -> pseudo_cost(1.0, x, Val(:idle_node), 1.5)
 
 plot_pc = StatsPlots.plot(
     [
-        convex_pc,
         monotonic_pc,
+        convex_pc,
         load_plus_pc,
         cost_plus_pc,
         cost_times_pc,
         idle_cost_pc,
     ],
     0:0.01:0.95;
-    label=["\\bf convex" "\\bf monotonic" "\\em load +.2" "\\em cost +.5" "\\em cost ×2" "\\em idle cost ×1.5"],
+    label=["\\bf monotonic" "\\bf convex" "\\em convex load +.2" "\\em convex cost +.5" "\\em convex cost ×2" "\\em convex idle cost ×1.5"],
     legend=:topleft,
     xlabel="load",
     ylabel="pseudo cost",
