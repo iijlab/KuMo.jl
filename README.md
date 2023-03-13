@@ -23,23 +23,23 @@ Do not use the `julia` version available on most repositories (such as `apt`) as
 
 **Clone the repository**
 
-Either clone this repository using, for instance the following command
-
-```shell
-git clone https://github.com/Azzaare/KuMo.jl.git
-```
-
-or, within the Julia REPL
+Either clone this repository using, for instance the following command within the Julia REPL
 
 ```julia
 ] dev https://github.com/Azzaare/KuMo.jl.git
 ```
 
-Note that the last command will download and install the package at the following path  `~/.julia/dev/KuMo`.
+or in a shell
+
+```shell
+git clone https://github.com/Azzaare/KuMo.jl.git
+```
+
+Note that the first command will download and install the package at the following path  `~/.julia/dev/KuMo`.
 
 **Change directory**
 
-Please open a terminal in `KuMo/scripts` (or `cd` into it).
+Please open a terminal in `path_to_KuMo/scripts` (or `cd` into it).
 
 **Run the script**
 
@@ -49,7 +49,7 @@ If one has LaTeX installed, running the script is as simple as using
 julia main.jl
 ```
 
-If not LaTeX engine is available, one needs to comment line 18-22 in `main.jl` before running the script:
+If no LaTeX engine are available, one needs to comment line 18-22 in `main.jl` before running the script:
 
 ```julia
 begin
@@ -59,7 +59,7 @@ begin
 end
 ```
 
-The output is generated in `KuMo/figures`. Note that if LaTeX is not used, the figures might not appear as in the original paper.
+The output is generated in `path_to_KuMo/figures`. Note that if LaTeX is not used, the figures might not appear as in the original paper.
 
 <!-- ## Citing
 
