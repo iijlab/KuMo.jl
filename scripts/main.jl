@@ -1,30 +1,26 @@
 ## Script to execute to reproduce all the figures in the paper (see README.md)
 
-# Can be commented after the first execution for extra speed
-begin
-    using Pkg
-    Pkg.activate(".")
-    Pkg.update()
-    # Pkg.instantiate()
+using Pkg
+Pkg.update()
+
+try
+    using DrWatson
+catch e
+    @warn "Installing DrWatson" exception = (e, catch_backtrace())
+    Pkg.add("DrWatson")
+    using DrWatson
 end
+
+@quickactivate
 
 #SECTION - Load packages
 using CSV
 using DataFrames
-using DrWatson
 using KuMo
 using StatsPlots
 
-#NOTE - (Un-)Comment the following block to use default/PGFPlotsX backend
-#NOTE 2 - Only comment if no local latexengine is available
-begin
-    using PGFPlotsX
-    pgfplotsx()
-    latexengine!(PGFPlotsX.LUALATEX)
-end
-
 #NOTE - Define figures directory
-figuresdir() = joinpath(findproject(), "..", "figures")
+figuresdir() = joinpath(findproject(), "figures")
 
 #SECTION Includes
 
@@ -46,7 +42,7 @@ include("cost_manipulations.jl")
 # figure 8
 include("mixed_load.jl")
 
-function main(title=true)
+function main(; title=true, latex=true)
     F = [
         figure_3,
         figure_4,
@@ -58,12 +54,23 @@ function main(title=true)
 
     for (i, f) in enumerate(F)
         @debug "Plotting figure $(i+2) ∈ [3, $(length(F)+2)]" title
-        f(; title)
+        f(; title, latex)
     end
 
     return nothing
 end
 
+const LATEX = "--nolatex" ∉ ARGS
+
+if LATEX
+    # Requires luatex (installed by most LaTeX distributions)
+    begin
+        using PGFPlotsX
+        pgfplotsx()
+        latexengine!(PGFPlotsX.LUALATEX)
+    end
+end
+
 # Comment both if excuting each figure individually
-main() # with titles for review
-# main(false) # without titles for integration in the paper
+main(; latex=LATEX) # with titles for review
+# main(;title = false, latex=LATEX) # without titles for integration in the paper

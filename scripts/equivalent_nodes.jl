@@ -1,6 +1,7 @@
 #SECTION 2 - Figure 4 - Load distribution among 4 equivalent cost nodes: the load of each resource (top) and the total load (bottom)
 
 function figure_4(;
+    latex=true,
     output=joinpath(figuresdir(), "figure4_equivalent_nodes.pdf"),
     title=false
 )
@@ -64,13 +65,15 @@ function figure_4(;
         ylims=(0, 4)
     )
 
+    pt = latex ? "\\bf " : ""
+
     p = StatsPlots.plot(
         p1,
         p2;
         layout=(2, 1),
-        thickness_scaling=2,
+        thickness_scaling=latex ? 2 : 1,
         plot_titlefontsize=10,
-        plot_title=title ? "\\bf Figure 4: Load distribution (equivalent nodes)" : "",
+        plot_title=title ? (pt * "Figure 4: Load distribution (equivalent nodes)") : "",
         w=0.5)
 
     splitdir(output)[1] |> mkpath

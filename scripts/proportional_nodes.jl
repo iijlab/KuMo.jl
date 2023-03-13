@@ -1,6 +1,7 @@
 #SECTION 2 - Figure 5 - Load distribution: 4 proportional cost nodes
 
 function figure_5(;
+    latex=true,
     output=joinpath(figuresdir(), "figure5_proportional_nodes.pdf"),
     title=false
 )
@@ -69,13 +70,15 @@ function figure_5(;
         ylims=(0, 4)
     )
 
+    pt = latex ? "\\bf " : ""
+
     p = StatsPlots.plot(
         p1,
         p2;
         layout=(2, 1),
-        thickness_scaling=2,
+        thickness_scaling=latex ? 2 : 1,
         plot_titlefontsize=10,
-        plot_title=title ? "\\bf Figure 5: Load distribution (proportional nodes)" : "",
+        plot_title=title ? (pt * "Figure 5: Load distribution (proportional nodes)") : "",
         w=0.5)
 
     splitdir(output)[1] |> mkpath

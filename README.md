@@ -110,27 +110,27 @@ Note that the first command will download and install the package at the followi
 
 **Change directory**
 
-Please open a terminal in `path_to_KuMo/scripts` (or `cd` into it).
+Please open a terminal anywhere within the cloned repository (or `cd` into it).
 
 **Run the script**
 
 If one has LaTeX installed, running the script is as simple as using
 
 ```shell
-julia main.jl
+julia scripts/main.jl
+# or from anywhere within the repository
+julia path/to/main.jl
 ```
 
-If no LaTeX engine are available, one needs to comment line 18-22 in `main.jl` before running the script:
+If no LaTeX engine are available, please add the `--nolatex` flag to the command line.
 
-```julia
-begin
-    using PGFPlotsX
-    pgfplotsx()
-    latexengine!(PGFPlotsX.LUALATEX)
-end
+```shell
+julia scripts/main.jl --nolatex
 ```
 
-The output is generated in `path_to_KuMo/figures`. Note that if LaTeX is not used, the figures might not appear as in the original paper.
+The output is generated in `/figures`.
+
+Note that the first execution of the script will take a while as it will download and install all the dependencies.
 
 <!-- ## Citing
 

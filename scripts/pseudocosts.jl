@@ -1,6 +1,7 @@
 #SECTION 2 - Figure 3 - Standard cost functions and variants
 
 function figure_3(;
+    latex=true,
     output=joinpath(figuresdir(), "figure3_pseudocosts.pdf"),
     select=:all, # use :standard or :variants to plot respective pseudocosts
     title=true
@@ -11,15 +12,19 @@ function figure_3(;
     thickness = Vector{Float64}()
     linestyles = Vector{Symbol}()
 
+    ls = latex ? "\\bf " : ""
+
     if select ∈ [:all, :standard]
         # Standard pseudo costs
         convex_pc = x -> pseudo_cost(1.0, x, Val(:default))
         monotonic_pc = x -> pseudo_cost(1.0, x, Val(:equal_load_balancing))
         foreach(pc -> push!(pcs, pc), [convex_pc, monotonic_pc])
-        foreach(label -> push!(labels, label), ["\\bf convex" "\\bf monotonic"])
+        foreach(label -> push!(labels, label), [(ls * "convex") (ls * "monotonic")])
         foreach(thick -> push!(thickness, thick), [1.25, 1.25])
         foreach(linestyle -> push!(linestyles, linestyle), [:solid, :solid])
     end
+
+    lv = latex ? "\\em " : ""
 
     if select ∈ [:all, :variants]
         # Variants
@@ -34,10 +39,10 @@ function figure_3(;
         foreach(
             label -> push!(labels, label),
             [
-                "\\em convex load +.2"
-                "\\em convex cost +.5"
-                "\\em convex cost ×2"
-                "\\em convex idle cost ×1.5"
+                (lv * "convex load +.2")
+                (lv * "convex cost +.5")
+                (lv * "convex cost ×2")
+                (lv * "convex idle cost ×1.5")
             ],
         )
         foreach(thick -> push!(thickness, thick), [0.625, 0.625, 0.625, 0.625])
@@ -50,8 +55,8 @@ function figure_3(;
         label=reshape(labels, 1, :),
         legend=:topleft,
         line=(reshape(thickness, 1, :), reshape(linestyles, 1, :)),
-        thickness_scaling=2,
-        title=title ? "\\bf Figure 3: Standard cost functions and variants" : "",
+        thickness_scaling=latex ? 2 : 1,
+        title=title ? (ls * "Figure 3: Standard cost functions and variants") : "",
         titlefontsize=10,
         w=0.5,
         xlabel="load",

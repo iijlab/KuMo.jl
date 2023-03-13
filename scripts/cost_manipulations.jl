@@ -1,6 +1,7 @@
 #SECTION 3 - Figure 7 - Cost manipulations: shifting the load +.2, +.4 and raising the weight for data access
 
 function figure_7(;
+    latex=true,
     output=joinpath(figuresdir(), "figure7_cost_manipulations.pdf"),
     title=true
 )
@@ -283,13 +284,15 @@ function figure_7(;
         yticks=0:0.25:1
     )
 
+    pt = latex ? "\\bf " : ""
+
     p = StatsPlots.plot(
         p1,
         p2;
         layout=(2, 1),
-        plot_title=title ? "\\bf Figure 7: Cost manipulations" : "",
+        plot_title=title ? (pt * "Figure 7: Cost manipulations") : "",
         plot_titlefontsize=10,
-        thickness_scaling=2,
+        thickness_scaling=latex ? 2 : 1,
         w=0.5
     )
 
