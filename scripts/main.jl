@@ -1,5 +1,12 @@
 ## Script to execute to reproduce all the figures in the paper (see README.md)
 
+# Can be commented after the first execution for extra speed
+begin
+    using Pkg
+    Pkg.activate(".")
+    Pkg.instantiate()
+end
+
 #SECTION - Load packages
 using CSV
 using DataFrames
@@ -7,6 +14,7 @@ using KuMo
 using StatsPlots
 
 #NOTE - (Un-)Comment the following block to use default/PGFPlotsX backend
+#NOTE 2 - Only comment if no local latexengine is available
 begin
     using PGFPlotsX
     pgfplotsx()
@@ -47,12 +55,13 @@ function main(title=true)
     ]
 
     for (i, f) in enumerate(F)
-        println("Figure $i")
+        @debug "Plotting figure $(i+2) ∈ [3, $(length(F)+2)]" title
         f(; title)
     end
 
     return nothing
 end
 
+# Comment both if excuting each figure individually
 main() # with titles for review
 # main(false) # without titles for integration in the paper

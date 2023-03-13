@@ -1,6 +1,9 @@
 #SECTION 3 - Figure 6 - Comparing (a) constant, (b) monotonic and (c) convex behaviors with a flock of drone scenario
 
-function figure_6(; output=joinpath(figuresdir(), "figure6_edge.pdf"))
+function figure_6(;
+    output=joinpath(figuresdir(), "figure6_edge.pdf"),
+    title=false
+)
     function core_scenario(
         nodes,
         links;
@@ -138,7 +141,7 @@ function figure_6(; output=joinpath(figuresdir(), "figure6_edge.pdf"))
         layout=(3, 1),
         size=(600, 600),
         thickness_scaling=2,
-        plot_title="\\bf Figure 6: Flock of drones",
+        plot_title=title ? "\\bf Figure 6: Flock of drones" : "",
         plot_titlefontsize=10,
         titlefontsize=10,
         titlelocation=:center,

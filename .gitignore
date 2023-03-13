@@ -19,5 +19,8 @@ test/Manifest.toml
 *main.pdf
 *.synctex.gz
 
+# Figures
+figures/*
+
 # vscode
 *.vscode*

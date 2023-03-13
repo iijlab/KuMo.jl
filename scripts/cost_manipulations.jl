@@ -1,6 +1,9 @@
 #SECTION 3 - Figure 7 - Cost manipulations: shifting the load +.2, +.4 and raising the weight for data access
 
-function figure_7(; output=joinpath(figuresdir(), "figure7_cost_manipulations.pdf"))
+function figure_7(;
+    output=joinpath(figuresdir(), "figure7_cost_manipulations.pdf"),
+    title=true
+)
     function scenario6a(;)
         reqs = Vector{Request{<:KuMo.AbstractJob}}()
 
@@ -284,7 +287,7 @@ function figure_7(; output=joinpath(figuresdir(), "figure7_cost_manipulations.pd
         p1,
         p2;
         layout=(2, 1),
-        plot_title="\\bf Figure 7: Cost manipulations",
+        plot_title=title ? "\\bf Figure 7: Cost manipulations" : "",
         plot_titlefontsize=10,
         thickness_scaling=2,
         w=0.5

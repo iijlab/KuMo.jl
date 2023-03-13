@@ -1,6 +1,9 @@
 #SECTION 2 - Figure 4 - Load distribution among 4 equivalent cost nodes: the load of each resource (top) and the total load (bottom)
 
-function figure_4(; output=joinpath(figuresdir(), "figure4_equivalent_nodes.pdf"))
+function figure_4(;
+    output=joinpath(figuresdir(), "figure4_equivalent_nodes.pdf"),
+    title=false
+)
     function local_scenario()
         # maximum duration
         duration = 1000
@@ -67,7 +70,7 @@ function figure_4(; output=joinpath(figuresdir(), "figure4_equivalent_nodes.pdf"
         layout=(2, 1),
         thickness_scaling=2,
         plot_titlefontsize=10,
-        plot_title="\\bf Figure 4: Load distribution (equivalent nodes)",
+        plot_title=title ? "\\bf Figure 4: Load distribution (equivalent nodes)" : "",
         w=0.5)
 
     splitdir(output)[1] |> mkpath

@@ -1,6 +1,9 @@
 #SECTION 3 - Figure 8 - Mixed load with 2 DCs and 2 MDCs
 
-function figure_8(; output=joinpath(figuresdir(), "figure8_mixed_load.pdf"))
+function figure_8(;
+    output=joinpath(figuresdir(), "figure8_mixed_load.pdf"),
+    title=true
+)
     df = DataFrame(CSV.File("../data/figure8.csv"))
 
     df_no_norm = deepcopy(df)
@@ -46,7 +49,7 @@ function figure_8(; output=joinpath(figuresdir(), "figure8_mixed_load.pdf"))
         p2,
         p3;
         layout=(3, 1),
-        plot_title="\\bf Figure 8: Mixed load",
+        plot_title=title ? "\\bf Figure 8: Mixed load" : "",
         plot_titlefontsize=10,
         thickness_scaling=2,
         w=0.5,
