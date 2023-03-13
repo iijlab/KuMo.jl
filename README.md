@@ -15,7 +15,7 @@
 
 ## Visualization Tools
 
-We provide an interface to two popular visualization tools in tje Julia ecosystem:
+We provide an interface to two popular visualization tools in the Julia ecosystem:
 - (GL)Makie.jl for an interactive plot analysis
 - (Stats)Plots.jl for generating figures in LaTeX/PDF fashion
 
