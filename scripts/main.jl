@@ -4,12 +4,14 @@
 begin
     using Pkg
     Pkg.activate(".")
-    Pkg.instantiate()
+    Pkg.update()
+    # Pkg.instantiate()
 end
 
 #SECTION - Load packages
 using CSV
 using DataFrames
+using DrWatson
 using KuMo
 using StatsPlots
 

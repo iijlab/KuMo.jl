@@ -2,7 +2,7 @@
 
 julia_version = "1.9.0-rc1"
 manifest_format = "2.0"
-project_hash = "392a031626fdb5e7e5ed952a915aaf838faebfa8"
+project_hash = "f74a56b37e9083170ee3a56ce98ed77da34d79ca"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -731,9 +731,7 @@ version = "0.6.5"
 
 [[deps.KuMo]]
 deps = ["CSV", "Colors", "DataFrames", "DataStructures", "Dictionaries", "Distributions", "DrWatson", "GraphMakie", "Graphs", "JuMP", "Makie", "MathOptInterface", "PGFPlotsX", "PackageCompatUI", "PrettyTables", "ProgressMeter", "Random", "RecipesBase", "SimpleTraits", "SparseArrays", "StatsPlots", "TestItemRunner", "TestItems"]
-git-tree-sha1 = "3b99611a3bf0012161090ea69f31958a5c5fef0d"
-repo-rev = "main"
-repo-url = "https://github.com/Azzaare/KuMo.jl"
+git-tree-sha1 = "2b4bd05a1a7ee10d12760e4fdd8f0adcfee54851"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
 version = "0.1.37"
 
