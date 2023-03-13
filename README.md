@@ -44,15 +44,15 @@ show_pseudo_costs()
 
 ### Interactive plot analysis with Makie
 
-With our Makie interface, we provide a simple way to visualize the results of a scenario. The following code snippet will generate a plot of the scenario `scenario` with the default Makie theme.
+With our Makie interface, we provide a simple way to visualize the results of a scenario. The following code snippet will generate a plot of a default scenario.
 
 ```julia
 using KuMo, GLMakie
 
-show_simulation(scenario)
+show_simulation()
 ```
 
-Note that by default, `show_simulation()` will use a simple four convex nodes' scenario available in a small scenario library called `SCENARII`.
+Note that by default, `show_simulation()` will use a simple four convex nodes' scenario available in a small scenario collection called `SCENARII`.
 
 At the time of writing, the user can try out-of-the-box the following scenario through
 
