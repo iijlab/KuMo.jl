@@ -18,7 +18,8 @@
 In a Julia REPL (command-line interface for julia), please use the following code snippet to install KuMo.
 
 ```julia
-] add https://github.com/Azzaare/KuMo.jl
+using Pkg
+Pkg.add(url="https://github.com/Azzaare/KuMo.jl")
 ```
 
 ## Visualization Tools
