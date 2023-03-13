@@ -8,6 +8,68 @@
 <!-- [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac) -->
 <!-- [![PkgEval](https://JuliaCI.github.io/NanosoldierReports/pkgeval_badges/K/KuMo.svg)](https://JuliaCI.github.io/NanosoldierReports/pkgeval_badges/report.html) -->
 
+**Table of contents**
+
+- [Visualization Tools](https://github.com/Azzaare/KuMo.jl#visualization-tools)
+- [Reproducing the experimental results of any related paper](https://github.com/Azzaare/KuMo.jl#reproducing-the-experimental-results-of-any-related-paper)
+
+## Visualization Tools
+
+We provide an interface to two popular visualization tools in tje Julia ecosystem:
+- (GL)Makie.jl for an interactive plot analysis
+- (Stats)Plots.jl for generating figures in LaTeX/PDF fashion
+
+We recommend using the Makie interface first when designing or analyzing a scenario.
+
+### Pseudo costs selection and manipulation
+
+Using efficiently our Cloud Morphing system, KuMo, is mainly done by selecting appropriate pseudo costs function for each resource. We implemented a small tool available within KuMo to help users with standard and usual variants of monotonic and convex pseudo costs.
+
+In the julia REPL (command-line interface for julia), please use the following code snippet.
+
+```julia
+using KuMo, GLMakie
+
+show_pseudo_costs()
+```
+
+### Interactive plot analysis with Makie
+
+With our Makie interface, we provide a simple way to visualize the results of a scenario. The following code snippet will generate a plot of the scenario `scenario` with the default Makie theme.
+
+```julia
+using KuMo, GLMakie
+
+show_simulation(scenario)
+```
+
+Note that by default, `show_simulation()` will use a simple four convex nodes' scenario available in a small scenario library called `SCENARII`.
+
+At the time of writing, the user can try out-of-the-box the following scenario through
+
+```julia
+show_simulation(SCENARII[:four_nodes]) # default scenario for show_simulation()
+
+show_simulation(SCENARII[:four_nodes_four_users])
+
+show_simulation(SCENARII[:square])
+```
+
+### Generating quality plots with Plots
+
+Users can generate high quality plots with the goal of a LaTeX formatted PDF output in the following fashion.
+
+```julia
+    using KuMo, Plots
+
+    scenario = SCENARII[:four_nodes]
+
+    simulate_and_plot!(scenario; plot_type = :all, target=:all)
+```
+
+The `plot_type` argument can be either `:all` or `:plot` or `:areaplot`. The `target` argument can be either `:all` or `:nodes` or `:links`.
+
+Please read the documentation (WIP) for more information.
 
 ## Reproducing the experimental results of any related paper
 

@@ -18,7 +18,7 @@ function plot_nodes(df; kind=:plot)
     p = @df df eval(kind)(:instant,
         cols(a:b), xlabel="time", seriestype=:steppre,
         ylabel="load",
-        linestyle= kind==:plot ? :auto : :solid,
+        linestyle=kind == :plot ? :auto : :solid,
         w=1.25,
     )
     return p
@@ -37,7 +37,7 @@ function plot_links(df; kind=:plot)
         p = @df df eval(kind)(:instant,
             cols(c:d), xlabel="time", seriestype=:steppre,
             ylabel="load",
-            linestyle= kind==:plot ? :auto : :solid,
+            linestyle=kind == :plot ? :auto : :solid,
             w=1.25,
         )
         return p
@@ -57,7 +57,7 @@ function plot_resources(df; kind=:plot)
         p = @df df eval(kind)(:instant,
             cols(a:d), xlabel="time", seriestype=:steppre,
             ylabel="load",
-            linestyle= kind==:plot ? :auto : :solid,
+            linestyle=kind == :plot ? :auto : :solid,
             w=1.25,
         )
         return p
@@ -113,7 +113,7 @@ Simulate and plot the snapshots generate through `scenario` in a single multiplo
 - an optional `title`
 """
 function simulate_and_plot(
-    s, algo;
+    s, algo=ShortestPath();
     speed=0, output="", verbose=true, target=:all, plot_type=:all, title="Cloud Morphing: a responsive allocation of resources"
 )
     times, df, _ = simulate(s, algo; speed, output, verbose)
