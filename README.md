@@ -82,31 +82,31 @@ Please read the documentation (WIP) for more information.
 
 ## Reproducing the experimental results of any related paper
 
-We recommend any user, specially if unfamiliar with the Julia language, to follow the small guide below.
-
 ### Installing Julia
 
-We recommend any user, specially if unfamiliar with the Julia language, to use [juliaup](https://github.com/JuliaLang/juliaup). Among other things, `juliaup` will install the latest release of Julia and it to the path.
+We recommend any user, specially if unfamiliar with the Julia language, to use [juliaup](https://github.com/JuliaLang/juliaup). Among other things, `juliaup` will install the latest release of Julia and add it to the path.
 
 Do not use the `julia` version available on most repositories (such as `apt`) as it tends to not be maintained. Either install through `juliaup` or by downloading the binaries on the Julia language website.
 
+Note that this package requires at least Julia 1.8 (the latest release at the time of writing).
 ### How to use the scripts to generate the figures in the article
 
 **Clone the repository**
 
-Either clone this repository using, for instance the following command within the Julia REPL
-
-```julia
-] dev https://github.com/Azzaare/KuMo.jl.git
-```
-
-or in a shell
+Either clone this repository using, for instance the following command line in a shell
 
 ```shell
 git clone https://github.com/Azzaare/KuMo.jl.git
 ```
 
-Note that the first command will download and install the package at the following path  `~/.julia/dev/KuMo`.
+or in a Julia REPL
+
+```julia
+using Pkg
+Pkg.develop(url="https://github.com/Azzaare/KuMo.jl.git")
+```
+
+Note that the last command will download and install the package at the following path `~/.julia/dev/KuMo`.
 
 **Change directory**
 
@@ -118,11 +118,12 @@ If one has LaTeX installed, running the script is as simple as using
 
 ```shell
 julia scripts/main.jl
+
 # or from anywhere within the repository
 julia path/to/main.jl
 ```
 
-If no LaTeX engine are available, please add the `--nolatex` flag to the command line.
+If no LaTeX engine are available, please add the `--nolatex` flag.
 
 ```shell
 julia scripts/main.jl --nolatex
