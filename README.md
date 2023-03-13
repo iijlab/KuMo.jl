@@ -13,6 +13,14 @@
 - [Visualization Tools](https://github.com/Azzaare/KuMo.jl#visualization-tools)
 - [Reproducing the experimental results of any related paper](https://github.com/Azzaare/KuMo.jl#reproducing-the-experimental-results-of-any-related-paper)
 
+## Installing KuMo
+
+In a Julia REPL (command-line interface for julia), please use the following code snippet to install KuMo.
+
+```julia
+] add https://github.com/Azzaare/KuMo.jl
+```
+
 ## Visualization Tools
 
 We provide an interface to two popular visualization tools in the Julia ecosystem:
