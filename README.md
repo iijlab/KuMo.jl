@@ -69,11 +69,11 @@ show_simulation(SCENARII[:square])
 Users can generate high quality plots with the goal of a LaTeX formatted PDF output in the following fashion.
 
 ```julia
-    using KuMo, Plots
+using KuMo, Plots
 
-    scenario = SCENARII[:four_nodes]
+scenario = SCENARII[:four_nodes]
 
-    simulate_and_plot!(scenario; plot_type = :all, target=:all)
+simulate_and_plot!(scenario; plot_type = :all, target=:all)
 ```
 
 The `plot_type` argument can be either `:all` or `:plot` or `:areaplot`. The `target` argument can be either `:all` or `:nodes` or `:links`.
