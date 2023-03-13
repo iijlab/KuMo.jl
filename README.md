@@ -43,13 +43,23 @@ Please open a terminal in `KuMo/scripts` (or `cd` into it).
 
 **Run the script**
 
-Running the script is as simple as using
+If one has LaTeX installed, running the script is as simple as using
 
 ```shell
 julia main.jl
 ```
 
-The ouput is generated in `KuMo/figures`.
+If not LaTeX engine is available, one needs to comment line 18-22 in `main.jl` before running the script:
+
+```julia
+begin
+    using PGFPlotsX
+    pgfplotsx()
+    latexengine!(PGFPlotsX.LUALATEX)
+end
+```
+
+The output is generated in `KuMo/figures`. Note that if LaTeX is not used, the figures might not appear as in the original paper.
 
 <!-- ## Citing
 
