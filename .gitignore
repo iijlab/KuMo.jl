@@ -6,6 +6,7 @@
 /Manifest.toml
 test/Manifest.toml
 *Manifest.toml
+scripts/Manifest.toml
 /docs/build/
 
 # TeX
