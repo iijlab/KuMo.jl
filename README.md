@@ -25,6 +25,7 @@ Pkg.add(url="https://github.com/Azzaare/KuMo.jl")
 ## Visualization Tools
 
 We provide an interface to two popular visualization tools in the Julia ecosystem:
+
 - (GL)Makie.jl for an interactive plot analysis
 - (Stats)Plots.jl for generating figures in LaTeX/PDF fashion
 
@@ -69,7 +70,7 @@ show_simulation(SCENARII[:square])
 Users can generate high quality plots with the goal of a LaTeX formatted PDF output in the following fashion.
 
 ```julia
-using KuMo, Plots
+using KuMo, StatsPlots
 
 scenario = SCENARII[:four_nodes]
 
@@ -89,6 +90,7 @@ We recommend any user, specially if unfamiliar with the Julia language, to use [
 Do not use the `julia` version available on most repositories (such as `apt`) as it tends to not be maintained. Either install through `juliaup` or by downloading the binaries on the Julia language website.
 
 Note that this package requires at least Julia 1.8 (the latest release at the time of writing).
+
 ### How to use the scripts to generate the figures in the article
 
 **Clone the repository**
