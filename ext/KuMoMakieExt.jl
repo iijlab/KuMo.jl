@@ -1,4 +1,6 @@
-module VizMakie
+module KuMoMakieExt
+
+# imports
 
 using Colors
 using CSV
@@ -164,7 +166,7 @@ const DEFAULT_PSEUDO_COSTS = [
     BASIC_PSEUDO_COSTS[2],
 ]
 
-function show_pseudo_costs(; interaction=:auto, pseudo_costs=[])
+function KuMo.show_pseudo_costs(; interaction=:auto, pseudo_costs=[])
     cb = string(Makie.current_backend())
     is_static = occursin(CAIROMAKIE, cb) || occursin(RPRMAKIE, cb)
     if interaction ∈ [:static] || is_static
@@ -376,7 +378,7 @@ function show_simulation(df, norms, select, ::Val{:static})
     return fig
 end
 
-function show_simulation(df, norms; interaction=:auto, select=nothing)
+function KuMo.show_simulation(df, norms; interaction=:auto, select=nothing)
     cb = string(Makie.current_backend())
     is_static = occursin(CAIROMAKIE, cb) || occursin(RPRMAKIE, cb)
     if interaction ∈ [:static] || is_static
@@ -385,14 +387,14 @@ function show_simulation(df, norms; interaction=:auto, select=nothing)
     return show_simulation(df, norms, select, Val(:interactive))
 end
 
-function show_simulation(path::String; norms=Dict(), interaction=:auto, select=nothing)
+function KuMo.show_simulation(path::String; norms=Dict(), interaction=:auto, select=nothing)
     df = DataFrame(CSV.File(path; delim=','))
-    return show_simulation(df, norms; interaction, select)
+    return KuMo.show_simulation(df, norms; interaction, select)
 end
 
-function show_simulation(s::Scenario=SCENARII[:four_nodes]; norms=Dict(), interaction=:auto, select=nothing)
+function KuMo.show_simulation(s::Scenario=SCENARII[:four_nodes]; norms=Dict(), interaction=:auto, select=nothing)
     df = simulate(s, ShortestPath())[2]
-    return show_simulation(df, norms; interaction, select)
+    return KuMo.show_simulation(df, norms; interaction, select)
 end
 
 end

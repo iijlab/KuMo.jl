@@ -32,7 +32,6 @@ links(topo::Topology, i, j) = topo.links[minmax(i, j)]
     vtx(algorithm::AbstractAlgorithm)
 Return the number of additional vertices required by the `algorithm` used to allocate resources in the network.
 """
-vtx(::MinCostFlow) = 2
 vtx(_) = 0
 
 make_graph(n, ::DirectedTopology) = SimpleDiGraph(n)

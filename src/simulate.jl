@@ -1,7 +1,7 @@
 """
     State
 
-A structure to store the state of the different resources, e.g. nodes and links, during a simualtion.
+A structure to store the state of the different resources, e.g. nodes and links, during a simulation.
 
 # Arguments:
 - `links::SparseMatrixCSC{Float64, Int64}`: sparse matrice with the links loads
@@ -152,87 +152,6 @@ struct Unload
 end
 
 Base.isless(x::Union{Load,Unload}, y::Union{Load,Unload}) = isless(x.occ, y.occ)
-
-"""
-    inner_queue(
-        g, u, j, nodes, capacities, state, algo::MinCostFlow, ii = 0;
-        lck = ReentrantLock(), demands, links = nothing
-    )
-
-The inner queue step of the resource allocation of a new request. Uses a `MinCostFlow` algorithm.
-
-# Arguments:
-- `g`: a graph representing the topology of the network
-- `u`: user location
-- `j`: requested job
-- `nodes`: nodes capacities
-- `capacities`: links capacities
-- `state`: current state of the network
-- `algo`: `MinCostFlow <: AbstractAlgorithm`
-- `ii`: a counter to mesure the progress in the simulation
-- `lck`: a lck for asynchronous simulation
-- `demands`: flow demands for `MinCostFlow` algorithm
-- `links`: not needed for `MinCostFlow` algorithm
-"""
-function inner_queue(
-    g, u, j, nodes, capacities, state, algo::MinCostFlow, ii=0;
-    lck=ReentrantLock(), demands, links=nothing
-)
-    nvtx = nv(g)
-
-    add_edge!(g, nvtx - 1, u)
-    add_edge!(g, nvtx - 1, j.data_location)
-
-    lock(lck)
-    try
-        state.links[nvtx-1, u] += j.frontend
-        state.links[nvtx-1, j.data_location] += j.backend
-    finally
-        unlock(lck)
-    end
-
-    demands[nvtx-1] = -(j.backend + j.frontend)
-    demands[nvtx] = j.backend + j.frontend
-
-    best_links = spzeros(nvtx, nvtx)
-    best_node = 0
-    best_cost = Inf
-
-    for (i, v) in pairs(nodes)
-        node_cost = pseudo_cost(v, j.containers)
-        aux_cap = nothing
-
-        lock(lck)
-        try
-            aux_cap = deepcopy(state.links)
-        finally
-            unlock(lck)
-        end
-
-        aux_cap[i, nvtx] = j.backend + j.frontend
-        f, links_cost = mincost_flow(g, demands, capacities, aux_cap, algo.optimizer)
-        cost = node_cost + links_cost
-        if cost < best_cost
-            best_cost = cost
-            best_links = f
-            best_node = i
-        end
-    end
-
-    rem_edge!(g, nvtx - 1, u)
-    rem_edge!(g, nvtx - 1, j.data_location)
-
-
-    lock(lck)
-    try
-        state.links[nvtx-1, u] = 0.0
-        state.links[nvtx-1, j.data_location] = 0.0
-    finally
-        unlock(lck)
-    end
-
-    return best_links, best_cost, best_node
-end
 
 """
     retrieve_path(u, v, paths)
@@ -713,7 +632,7 @@ Compute the best load allocation and return if it is a valid one.
 - `capacities`: capacities of the network
 - `state`: current state of resources
 - `algo`: algo used for computing the best allocation cost
-- `demands`: if algo is `MinCostFlow`, demands are required
+- `demands`: if algo is `KuMoFlowExt.MinCostFlow`, demands are required
 - `ii`: a counter to measure the approximative progress of the simulation
 """
 function execute_valid_load(s, task, g, capacities, state, algo, demands, ii=0)
