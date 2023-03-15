@@ -1,12 +1,12 @@
-module VizStatsPlots
+module KuMoPlotsExt
 
+# imports
 using KuMo
 using PrettyTables
 using StatsPlots
 
-using StatsPlots: grid
-
-
+# exports
+export simulate_and_plot
 
 """
     plot_nodes(df::DataFrame; kind=:plot)
@@ -112,8 +112,8 @@ Simulate and plot the snapshots generate through `scenario` in a single multiplo
 - `plot_type` defines the kind of plots that will be generated: `:all` (default), `:plot`, `:areaplot`
 - an optional `title`
 """
-function simulate_and_plot(
-    s, algo=ShortestPath();
+function KuMo.simulate_and_plot(
+    s=SCENARII[:four_nodes], algo=ShortestPath();
     speed=0, output="", verbose=true, target=:all, plot_type=:all, title="Cloud Morphing: a responsive allocation of resources"
 )
     times, df, _ = simulate(s, algo; speed, output, verbose)

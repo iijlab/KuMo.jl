@@ -1,6 +1,7 @@
 ## Script to execute to reproduce all the figures in the paper (see README.md)
 
 using Pkg
+Pkg.activate(; temp=true)
 Pkg.update()
 
 try
@@ -11,53 +12,20 @@ catch e
     using DrWatson
 end
 
-@quickactivate
+try
+    using StatsPlots
+catch e
+    @warn "Installing StatsPlots" exception = (e, catch_backtrace())
+    Pkg.add("StatsPlots")
+    using StatsPlots
+end
 
-#SECTION - Load packages
-using CSV
-using DataFrames
-using KuMo
-using StatsPlots
-
-#NOTE - Define figures directory
-figuresdir() = joinpath(findproject(), "figures")
-
-#SECTION Includes
-
-# figure 3
-include("pseudocosts.jl")
-
-# figure 4
-include("equivalent_nodes.jl")
-
-# figure 5
-include("proportional_nodes.jl")
-
-# figure 6
-include("edge.jl")
-
-# figure 7
-include("cost_manipulations.jl")
-
-# figure 8
-include("mixed_load.jl")
-
-function main(; title=true, latex=true)
-    F = [
-        figure_3,
-        figure_4,
-        figure_5,
-        figure_6,
-        figure_7,
-        figure_8,
-    ]
-
-    for (i, f) in enumerate(F)
-        @debug "Plotting figure $(i+2) ∈ [3, $(length(F)+2)]" title
-        f(; title, latex)
-    end
-
-    return nothing
+try
+    using KuMo
+catch e
+    @warn "Installing KuMo" exception = (e, catch_backtrace())
+    Pkg.add(url="https://github.com/Azzaare/KuMo.jl")
+    using KuMo
 end
 
 const LATEX = "--nolatex" ∉ ARGS
@@ -65,12 +33,34 @@ const LATEX = "--nolatex" ∉ ARGS
 if LATEX
     # Requires luatex (installed by most LaTeX distributions)
     begin
-        using PGFPlotsX
+        try
+            using PGFPlotsX
+        catch e
+            @warn "Installing PGFPlotsX" exception = (e, catch_backtrace())
+            Pkg.add("PGFPlotsX")
+            using PGFPlotsX
+        end
         pgfplotsx()
         latexengine!(PGFPlotsX.LUALATEX)
     end
 end
 
-# Comment both if excuting each figure individually
+@quickactivate
+
+function main(; title=true, latex=true)
+    F = [
+        :figure_3,
+        :figure_4,
+        :figure_5,
+        :figure_6,
+        :figure_7,
+        :figure_8,
+    ]
+
+    foreach(f -> figures(f; title, latex), F)
+
+    return nothing
+end
+
 main(; latex=LATEX) # with titles for review
 # main(;title = false, latex=LATEX) # without titles for integration in the paper

@@ -9,8 +9,8 @@ using Dictionaries
 using Distributions
 using DrWatson
 using Graphs
-using JuMP
-using MathOptInterface
+# using JuMP
+# using MathOptInterface
 using PrettyTables
 using ProgressMeter
 using Random
@@ -20,16 +20,17 @@ using TestItemRunner
 using TestItems
 
 # SECTION - exports
+export figures
 export job
 export job_distributions
 export make_df
 export make_links
 export make_nodes
 export marks
-export mincost_flow
-export plot_links
-export plot_nodes
-export plot_resources
+# export mincost_flow
+# export plot_links
+# export plot_nodes
+# export plot_resources
 export predict_cost
 export predict_best_cost
 export pseudo_cost
@@ -68,6 +69,7 @@ export PremiumNode
 
 export SCENARII
 
+
 ## SECTION - includes
 
 # utilities
@@ -98,11 +100,16 @@ include("scenarii/basic.jl")
 # simulation
 include("simulate.jl")
 
-# visualization
-include("visualization/statsplots.jl")
-include("visualization/makie.jl")
+# # visualization
+# include("visualization/statsplots.jl")
+# include("visualization/makie.jl")
 
-using .VizStatsPlots: simulate_and_plot, plot_links, plot_nodes, plot_resources
-using .VizMakie: show_pseudo_costs, show_simulation
+# using .VizStatsPlots: simulate_and_plot, plot_links, plot_nodes, plot_resources
+# using .VizMakie: show_pseudo_costs, show_simulation
+
+function show_pseudo_costs end
+function show_simulation end
+function simulate_and_plot end
+function figures end
 
 end
