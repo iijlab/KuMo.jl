@@ -7,7 +7,7 @@ Pkg.update()
 try
     using DrWatson
 catch e
-    @warn "Installing DrWatson" exception = (e, catch_backtrace())
+    @warn "Installing DrWatson (catching package missing error)" exception = (e, catch_backtrace())
     Pkg.add("DrWatson")
     using DrWatson
 end
@@ -15,7 +15,9 @@ end
 try
     using StatsPlots
 catch e
-    @warn "Installing StatsPlots" exception = (e, catch_backtrace())
+    @warn "Installing StatsPlots (catching package missing error)" exception = (e, catch_backtrace())
+    Pkg.add("FileIO")
+    Pkg.add("Plots")
     Pkg.add("StatsPlots")
     using StatsPlots
 end
@@ -23,7 +25,7 @@ end
 try
     using KuMo
 catch e
-    @warn "Installing KuMo" exception = (e, catch_backtrace())
+    @warn "Installing KuMo (catching package missing error)" exception = (e, catch_backtrace())
     Pkg.add(url="https://github.com/Azzaare/KuMo.jl")
     using KuMo
 end
@@ -36,7 +38,7 @@ if LATEX
         try
             using PGFPlotsX
         catch e
-            @warn "Installing PGFPlotsX" exception = (e, catch_backtrace())
+            @warn "Installing PGFPlotsX (catching package missing error)" exception = (e, catch_backtrace())
             Pkg.add("PGFPlotsX")
             using PGFPlotsX
         end
