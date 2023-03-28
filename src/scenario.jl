@@ -9,157 +9,174 @@ Structure to store the information of a scenario.
 - `topology::Topology{N, L}`: network's topology
 - `users::Dictionary{Int, U}`: collection of users
 """
-struct Scenario{T<:AbstractTopology,U<:User}
+mutable struct Scenario{T<:AbstractTopology,U<:User}
+    d::Int
     data::Dictionary{Int,Data}
     duration::Real
+    m::Int
+    n::Int
+    requests::Requests
     topology::T
+    u::Int
     users::Dictionary{Int,U}
 end
 
-"""
-    make_nodes(nodes)
-
-Create nodes.
-"""
-function make_nodes(nodes)
-    types = Set{Type}()
-    foreach(v -> push!(types, v), Iterators.map(typeof, nodes))
-    UT = Union{collect(types)...}
-    _nodes = Dictionary{Int,UT}()
-    foreach(v -> set!(_nodes, v[1], v[2]), enumerate(nodes))
-    return _nodes
+function Scenario(;
+    data=Dictionary{Int,Data}(),
+    duration,
+    topology,
+    users=Dictionary{Int,User}(),
+    requests
+)
+    d = length(data)
+    n = topology |> nodes |> length
+    m = topology |> links |> length
+    u = length(users)
+    return Scenario(d, data, duration, m, n, requests, topology, u, users)
 end
 
-function make_nodes(nt::DataType, capacities)
-    _nodes = Dictionary{Int,nt}()
-    foreach((i, c) -> set!(_nodes, i, nt(c)), enumerate(capacities))
-    return _nodes
+# Add a node to the scenario
+function add_node!(s::Scenario, t::Float64, r::N) where {N<:AbstractNode}
+    s.n += 1
+    req = NodeRequest(s.n, r, t)
+    push!(s.requests, req)
+end
+node!(s::Scenario, t::Float64, r::AbstractNode) = add_node!(s, t, r)
+
+function rem_node!(s::Scenario, t::Float64, id::Int)
+    req = NodeRequest(id, nothing, t)
+    push!(s.requests, req)
+end
+node!(s::Scenario, t::Float64, id::Int) = rem_node!(s, t, id)
+
+function change_node!(s::Scenario, t::Float64, id::Int, r::N) where {N<:AbstractNode}
+    req = NodeRequest(id, r, t)
+    push!(s.requests, req)
+end
+node!(s::Scenario, t::Float64, id::Int, r::AbstractNode) = change_node!(s, t, id, r)
+
+# macro node(args...)
+#     return if length(args) == 3
+#         :(node!($(args[1]), $(args[2]), $(args[3])))
+#     else
+#         :(node!($(args[1]), $(args[2]), $(args[3]), $(args[4])))
+#     end
+# end
+
+function add_link!(
+    s::Scenario,
+    t::Float64,
+    source::Int,
+    target::Int,
+    r::L,
+) where {L<:AbstractLink}
+    s.m += 1
+    req = LinkRequest(r, source, t, target)
+    push!(s.requests, req)
 end
 
-function make_nodes(nt::DataType, n, capacity)
-    _nodes = Dictionary{Int,nt}()
-    foreach(i -> set!(_nodes, i, nt(capacity)), 1:n)
-    return _nodes
+function rem_link!(s::Scenario, t::Float64, source::Int, target::Int)
+    req = LinkRequest(nothing, source, t, target)
+    push!(s.requests, req)
 end
+link!(s::Scenario, t::Float64, source::Int, target::Int) = rem_link!(s, t, source, target)
 
-make_nodes(n, c) = make_nodes(Node{typeof(c)}, n, c)
-
-function make_nodes(capacities::Vector{T}) where {T<:Number}
-    return make_nodes(Node{T}, capacities)
+function change_link!(
+    s::Scenario,
+    t::Float64,
+    source::Int,
+    target::Int,
+    r::L,
+) where {L<:AbstractLink}
+    req = LinkRequest(r, source, t, target)
+    push!(s.requests, req)
 end
-
-make_nodes(x::Tuple) = make_nodes(x...)
-
-"""
-    make_links(links)
-
-Creates links.
-"""
-function make_links(links; directed=true)
-    _links = Dictionary{Tuple{Int,Int},FreeLink}()
-    for l in links
-        set!(_links, (l[1], l[2]), FreeLink())
-        directed || set!(_links, (l[2], l[1]), FreeLink())
+function link!(s::Scenario, t::Float64, source::Int, target::Int, r::AbstractLink)
+    if (source, target) ∈ s.topology |> links |> keys
+        return change_link!(s, t, source, target, r)
     end
-    return _links
+    return add_link!(s, t, source, target, r)
 end
 
-function make_links(::Nothing, n::Int; directed=true)
-    make_links(Iterators.product(1:n, 1:n); directed)
+function add_user!(s::Scenario, t::Float64, loc::Int)
+    s.u += 1
+    req = UserRequest(s.u, loc, t)
+    push!(s.requests, req)
 end
-function make_links(links::Vector{Tuple{Int,Int,T}}; directed=true) where {T<:AbstractLink}
-    types = Set{Type}()
-    foreach(l -> push!(types, typeof(l[3])), links)
-    UT = Union{collect(types)...}
-    _links = Dictionary{Tuple{Int,Int},UT}()
-    for l in links
-        α, β = minmax(l[1], l[2])
-        set!(_links, (α, β), l[3])
-        directed || set!(_links, (β, α), l[3])
+user!(s::Scenario, t::Float64, loc::Int) = add_user!(s, t, loc)
+
+function rem_user!(s::Scenario, t::Float64, id::Int)
+    req = UserRequest(id, 0, t)
+    push!(s.requests, req)
+end
+
+function move_user!(s::Scenario, t::Float64, id::Int, loc::Int)
+    req = UserRequest(id, loc, t)
+    push!(s.requests, req)
+end
+user!(s::Scenario, t::Float64, id::Int, loc::Int) = move_user!(s, t, id, loc)
+
+function add_data!(s::Scenario, t::Float64, loc::Int)
+    s.d += 1
+    req = DataRequest(s.d, loc, t)
+    push!(s.requests, req)
+end
+data!(s::Scenario, t::Float64, loc::Int) = add_data!(s, t, loc)
+
+function rem_data!(s::Scenario, t::Float64, id::Int)
+    req = DataRequest(id, 0, t)
+    push!(s.requests, req)
+end
+
+function move_data!(s::Scenario, t::Float64, id::Int, loc::Int)
+    req = DataRequest(id, loc, t)
+    push!(s.requests, req)
+end
+data!(s::Scenario, t::Float64, id::Int, loc::Int) = move_data!(s, t, id, loc)
+
+function add_job!(s::Scenario, t::Float64, j::Job, u_id::Int, d_id::Int)
+    req = JobRequest(d_id, j, t, u_id)
+    push!(s.requests, req)
+end
+
+function job!(
+    s::Scenario,
+    backend,
+    container,
+    duration,
+    frontend,
+    data_id,
+    user_id,
+    ν;
+    start=0.0,
+    stop=s.duration
+)
+    j = job(backend, container, duration, frontend)
+    for t in start:ν:stop
+        add_job!(s, t, j, user_id, data_id)
     end
-    return _links
 end
 
-function make_links(lt::DataType, links; directed=true)
-    _links = Dictionary{Tuple{Int,Int},lt}()
-    for l in links
-        α, β = minmax(l[1], l[2])
-        set!(_links, (α, β), lt(l[3]))
-        directed || set!(_links, (β, α), lt(l[3]))
-    end
-    return _links
+function job!(
+    s::Scenario,
+    t::Float64,
+    backend,
+    container,
+    duration,
+    frontend,
+    data_id,
+    user_id;
+)
+    j = job(backend, container, duration, frontend)
+    add_job!(s, t, j, user_id, data_id)
 end
 
-function make_links(links::Vector{Tuple{Int,Int,T}}; directed=true) where {T<:Number}
-    make_links(Link{T}, links; directed)
-end
-function make_links(lt::DataType, links, c; directed=true)
-    _links = Dictionary{Tuple{Int,Int},lt}()
-    for l in links
-        set!(_links, (l[1], l[2]), lt(c))
-        directed || set!(_links, (l[2], l[1]), lt(c))
-    end
-    return _links
-end
+make_topology(::Val{true}) = DirectedTopology()
+make_topology(::Val{false}) = Topology()
 
-function make_links(links, c; directed=true)
-    make_links(Link{typeof(c)}, links, c; directed)
-end
-function make_links(n::Int, c; directed=true)
-    make_links(Iterators.product(1:n, 1:n), c; directed)
-end
-function make_links(x::Tuple; directed=true)
-    make_links(x...; directed)
-end
-"""
-    make_users(args...)
-
-Create users.
-"""
-function make_users(n::Int, rate, locations, jd, data)
-    users = Dictionary{Int,User{PeriodicRequests{Job}}}()
-    for i in 1:n
-        set!(users, i, user(jd, rate, locations))
-        set!(data, i, Data(rand(locations)))
-    end
-    return users
-end
-
-function make_users(users, locations, data)
-    _users = Dictionary(users)
-    for i in 1:length(users)
-        set!(data, i, Data(rand(locations)))
-    end
-    return _users
-end
-
-make_topology(nodes, links, ::Val{true}) = DirectedTopology(nodes, links)
-make_topology(nodes, links, ::Val{false}) = Topology(nodes, links)
-
-function scenario(duration, links, nodes, users, directed)
-    _nodes = make_nodes(nodes)
-    _links = isnothing(links) ? make_links(links, length(_nodes); directed) : make_links(links; directed)
-    _data = Dictionary{Int,Data}()
-    locations = 1:length(_nodes)
-
-    _users = make_users(users, locations, _data)
-
-    topo = make_topology(_nodes, _links, Val(directed))
-
-    return Scenario(_data, duration, topo, _users)
-end
-
-function scenario(duration, links, nodes, users, job_distribution, request_rate, directed)
-    _nodes = make_nodes(nodes)
-    _links = isnothing(links) ? make_links(links, length(_nodes)) : make_links(links)
-    _data = Dictionary{Int,Data}()
-    locations = 1:length(_nodes)
-
-    _users = make_users(users, request_rate, locations, job_distribution, _data)
-
-    topo = make_topology(_nodes, _links, Val(directed))
-
-    return Scenario(_data, duration, topo, _users)
+function scenario(directed, duration, requests)
+    topology = make_topology(Val(directed))
+    return Scenario(; duration, requests, topology)
 end
 
 """
@@ -176,19 +193,11 @@ Build a scenario.
 - `request_rate`: (optional) average request rate
 """
 function scenario(;
-    duration,
-    links=nothing,
-    nodes,
-    users,
-    job_distribution=nothing,
-    request_rate=nothing,
-    directed=true
+    directed=true,
+    duration=0,
+    requests=Requests()
 )
-    if job_distribution === nothing || request_rate === nothing
-        scenario(duration, links, nodes, users, directed)
-    else
-        scenario(duration, links, nodes, users, job_distribution, request_rate, directed)
-    end
+    return scenario(directed, duration, requests)
 end
 
 """

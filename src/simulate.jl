@@ -444,27 +444,27 @@ function init_simulate(::Val)
     return tasks, c
 end
 
-"""
-    init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
+# """
+#     init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
 
-Initialize user `u` periodic requests.
+# Initialize user `u` periodic requests.
 
-# Arguments:
-- `s`: scenario that is about to be simulated
-- `u`: a user id
-- `tasks`: container of sorted tasks
-"""
-function init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
-    jr = u.job_requests
-    j = jr.job
-    p = jr.period
-    t0 = max(jr.start, 0.0)
-    t1 = min(jr.stop, s.duration)
+# # Arguments:
+# - `s`: scenario that is about to be simulated
+# - `u`: a user id
+# - `tasks`: container of sorted tasks
+# """
+# function init_user(s::Scenario, u::User, tasks, ::PeriodicRequests)
+#     jr = u.job_requests
+#     j = jr.job
+#     p = jr.period
+#     t0 = max(jr.start, 0.0)
+#     t1 = min(jr.stop, s.duration)
 
-    foreach(occ -> push!(tasks, Load(occ, u.location, j)), t0:p:t1)
-    sort!(tasks)
-    # @info "debug PR" tasks
-end
+#     foreach(occ -> push!(tasks, Load(occ, u.location, j)), t0:p:t1)
+#     sort!(tasks)
+#     # @info "debug PR" tasks
+# end
 
 """
     init_user(::Scenario, u::User, tasks, ::Requests)

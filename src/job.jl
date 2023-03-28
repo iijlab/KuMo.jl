@@ -13,14 +13,12 @@ The most generic job type.
 # Arguments:
 - `backend::Int`: size of the backend data to be sent from data location to the server
 - `containers::Int`: number of containers required to execute the job
-- `data_location::Int`: location of the data (node id)
 - `duration::Float64`: job duration
 - `frontend::Int`: size of the frontend data to be sent from the user location to the server
 """
 struct Job <: AbstractJob
     backend::Int
     containers::Int
-    data_location::Int
     duration::Float64
     frontend::Int
 end
