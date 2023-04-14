@@ -154,7 +154,7 @@ function figure_3(;
         foreach(pc -> push!(pcs, pc), [convex_pc, monotonic_pc])
         foreach(label -> push!(labels, label), [(ls * "convex") (ls * "monotonic")])
         t = select == :standard ? 1 : 1.25
-        foreach(thick -> push!(thickness, thick), [1.25, 1.25])
+        foreach(thick -> push!(thickness, thick), [t, t])
         foreach(linestyle -> push!(linestyles, linestyle), [:solid, :solid])
     end
 
