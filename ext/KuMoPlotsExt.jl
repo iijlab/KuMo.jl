@@ -162,13 +162,14 @@ function figure_3(;
 
     if select ∈ [:all, :variants]
         if select == :variants
-        # Standard pseudo costs
-        convex_pc = x -> pseudo_cost(1.0, x, Val(:default))
-        foreach(pc -> push!(pcs, pc), [convex_pc])
-        foreach(label -> push!(labels, label), [(ls * "convex")])
-        t = select == 1.25
-        foreach(thick -> push!(thickness, thick), [t])
-        foreach(linestyle -> push!(linestyles, linestyle), [:solid])
+            # Standard pseudo costs
+            convex_pc = x -> pseudo_cost(1.0, x, Val(:default))
+            foreach(pc -> push!(pcs, pc), [convex_pc])
+            foreach(label -> push!(labels, label), [(ls * "convex")])
+            t = select == 1.25
+            foreach(thick -> push!(thickness, thick), [t])
+            foreach(linestyle -> push!(linestyles, linestyle), [:solid])
+        end
         # Variants
         load_plus_pc = x -> pseudo_cost(1.0, x + 0.2, Val(:default))
         cost_plus_pc = x -> pseudo_cost(1.0, x, Val(:default)) + 0.5
