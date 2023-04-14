@@ -1,15 +1,15 @@
 # KuMo: Towards Cloud Morphing
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://Azzaare.github.io/KuMo.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://Azzaare.github.io/KuMo.jl/dev)
-[![Build Status](https://github.com/Azzaare/KuMo.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/Azzaare/KuMo.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![codecov](https://codecov.io/gh/Azzaare/KuMo.jl/branch/main/graph/badge.svg?token=rlJUxj3NkP)](https://codecov.io/gh/Azzaare/KuMo.jl)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://iijlab.github.io/KuMo.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://iijlab.github.io/KuMo.jl/dev)
+[![Build Status](https://github.com/iijlab/KuMo.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/iijlab/KuMo.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/iijlab/KuMo.jl/branch/main/graph/badge.svg?token=rlJUxj3NkP)](https://codecov.io/gh/iijlab/KuMo.jl)
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 
 **Table of contents**
 
-- [Visualization Tools](https://github.com/Azzaare/KuMo.jl#visualization-tools)
-- [Reproducing the experimental results of any related paper](https://github.com/Azzaare/KuMo.jl#reproducing-the-experimental-results-of-any-related-paper)
+- [Visualization Tools](https://github.com/iijlab/KuMo.jl#visualization-tools)
+- [Reproducing the experimental results of any related paper](https://github.com/iijlab/KuMo.jl#reproducing-the-experimental-results-of-any-related-paper)
 
 ## Installing KuMo
 
