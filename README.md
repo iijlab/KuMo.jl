@@ -17,7 +17,7 @@ In a Julia REPL (command-line interface for julia), please use the following cod
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/Azzaare/KuMo.jl")
+Pkg.add(url="https://github.com/iijlab/KuMo.jl")
 ```
 
 ## Visualization Tools
@@ -96,14 +96,14 @@ Note that this package requires at least Julia 1.8 (the latest release at the ti
 Either clone this repository using, for instance the following command line in a shell
 
 ```shell
-git clone https://github.com/Azzaare/KuMo.jl.git
+git clone https://github.com/iijlab/KuMo.jl.git
 ```
 
 or in a Julia REPL
 
 ```julia
 using Pkg
-Pkg.develop(url="https://github.com/Azzaare/KuMo.jl.git")
+Pkg.develop(url="https://github.com/iijlab/KuMo.jl.git")
 ```
 
 Note that the last command will download and install the package at the following path `~/.julia/dev/KuMo`.
