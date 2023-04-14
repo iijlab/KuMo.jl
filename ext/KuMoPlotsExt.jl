@@ -145,7 +145,7 @@ function figure_3(;
     thickness = Vector{Float64}()
     linestyles = Vector{Symbol}()
 
-    ls = latex ? "\\bf " : ""
+    ls = latex && select == :all ? "\\bf " : ""
 
     if select ∈ [:all, :standard]
         # Standard pseudo costs
@@ -153,11 +153,12 @@ function figure_3(;
         monotonic_pc = x -> pseudo_cost(1.0, x, Val(:equal_load_balancing))
         foreach(pc -> push!(pcs, pc), [convex_pc, monotonic_pc])
         foreach(label -> push!(labels, label), [(ls * "convex") (ls * "monotonic")])
+        t = select == :standard ? 1 : 1.25
         foreach(thick -> push!(thickness, thick), [1.25, 1.25])
         foreach(linestyle -> push!(linestyles, linestyle), [:solid, :solid])
     end
 
-    lv = latex ? "\\em " : ""
+    lv = latex && select == :variants ? "\\em " : ""
 
     if select ∈ [:all, :variants]
         # Variants
@@ -178,8 +179,10 @@ function figure_3(;
                 (lv * "convex idle cost ×1.5")
             ],
         )
-        foreach(thick -> push!(thickness, thick), [0.625, 0.625, 0.625, 0.625])
-        foreach(linestyle -> push!(linestyles, linestyle), [:dash, :dot, :dashdot, :dashdotdot])
+        t = select == :variants ? 1 : 0.625
+        L = select == :variants ? [:solid, :solid, :solid, :solid] : [:dash, :dot, :dashdot, :dashdotdot]
+        foreach(thick -> push!(thickness, thick), [t, t, t, t])
+        foreach(linestyle -> push!(linestyles, linestyle), L)
     end
 
     plot_pc = plot(

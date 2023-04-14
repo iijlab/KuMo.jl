@@ -49,7 +49,7 @@ end
 
 function main(; title=true, latex=true)
     F = [
-        :figure_3,
+        # :figure_3,
         :figure_4,
         :figure_5,
         :figure_6,
@@ -57,10 +57,13 @@ function main(; title=true, latex=true)
         :figure_8,
     ]
 
-    foreach(f -> figures(f; title, latex), F)
+    # foreach(f -> figures(f; title, latex), F)
+
+    figures(:figure_3; select=:standard, title, latex)
+    figures(:figure_3; select=:variants, output=joinpath(pwd(), "..", "figures", "figure3_pseudocosts_variants.pdf"), title, latex)
 
     return nothing
 end
 
-main(; latex=LATEX) # with titles for review
-# main(;title = false, latex=LATEX) # without titles for integration in the paper
+# main(; title=true, latex=LATEX) # with titles for review
+main(; title=false, latex=LATEX) # without titles for integration in the paper
