@@ -188,7 +188,7 @@ function figure_3(;
                 (lv * "convex idle cost ×1.5")
             ],
         )
-        t = select == :variants ? 1 : 0.625
+        t = 0.625
         L = [:dash, :dot, :dashdot, :dashdotdot]
         foreach(thick -> push!(thickness, thick), [t, t, t, t])
         foreach(linestyle -> push!(linestyles, linestyle), L)
