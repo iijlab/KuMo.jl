@@ -158,7 +158,7 @@ function figure_3(;
         foreach(linestyle -> push!(linestyles, linestyle), [:solid, :solid])
     end
 
-    lv = latex && select == :variants ? "\\em " : ""
+    lv = latex && select == :all ? "\\em " : ""
 
     if select ∈ [:all, :variants]
         # Variants
