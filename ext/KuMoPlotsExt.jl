@@ -145,7 +145,7 @@ function figure_3(;
     thickness = Vector{Float64}()
     linestyles = Vector{Symbol}()
 
-    ls = latex && select == :all ? "\\bf " : ""
+    ls = latex && select != :standard ? "\\bf " : ""
 
     if select ∈ [:all, :standard]
         # Standard pseudo costs
@@ -166,7 +166,7 @@ function figure_3(;
             convex_pc = x -> pseudo_cost(1.0, x, Val(:default))
             foreach(pc -> push!(pcs, pc), [convex_pc])
             foreach(label -> push!(labels, label), [(ls * "convex")])
-            t = select == 1.25
+            t = 1.25
             foreach(thick -> push!(thickness, thick), [t])
             foreach(linestyle -> push!(linestyles, linestyle), [:solid])
         end
