@@ -158,9 +158,17 @@ function figure_3(;
         foreach(linestyle -> push!(linestyles, linestyle), [:solid, :solid])
     end
 
-    lv = latex && select == :all ? "\\em " : ""
+    lv = latex ? "\\em " : ""
 
     if select ∈ [:all, :variants]
+        if select == :variants
+        # Standard pseudo costs
+        convex_pc = x -> pseudo_cost(1.0, x, Val(:default))
+        foreach(pc -> push!(pcs, pc), [convex_pc])
+        foreach(label -> push!(labels, label), [(ls * "convex")])
+        t = select == 1.25
+        foreach(thick -> push!(thickness, thick), [t])
+        foreach(linestyle -> push!(linestyles, linestyle), [:solid])
         # Variants
         load_plus_pc = x -> pseudo_cost(1.0, x + 0.2, Val(:default))
         cost_plus_pc = x -> pseudo_cost(1.0, x, Val(:default)) + 0.5
@@ -180,7 +188,7 @@ function figure_3(;
             ],
         )
         t = select == :variants ? 1 : 0.625
-        L = select == :variants ? [:solid, :solid, :solid, :solid] : [:dash, :dot, :dashdot, :dashdotdot]
+        L = [:dash, :dot, :dashdot, :dashdotdot]
         foreach(thick -> push!(thickness, thick), [t, t, t, t])
         foreach(linestyle -> push!(linestyles, linestyle), L)
     end
