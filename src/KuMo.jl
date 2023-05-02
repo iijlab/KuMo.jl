@@ -92,8 +92,10 @@ include("scenario.jl")
 # scenarii (dictionaries)
 include("scenarii/basic.jl")
 
-# simulation
-include("simulate.jl")
+# execution
+include("execute.jl")
+include("execution/batch_simulation.jl")
+include("execution/interactive.jl")
 
 # functions definition for extensions
 function show_pseudo_costs end

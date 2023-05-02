@@ -907,9 +907,10 @@ function simulate(s::Scenario, algo=ShortestPath(); speed=0, output="", verbose=
     # simulate loop
     simulate_loop(s, algo, speed, start, containers, args_loop, Val(speed))
 
-    # @info "debug" args_loop[1] args_loop[2] args_loop[3]
-    # @info "debug" args_loop[4] args_loop[5] args_loop[6]
-    # @info "debug" args_loop[6].links
+    @info "debug" args_loop
+    @info "debug" containers
+
+
 
     # post-process
     return args_loop[1], post_simulate(s, args_loop[2], verbose, output), args_loop[2]

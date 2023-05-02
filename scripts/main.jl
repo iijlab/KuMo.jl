@@ -24,7 +24,7 @@ try
     using KuMo
 catch e
     @warn "Installing KuMo" exception = (e, catch_backtrace())
-    Pkg.add(url="https://github.com/Azzaare/KuMo.jl")
+    Pkg.add(url="https://github.com/Azzaare/KuMo.jl", rev="dyna")
     using KuMo
 end
 
