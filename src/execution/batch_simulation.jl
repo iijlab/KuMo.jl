@@ -9,7 +9,7 @@ struct BatchSimulation{T<:AbstractTopology} <: AbstractExecution
 
     function BatchSimulation(;
         algo::AbstractAlgorithm=ShortestPath(),
-        infrastructure::Infrastructure{T}=Infrastructure{T}(),
+        infrastructure::Infrastructure{T}=Infrastructure{DirectedTopology}(),
         output::String="",
         requests::Requests=Requests(),
         verbose::Bool=false
@@ -48,9 +48,12 @@ end
 
 Initialize a synchronous batch simulation.
 """
-init_execution(::BatchSimulation) = SimulationVectors()
-
-# SECTION - simulation loop
+function init_execution(exe::BatchSimulation)
+    sv = SimulationVectors()
+    foreach(r -> push!(sv, r), exe.requests)
+    @info "debug init_execution : $(typeof(exe))" exe sv
+    return sv
+end
 
 """
     valid_load(s, task, g, capacities, state, algo, demands, ii = 0)
@@ -195,4 +198,103 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
     end
     push!(times, "end_queue" => time() - start)
     return nothing
+end
+
+#SECTION - Requests API
+
+function add_node!(exe::BatchSimulation, t::Float64, r::N) where {N<:AbstractNode}
+    exe.infrastructure.n += 1
+    req = NodeRequest(exe.infrastructure.n, r, t)
+    push!(exe.requests, req)
+end
+
+function rem_node!(exe::BatchSimulation, t::Float64, id::Int)
+    req = NodeRequest(id, nothing, t)
+    push!(exe.requests, req)
+end
+
+function change_node!(
+    exe::BatchSimulation, t::Float64, id::Int, r::N
+) where {N<:AbstractNode}
+    req = NodeRequest(id, r, t)
+    push!(exe.requests, req)
+end
+
+function add_link!(
+    exe::BatchSimulation,
+    t::Float64,
+    source::Int,
+    target::Int,
+    r::L,
+) where {L<:AbstractLink}
+    exe.infrastructure.m += 1
+    req = LinkRequest(r, source, t, target)
+    push!(exe.requests, req)
+end
+
+function rem_link!(exe::BatchSimulation, t::Float64, source::Int, target::Int)
+    req = LinkRequest(nothing, source, t, target)
+    push!(exe.requests, req)
+end
+
+function change_link!(
+    exe::BatchSimulation,
+    t::Float64,
+    source::Int,
+    target::Int,
+    r::L,
+) where {L<:AbstractLink}
+    req = LinkRequest(r, source, t, target)
+    push!(exe.requests, req)
+end
+
+function add_user!(exe::BatchSimulation, t::Float64, loc::Int)
+    exe.infrastructure.u += 1
+    req = UserRequest(exe.infrastructure.u, loc, t)
+    push!(exe.requests, req)
+end
+
+function rem_user!(exe::BatchSimulation, t::Float64, id::Int)
+    req = UserRequest(id, 0, t)
+    push!(exe.requests, req)
+end
+
+function move_user!(exe::BatchSimulation, t::Float64, id::Int, loc::Int)
+    # create a request with the user's current location
+    req = UserRequest(id, loc, t)
+    # add the request to the list of requests
+    push!(exe.requests, req)
+end
+
+function add_data!(exe::BatchSimulation, t::Float64, loc::Int)
+    exe.infrastructure.d += 1
+    req = DataRequest(exe.infrastructure.d, loc, t)
+    push!(exe.requests, req)
+end
+
+function rem_data!(exe::BatchSimulation, t::Float64, id::Int)
+    req = DataRequest(id, 0, t)
+    push!(exe.requests, req)
+end
+
+function move_data!(exe::BatchSimulation, t::Float64, id::Int, loc::Int)
+    req = DataRequest(id, loc, t)
+    push!(exe.requests, req)
+end
+
+function add_job!(exe::BatchSimulation, t::Float64, j::Job, u_id::Int, d_id::Int)
+    req = JobRequest(d_id, j, t, u_id)
+    push!(exe.requests, req)
+end
+
+function simulate(;
+    algo::AbstractAlgorithm=ShortestPath(),
+    directed::Bool=true,
+    output="",
+    requests::Requests=Requests(),
+    verbose=false
+)
+    infrastructure = Infrastructure{directed ? DirectedTopology : Topology}()
+    exe = BatchSimulation(; algo, infrastructure, output, requests, verbose)
+    return execute(exe)
 end

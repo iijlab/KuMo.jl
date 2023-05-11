@@ -7,7 +7,7 @@ struct InteractiveRun{T<:AbstractTopology} <: AbstractExecution
 
     function InteractiveRun(;
         algo::AbstractAlgorithm=ShortestPath(),
-        infrastructure::Infrastructure{T}=Infrastructure{T}(),
+        infrastructure::Infrastructure{T}=Infrastructure{DirectedTopology}(),
         output::String="",
         time_limit::Float64=Inf,
         verbose::Bool=false
@@ -49,6 +49,7 @@ Initialize an interactive run.
 """
 init_execution(::InteractiveRun) = InteractiveChannels()
 
+execute_loop(exe::InteractiveRun, args, containers, start) = nothing
 
 # """
 #     simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)

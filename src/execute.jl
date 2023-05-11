@@ -1,4 +1,4 @@
-## Abstract types
+# SECTION - Abstract types
 
 abstract type AbstractExecution end
 
@@ -12,14 +12,73 @@ verbose(execution::AbstractExecution) = execution.verbose
 
 abstract type AbstractContainers end
 
-# include all execution types
+Base.push!(sv::AbstractContainers, action::LoadJobAction) = push!(sv.loads, action)
+Base.push!(sv::AbstractContainers, action::UnloadJobAction) = push!(sv.unloads, action)
+Base.push!(sv::AbstractContainers, action) = push!(sv.infras, action)
+
 include("execution/batch_simulation.jl")
 include("execution/interactive.jl")
 
-## Initialization
+# SECTION - Requests API: node!, link!, user!, data!, job!
+node!(exe::AbstractExecution, t::Float64, r::AbstractNode) = add_node!(exe, t, r)
+node!(exe::AbstractExecution, t::Float64, id::Int) = rem_node!(exe, t, id)
+function node!(exe::AbstractExecution, t::Float64, id::Int, r::AbstractNode)
+    return change_node!(exe, t, id, r)
+end
 
+function link!(exe::AbstractExecution, t::Float64, source::Int, target::Int)
+    return rem_link!(exe, t, source, target)
+end
+function link!(
+    exe::AbstractExecution, t::Float64, source::Int, target::Int, r::AbstractLink
+)
+    if (source, target) ∈ exe.infrastructure.topology |> links |> keys
+        return change_link!(exe, t, source, target, r)
+    end
+    return add_link!(exe, t, source, target, r)
+end
+
+user!(exe::AbstractExecution, t::Float64, loc::Int) = add_user!(exe, t, loc)
+user!(exe::AbstractExecution, t::Float64, id::Int, loc::Int) = move_user!(exe, t, id, loc)
+
+data!(exe::AbstractExecution, t::Float64, loc::Int) = add_data!(exe, t, loc)
+data!(exe::AbstractExecution, t::Float64, id::Int, loc::Int) = move_data!(exe, t, id, loc)
+
+function job!(
+    exe::AbstractExecution,
+    backend,
+    container,
+    duration,
+    frontend,
+    data_id,
+    user_id,
+    ν;
+    start=0.0,
+    stop=s.duration
+)
+    j = job(backend, container, duration, frontend)
+    for t in start:ν:stop
+        add_job!(exe, t, j, user_id, data_id)
+    end
+end
+
+function job!(
+    exe::AbstractExecution,
+    t::Float64,
+    backend,
+    container,
+    duration,
+    frontend,
+    data_id,
+    user_id;
+)
+    j = job(backend, container, duration, frontend)
+    add_job!(exe, t, j, user_id, data_id)
+end
+
+#SECTION - Loop arguments
 struct LoopArguments
-    capacities::Dict{Int64,Float64}
+    capacities::SparseMatrixCSC{Float64,Int64}
     demands::SparseVector{Float64,Int64}
     g::AbstractGraph
     n::Int64
@@ -56,6 +115,36 @@ function extract_loop_arguments(args::LoopArguments)
     return capacities, demands, g, n, snapshots, state, times
 end
 
+## Results
+struct ExecutionResults
+    df::DataFrame
+    times::Dict{String,Float64}
+end
+
+"""
+    post_simulate(s, snapshots, verbose, output)
+
+Post-simulation process that covers cleaning the snapshots and producing an output.
+
+# Arguments:
+- `s`: simulated scenario
+- `snapshots`: resulting snapshots (before cleaning)
+- `verbose`: if set to true, prints information about the output and the snapshots
+- `output`: output path
+"""
+function execution_results(exe, args)
+    verbose = exe.verbose
+    df = make_df(clean(args.snapshots), exe.infrastructure.topology; verbose)
+    if !isempty(exe.output)
+        CSV.write(joinpath(datadir(), output(exe)), df)
+        verbose && (@info "Output written in $(datadir())")
+    end
+
+    verbose && pretty_table(df)
+
+    return ExecutionResults(df, args.times)
+end
+
 ## Execution
 
 function execute(exe::AbstractExecution=InteractiveRun())
@@ -74,10 +163,5 @@ function execute(exe::AbstractExecution=InteractiveRun())
     # start execution
     execute_loop(exe, args_loop, containers, start)
 
-    # TODO - make a execution_results multiple dispatch function
-    # return execution_results(exe, args_loop, containers, start)
-    return nothing
-
-    # formerly
-    # return args_loop[1], post_simulate(s, args_loop[2], verbose, output), args_loop[2]
+    return execution_results(exe, args_loop)
 end

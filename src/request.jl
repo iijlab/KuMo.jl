@@ -15,6 +15,8 @@ end
 
 Base.push!(reqs::Requests, r) = push!(reqs.requests, r)
 
+Base.iterate(reqs::Requests) = iterate(reqs.requests)
+
 #     PeriodicRequests{J < :AbstractJob} <: AbstractRequests
 
 # A structure to handle job that

@@ -124,26 +124,3 @@ function clean(snaps)
 
     return snapshots
 end
-
-"""
-    post_simulate(s, snapshots, verbose, output)
-
-Post-simulation process that covers cleaning the snapshots and producing an output.
-
-# Arguments:
-- `s`: simulated scenario
-- `snapshots`: resulting snapshots (before cleaning)
-- `verbose`: if set to true, prints information about the output and the snapshots
-- `output`: output path
-"""
-function post_simulate(infra, snapshots, verbose, output)
-    df_snaps = make_df(clean(snapshots), topology(infra); verbose)
-    if !isempty(output)
-        CSV.write(joinpath(datadir(), output), df_snaps)
-        verbose && (@info "Output written in $(datadir())")
-    end
-
-    verbose && pretty_table(df_snaps)
-
-    return df_snaps
-end
