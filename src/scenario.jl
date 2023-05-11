@@ -1,3 +1,7 @@
+abstract type AbstractScenario end
+
+struct EmptyScenario <: AbstractScenario end
+
 """
     Scenario{N <: AbstractNode, L <: AbstractLink, U <: User}
 
@@ -9,7 +13,7 @@ Structure to store the information of a scenario.
 - `topology::Topology{N, L}`: network's topology
 - `users::Dictionary{Int, U}`: collection of users
 """
-mutable struct Scenario{T<:AbstractTopology,U<:User}
+mutable struct Scenario{T<:AbstractTopology,U<:User} <: AbstractScenario
     d::Int
     data::Dictionary{Int,Data}
     duration::Real
