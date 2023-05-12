@@ -12,7 +12,7 @@ struct LoadJobAction{J<:AbstractJob} <: AbstractAction
 end
 action(r::JobRequest) = LoadJobAction(r.start, r.data, r.job, r.user)
 
-struct UnloadJobAction{J<:AbstractJob} <: AbstractAction
+struct UnloadJobAction <: AbstractAction
     occ::Float64
     node::Int
     vload::Int

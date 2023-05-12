@@ -49,3 +49,11 @@ function insert_sorted!(w, val, it=iterate(w))
     push!(w, val)
     return w
 end
+
+function safe_get_index(M::AbstractMatrix, i, j)
+    if i > size(M, 1) || j > size(M, 2)
+        return zero(eltype(M))
+    else
+        return M[i, j]
+    end
+end

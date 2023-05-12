@@ -51,10 +51,11 @@ DOCSTRING
 - `demands`: not needed for `ShortestPath` algorithm
 - `links`: description of the links topology
 """
-function inner_queue(
-    g, u, j, nodes, capacities, state, ::ShortestPath, ii=0;
-    lck=ReentrantLock(), demands=nothing, links
-)
+function inner_queue(exe, task, args, nodes, ii=0; lck=ReentrantLock(), links, demands)
+    u, j = task.user, task.job
+    capacities, demands, g, _, _, state, _ = extract_loop_arguments(args)
+    data_loc = exe.infrastructure.data[task.data].location
+
     nvtx = nv(g)
     best_links = spzeros(nvtx, nvtx)
     best_node = 0
@@ -110,13 +111,15 @@ function inner_queue(
         end
 
         paths_data = dijkstra_shortest_paths(
-            g, j.data_location, data_costs;
+            g, data_loc, data_costs;
             trackvertices=true
         )
 
+        current_cost = paths_user.dists[v] + paths_data.dists[v] + node_costs[v]
+
         if current_cost ≤ total_cost
             total_cost = current_cost
-            data_path = retrieve_path(j.data_location, v, paths_data)
+            data_path = retrieve_path(data_loc, v, paths_data)
             user_path = current_path
             best_node = v
         end
@@ -134,10 +137,10 @@ function inner_queue(
     finally
         unlock(lck)
     end
-    paths_data = dijkstra_shortest_paths(g, j.data_location, data_costs; trackvertices=true)
+    paths_data = dijkstra_shortest_paths(g, data_loc, data_costs; trackvertices=true)
 
     for v in keys(node_costs)
-        current_path = retrieve_path(j.data_location, v, paths_data)
+        current_path = retrieve_path(data_loc, v, paths_data)
 
         charges = deepcopy(state.links)
         for p in current_path

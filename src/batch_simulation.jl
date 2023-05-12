@@ -51,7 +51,6 @@ Initialize a synchronous batch simulation.
 function init_execution(exe::BatchSimulation)
     sv = SimulationVectors()
     foreach(r -> push!(sv, action(r)), exe.requests)
-    @info "debug init_execution : $(typeof(exe))" exe sv
     return sv
 end
 
@@ -70,26 +69,29 @@ Compute the best load allocation and return if it is a valid one.
 - `demands`: if algo is `KuMoFlowExt.MinCostFlow`, demands are required
 - `ii`: a counter to measure the approximative progress of the simulation
 """
-function valid_load(exe, task, g, capacities, state, algo, demands, ii=0)
+function valid_load(exe, task, args, ii=0)
     occ, u, j = task.occ, task.user, task.job
+
+    capacities, demands, g, _, _, state, _ = extract_loop_arguments(args)
+
+    @info "debug valid load" capacities
 
     nodes = exe.infrastructure.topology.nodes
     links = exe.infrastructure.topology.links
-    best_links, best_cost, best_node = inner_queue(
-        g, u, j, nodes, capacities, state, algo, ii;
-        links, demands
-    )
+
+    best_links, best_cost, best_node =
+        inner_queue(exe, task, args, nodes, ii; links, demands)
     compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
     valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
     valid_nodes =
-        state.nodes[best_node] + j.containers ≤ capacity(s.topology.nodes[best_node])
+        state.nodes[best_node] + j.containers ≤ capacity(exe.infrastructure.topology.nodes[best_node])
 
     return (best_links, best_cost, best_node, valid_links && valid_nodes)
 end
 
 function execute_loop(exe::BatchSimulation, args, containers, start)
     # extract from args and containers
-    capacities, demands, g, n, snapshots, state, times = extract_loop_arguments(args)
+    _, demands, g, n, snapshots, _, times = extract_loop_arguments(args)
     infras, loads, queued, unloads = extract_containers(containers)
 
     ii = 0
@@ -114,29 +116,32 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
     last_unload = zero(Float64)
     unchecked_unload = true
 
-    while ii < 2 * length(loads) && next_infra !== nothing
-        # next_infra = iterate(infras, previous_infra)
-        # if next_infra !== nothing
-        #     (infra, _) = next_infra
-        #     # Change infrastructure
-        #     # do!(state, infra, g)
-        #     # Advance iterator
-        #     previous_infra += 1
-        #     continue
-        # end
+    @info "Starting simulation loop" next_infra next_queued next_unload next_load
+
+    while ii < 2 * length(loads)
+
+        next_infra = iterate(infras, previous_infra)
+        if next_infra !== nothing
+            (infra, _) = next_infra
+            # Change infrastructure
+            do!(exe, args, infra)
+            # Advance iterator
+            previous_infra += 1
+            continue
+        end
 
         next_queued = iterate(queued, previous_queued)
         if next_queued !== nothing && unchecked_unload
             (task, _) = next_queued
             best_links, best_cost, best_node, is_valid =
-                valid_load(s, task, g, capacities, state, algo, demands)
+                valid_load(exe, task, args, demands)
 
             if is_valid
                 j = task.job
                 # Add load
-                add_load!(state, best_links, j.containers, best_node, n, g)
+                add_load!(args.state, best_links, j.containers, best_node, n, g)
                 # Snap new state
-                push_snap!(snapshots, state, 0, 0, 0, 0, last_unload, n)
+                push_snap!(snapshots, args.state, 0, 0, 0, 0, last_unload, n)
                 # Assign unload
                 unload = action(last_unload, j, best_node, best_links)
                 insert_sorted!(unloads, unload, next_unload)
@@ -157,8 +162,8 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
 
             if next_load === nothing || unload.occ ≤ next_load[1].occ
                 v, c, ls = unload.node, unload.vload, unload.lloads
-                rem_load!(state, ls, c, v, n, g)
-                push_snap!(snapshots, state, 0, 0, 0, 0, unload.occ, n)
+                rem_load!(args.state, ls, c, v, n, g)
+                push_snap!(snapshots, args.state, 0, 0, 0, 0, unload.occ, n)
 
                 previous_unload += 1
                 unchecked_unload = true
@@ -173,19 +178,20 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
         # Nothing can be unload or executed from the queue => load new task
         (task, ts) = next_load
         best_links, best_cost, best_node, is_valid =
-            valid_load(exe, task, g, capacities, state, algo, demands)
+            valid_load(exe, task, args)
+        @warn "debug loop $ii - load" next_load is_valid
         if is_valid
             ii += 1
             j = task.job
 
             # Add load
-            add_load!(state, best_links, j.containers, best_node, n, g)
+            add_load!(args.state, best_links, j.containers, best_node, n, g)
 
             # Snap new state
-            push_snap!(snapshots, state, 0, 0, 0, 0, task.occ, n)
+            push_snap!(snapshots, args.state, 0, 0, 0, 0, task.occ, n)
 
             # Assign unload
-            unload = Unload(task.occ + j.duration, best_node, j.containers, best_links)
+            unload = action(task.occ, j, best_node, best_links)
             insert_sorted!(unloads, unload, next_unload)
         else
             unchecked_unload = false

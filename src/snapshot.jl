@@ -69,7 +69,8 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
         # @info "debug links" topo.links s.state.links entry snapshots[end] topo
 
         for (i, j) in keys(topo.links)
-            push!(entry, string((i, j)) => s.state.links[i, j] / capacity(links(topo, i, j)))
+            c = safe_get_index(s.state.links, i, j)
+            push!(entry, string((i, j)) => c / capacity(links(topo, i, j)))
         end
 
         return entry
