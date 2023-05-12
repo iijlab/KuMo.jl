@@ -5,7 +5,7 @@ Collection of scenarii.
 """
 
 function _four_nodes()
-    s = scenario(; duration=399, directed=false)
+    s = simulation(; directed=false)
     # Add 4 nodes
     node!(s, 0.0, Node(125))
     node!(s, 0.0, Node(125))

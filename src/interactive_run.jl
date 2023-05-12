@@ -19,14 +19,14 @@ end
 time_limit(execution::InteractiveRun) = execution.time_limit
 
 struct InteractiveChannels <: AbstractContainers
-    infras::Channel{AbstractAction}
+    infras::Channel{StructAction}
     loads::Channel{LoadJobAction}
     stop::Channel{Bool}
     unloads::Channel{UnloadJobAction}
 
     function InteractiveChannels()
         channels_size = 10^7
-        infras = Channel{AbstractAction}(channels_size)
+        infras = Channel{StructAction}(channels_size)
         loads = Channel{LoadJobAction}(channels_size)
         stop = Channel{Bool}(1)
         unloads = Channel{UnloadJobAction}(channels_size)

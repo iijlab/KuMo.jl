@@ -87,10 +87,6 @@ include("job.jl")
 include("request.jl")
 include("action.jl")
 
-
-# scenarii (dictionaries)
-# include("scenarii/basic.jl")
-
 # algorithms to compute paths (shortest, mincostflow [extension]) in the network
 include("paths.jl")
 
@@ -98,6 +94,9 @@ include("paths.jl")
 include("state.jl")
 include("snapshot.jl")
 include("execute.jl")
+
+# scenarii (dictionaries)
+include("scenarii/basic.jl")
 
 # functions definition for extensions
 function show_pseudo_costs end

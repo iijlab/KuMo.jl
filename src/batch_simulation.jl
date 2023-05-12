@@ -21,13 +21,13 @@ end
 requests(execution::BatchSimulation) = execution.requests
 
 struct SimulationVectors <: AbstractContainers
-    infras::Vector{AbstractAction}
+    infras::Vector{StructAction}
     loads::Vector{LoadJobAction}
     queued::Vector{LoadJobAction}
     unloads::Vector{UnloadJobAction}
 
     function SimulationVectors()
-        infras = Vector{AbstractAction}()
+        infras = Vector{StructAction}()
         loads = Vector{LoadJobAction}()
         queued = Vector{LoadJobAction}()
         unloads = Vector{UnloadJobAction}()
@@ -50,7 +50,7 @@ Initialize a synchronous batch simulation.
 """
 function init_execution(exe::BatchSimulation)
     sv = SimulationVectors()
-    foreach(r -> push!(sv, r), exe.requests)
+    foreach(r -> push!(sv, action(r)), exe.requests)
     @info "debug init_execution : $(typeof(exe))" exe sv
     return sv
 end
@@ -70,11 +70,11 @@ Compute the best load allocation and return if it is a valid one.
 - `demands`: if algo is `KuMoFlowExt.MinCostFlow`, demands are required
 - `ii`: a counter to measure the approximative progress of the simulation
 """
-function valid_load(s, task, g, capacities, state, algo, demands, ii=0)
-    occ, u, j = task.occ, task.node, task.job
+function valid_load(exe, task, g, capacities, state, algo, demands, ii=0)
+    occ, u, j = task.occ, task.user, task.job
 
-    nodes = s.topology.nodes
-    links = s.topology.links
+    nodes = exe.infrastructure.topology.nodes
+    links = exe.infrastructure.topology.links
     best_links, best_cost, best_node = inner_queue(
         g, u, j, nodes, capacities, state, algo, ii;
         links, demands
@@ -138,7 +138,7 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
                 # Snap new state
                 push_snap!(snapshots, state, 0, 0, 0, 0, last_unload, n)
                 # Assign unload
-                unload = Unload(last_unload + j.duration, best_node, j.containers, best_links)
+                unload = action(last_unload, j, best_node, best_links)
                 insert_sorted!(unloads, unload, next_unload)
 
                 # Advance iterator
@@ -173,7 +173,7 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
         # Nothing can be unload or executed from the queue => load new task
         (task, ts) = next_load
         best_links, best_cost, best_node, is_valid =
-            valid_load(s, task, g, capacities, state, algo, demands)
+            valid_load(exe, task, g, capacities, state, algo, demands)
         if is_valid
             ii += 1
             j = task.job
@@ -287,6 +287,19 @@ function add_job!(exe::BatchSimulation, t::Float64, j::Job, u_id::Int, d_id::Int
     push!(exe.requests, req)
 end
 
+function simulation(;
+    algo::AbstractAlgorithm=ShortestPath(),
+    directed::Bool=true,
+    output::String="",
+    requests::Requests=Requests(),
+    verbose::Bool=false
+)
+    infrastructure = Infrastructure{directed ? DirectedTopology : Topology}()
+    return BatchSimulation(; algo, infrastructure, output, requests, verbose)
+end
+
+simulate(s::BatchSimulation) = execute(s)
+
 function simulate(;
     algo::AbstractAlgorithm=ShortestPath(),
     directed::Bool=true,
@@ -294,7 +307,5 @@ function simulate(;
     requests::Requests=Requests(),
     verbose=false
 )
-    infrastructure = Infrastructure{directed ? DirectedTopology : Topology}()
-    exe = BatchSimulation(; algo, infrastructure, output, requests, verbose)
-    return execute(exe)
+    return execute(simulation(; algo, directed, output, requests, verbose))
 end

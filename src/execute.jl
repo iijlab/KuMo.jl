@@ -14,12 +14,13 @@ abstract type AbstractContainers end
 
 Base.push!(sv::AbstractContainers, action::LoadJobAction) = push!(sv.loads, action)
 Base.push!(sv::AbstractContainers, action::UnloadJobAction) = push!(sv.unloads, action)
-Base.push!(sv::AbstractContainers, action) = push!(sv.infras, action)
+Base.push!(sv::AbstractContainers, action::AbstractAction) = push!(sv.infras, action)
 
-include("execution/batch_simulation.jl")
-include("execution/interactive.jl")
+include("batch_simulation.jl")
+include("interactive_run.jl")
 
 # SECTION - Requests API: node!, link!, user!, data!, job!
+
 node!(exe::AbstractExecution, t::Float64, r::AbstractNode) = add_node!(exe, t, r)
 node!(exe::AbstractExecution, t::Float64, id::Int) = rem_node!(exe, t, id)
 function node!(exe::AbstractExecution, t::Float64, id::Int, r::AbstractNode)
@@ -54,7 +55,7 @@ function job!(
     user_id,
     ν;
     start=0.0,
-    stop=s.duration
+    stop=start
 )
     j = job(backend, container, duration, frontend)
     for t in start:ν:stop

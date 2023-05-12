@@ -10,6 +10,7 @@ struct LoadJobAction{J<:AbstractJob} <: AbstractAction
     job::J
     user::Int
 end
+action(r::JobRequest) = LoadJobAction(r.start, r.data, r.job, r.user)
 
 struct UnloadJobAction{J<:AbstractJob} <: AbstractAction
     occ::Float64
@@ -17,37 +18,37 @@ struct UnloadJobAction{J<:AbstractJob} <: AbstractAction
     vload::Int
     lloads::SparseMatrixCSC{Float64,Int64}
 end
+function action(last_unload, j::AbstractJob, node_id, links)
+    return UnloadJobAction(last_unload + j.duration, node_id, j.containers, links)
+end
 
 abstract type StructAction <: AbstractAction end
 
-struct AddNodeAction <: StructAction
+struct NodeAction{R<:Union{AbstractNode,Nothing}} <: StructAction
+    id::Int
+    occ::Float64
+    resource::R
 end
+action(r::NodeRequest) = NodeAction(r.id, r.start, r.resource)
 
-struct ChangeNodeAction <: StructAction
+struct LinkAction{R<:Union{AbstractLink,Nothing}} <: StructAction
+    occ::Float64
+    resource::R
+    source::Int
+    target::Int
 end
+action(r::LinkRequest) = LinkAction(r.start, r.resource, r.source, r.target)
 
-struct RemoveNodeAction <: StructAction
+struct UserAction <: StructAction
+    id::Int
+    location::Int
+    occ::Float64
 end
+action(r::UserRequest) = UserAction(r.id, r.location, r.start)
 
-struct AddLinkAction <: StructAction
+struct DataAction <: StructAction
+    id::Int
+    location::Int
+    occ::Float64
 end
-
-struct ChangeLinkAction <: StructAction
-end
-
-struct RemoveLinkAction <: StructAction
-end
-
-struct AddUserAction <: StructAction
-end
-
-struct MoveUserAction <: StructAction
-end
-
-struct AddDataAction <: StructAction
-end
-
-struct MoveDataAction <: StructAction
-end
-
-# SECTION - Requests to actions
+action(r::DataRequest) = DataAction(r.id, r.location, r.start)
