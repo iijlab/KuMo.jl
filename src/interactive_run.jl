@@ -19,27 +19,30 @@ end
 time_limit(execution::InteractiveRun) = execution.time_limit
 
 struct InteractiveChannels <: AbstractContainers
+    has_queue::Channel{Bool}
     infras::Channel{StructAction}
     loads::Channel{LoadJobAction}
     stop::Channel{Bool}
     unloads::Channel{UnloadJobAction}
 
     function InteractiveChannels()
-        channels_size = 10^7
+        channels_size = Inf
+        has_queue = Channel{Bool}(1)
         infras = Channel{StructAction}(channels_size)
         loads = Channel{LoadJobAction}(channels_size)
         stop = Channel{Bool}(1)
         unloads = Channel{UnloadJobAction}(channels_size)
-        return new(infras, loads, stop, unloads)
+        return new(has_queue, infras, loads, stop, unloads)
     end
 end
 
 function extract_containers(containers::InteractiveChannels)
+    has_queue = containers.has_queue
     infras = containers.infras
     loads = containers.loads
     stop = containers.stop
     unloads = containers.unloads
-    return infras, loads, stop, unloads
+    return has_queue, infras, loads, stop, unloads
 end
 
 """
@@ -49,111 +52,62 @@ Initialize an interactive run.
 """
 init_execution(::InteractiveRun) = InteractiveChannels()
 
-execute_loop(exe::InteractiveRun, args, containers, start) = nothing
+function interactive_loop(exe, args, containers, start)
+    _, demands, g, _, snapshots, _, times = extract_loop_arguments(args)
+    @async begin
+        while true
+            take!(containers.has_queue)
+            # Check if the stop signal is received
+            if isready(containers.stop) ? take!(containers.stop) : false
+                @info "Stopping the interactive run after $(time() - start) seconds"
+                break
+            end
+        end
 
-# """
-#     simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)
+        # Your loop execution code goes here
+    end
+end
 
-# Inner loop of the simulation of scenario `s`.
+function execute_loop(exe::InteractiveRun, args, containers, start)
+    v = verbose(exe)
+    v && println("Starting the interactive loop...")
+    interactive_loop(exe, args, containers, start)
+    v && println("Interactive loop started.")
+    return nothing
+end
 
-# # Arguments:
-# - `s`: scenario being simulated
-# - `algo`: algo solving the resource allocation dynamically at each step
-# - `speed`: asynchronous simulation speed
-# - `start`: starting time of the simulation
-# - `containers`: containers generated to allocate tasks dynamically during the run
-# - `args_loop`: arguments required by this loop
-# """
-# function simulate_loop(s, algo, speed, start, containers, args_loop, ::Val)
-#     tasks, c = containers
-#     times, snapshots, g, capacities, n, state, demands = args_loop
+struct InteractiveInterface
+    exe::InteractiveRun
+    containers::InteractiveChannels
+    results::ExecutionResults
+end
 
-#     all_queue = false
-#     all_unloaded = false
-#     ii = 0
-#     p = Progress(
-#         length(tasks);
-#         desc="Simulating with $algo at speed $speed", showspeed=true, color=:normal
-#     )
+"""
+    post_simulate(s, snapshots, verbose, output)
 
-#     push!(times, "start_tasks" => time() - start)
+Post-simulation process that covers cleaning the snapshots and producing an output.
 
-#     for (i, t) in enumerate(tasks)
-#         @async begin
-#             sleep(t.occ / speed)
-#             put!(c, (t.node, t.job))
-#             i == length(tasks) && (all_queue = true)
-#         end
-#     end
+# Arguments:
+- `s`: simulated scenario
+- `snapshots`: resulting snapshots (before cleaning)
+- `verbose`: if set to true, prints information about the output and the snapshots
+- `output`: output path
+"""
+function execution_results(exe::InteractiveRun, args, containers)
+    # verbose = exe.verbose
+    # df = make_df(clean(args.snapshots), exe.infrastructure.topology; verbose)
+    # if !isempty(exe.output)
+    #     CSV.write(joinpath(datadir(), output(exe)), df)
+    #     verbose && (@info "Output written in $(datadir())")
+    # end
 
-#     lck = ReentrantLock()
+    # verbose && pretty_table(df)
 
-#     while !all_queue || isready(c)
-#         start_iteration = time()
-#         ii += 1
-#         u, j = take!(c)
+    return InteractiveInterface(exe, containers, ExecutionResults(DataFrame(), args.times))
+end
 
-#         start_solving = time() - start_iteration
-#         is_valid = false
-
-#         while !is_valid
-#             best_links, best_cost, best_node = inner_queue(g, u, j, s.topology.nodes, capacities, state, algo; links=s.topology.links, lck, demands)
-
-#             n = nv(g) - vtx(algo)
-
-#             valid_links, valid_nodes = nothing, nothing
-#             lock(lck)
-#             try
-#                 compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
-#                 valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
-#                 valid_nodes = state.nodes[best_node] + j.containers ≤ capacity(s.topology.nodes[best_node])
-#             finally
-#                 unlock(lck)
-#             end
-
-
-#             is_valid = valid_links && valid_nodes
-
-#             is_valid || (sleep(0.001); continue)
-
-#             lock(lck)
-#             try
-#                 add_load!(state, best_links, j.containers, best_node, n, g)
-#             finally
-#                 unlock(lck)
-#             end
-
-#             @async begin
-#                 last_unload = ii == length(tasks)
-#                 sleep(j.duration / speed)
-#                 lock(lck)
-#                 try
-#                     rem_load!(state, best_links, j.containers, best_node, n, g)
-#                     push_snap!(snapshots, state, 0, 0, 0, 0, time() - start, n)
-#                 finally
-#                     unlock(lck)
-#                 end
-#                 last_unload && (all_unloaded = true)
-#             end
-
-#             lock(lck)
-#             try
-#                 duration = time() - start_iteration
-#                 instant = time() - start
-#                 push_snap!(snapshots, state, best_cost, best_node, duration, duration - start_solving, instant, n)
-#             finally
-#                 unlock(lck)
-#             end
-
-#             ProgressMeter.update!(p, ii)
-#         end
-#     end
-
-#     push!(times, "end_queue" => time() - start)
-
-#     while !all_unloaded
-#         sleep(0.001)
-#     end
-
-#     return nothing
-# end
+function stop!(agent::InteractiveInterface)
+    put!(agent.containers.stop, true)
+    put!(agent.containers.has_queue, true)
+    return agent
+end

@@ -202,6 +202,30 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
     return nothing
 end
 
+"""
+    post_simulate(s, snapshots, verbose, output)
+
+Post-simulation process that covers cleaning the snapshots and producing an output.
+
+# Arguments:
+- `s`: simulated scenario
+- `snapshots`: resulting snapshots (before cleaning)
+- `verbose`: if set to true, prints information about the output and the snapshots
+- `output`: output path
+"""
+function execution_results(exe::BatchSimulation, args, _)
+    verbose = exe.verbose
+    df = make_df(clean(args.snapshots), exe.infrastructure.topology; verbose)
+    if !isempty(exe.output)
+        CSV.write(joinpath(datadir(), output(exe)), df)
+        verbose && (@info "Output written in $(datadir())")
+    end
+
+    verbose && pretty_table(df)
+
+    return ExecutionResults(df, args.times)
+end
+
 #SECTION - Requests API
 
 function add_node!(exe::BatchSimulation, t::Float64, r::N) where {N<:AbstractNode}

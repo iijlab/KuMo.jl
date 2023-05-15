@@ -1,6 +1,6 @@
 module KuMo
 
-# SECTION - usings and imports
+## SECTION - usings and imports
 
 using CSV
 using DataFrames
@@ -17,54 +17,10 @@ using SparseArrays
 using TestItemRunner
 using TestItems
 
+# SECTION - improts from Base
+using Base.Threads
+
 # SECTION - exports
-# export figures
-# export job
-# export job_distributions
-# export make_df
-# export make_links
-# export make_nodes
-# export marks
-# export predict_cost
-# export predict_best_cost
-# export pseudo_cost
-# # export requests
-# export scenario
-# export simulate
-# export simulate_and_plot
-# export show_pseudo_costs
-# export show_simulation
-# export smooth
-# export spike
-# export steady
-# export user
-
-# export node!
-
-# export Scenario
-
-# export MinCostFlow
-# export ShortestPath
-
-# export Request
-# export Requests
-# export PeriodicRequests
-
-# export Link
-# export ConvexLink
-# export FlatLink
-# export FreeLink
-
-# export Node
-# export AdditiveNode
-# export EqualLoadBalancingNode
-# export FlatNode
-# export IdleStateNode
-# export MultiplicativeNode
-# export PremiumNode
-
-# export SCENARII
-
 
 ## SECTION - includes
 

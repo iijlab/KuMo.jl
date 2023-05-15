@@ -16,6 +16,12 @@ Base.push!(sv::AbstractContainers, action::LoadJobAction) = insert_sorted!(sv.lo
 Base.push!(sv::AbstractContainers, action::UnloadJobAction) = insert_sorted!(sv.unloads, action)
 Base.push!(sv::AbstractContainers, action::AbstractAction) = insert_sorted!(sv.infras, action)
 
+## Results
+struct ExecutionResults
+    df::DataFrame
+    times::Dict{String,Float64}
+end
+
 include("batch_simulation.jl")
 include("interactive_run.jl")
 
@@ -225,36 +231,6 @@ function extract_loop_arguments(args::LoopArguments)
     return capacities, demands, g, n, snapshots, state, times
 end
 
-## Results
-struct ExecutionResults
-    df::DataFrame
-    times::Dict{String,Float64}
-end
-
-"""
-    post_simulate(s, snapshots, verbose, output)
-
-Post-simulation process that covers cleaning the snapshots and producing an output.
-
-# Arguments:
-- `s`: simulated scenario
-- `snapshots`: resulting snapshots (before cleaning)
-- `verbose`: if set to true, prints information about the output and the snapshots
-- `output`: output path
-"""
-function execution_results(exe, args)
-    verbose = exe.verbose
-    df = make_df(clean(args.snapshots), exe.infrastructure.topology; verbose)
-    if !isempty(exe.output)
-        CSV.write(joinpath(datadir(), output(exe)), df)
-        verbose && (@info "Output written in $(datadir())")
-    end
-
-    verbose && pretty_table(df)
-
-    return ExecutionResults(df, args.times)
-end
-
 ## Execution
 
 function execute(exe::AbstractExecution=InteractiveRun())
@@ -273,5 +249,5 @@ function execute(exe::AbstractExecution=InteractiveRun())
     # start execution
     execute_loop(exe, args_loop, containers, start)
 
-    return execution_results(exe, args_loop)
+    return execution_results(exe, args_loop, containers)
 end
