@@ -5,8 +5,10 @@ module KuMoMakieExt
 using Colors
 using CSV
 using DataFrames
-using KuMo
+import KuMo
 using Makie
+
+import KuMo: simulate, marks, show_pseudo_costs, show_simulation, pseudo_cost
 
 # SECTION - Utilities for visualization with Makie
 
@@ -392,8 +394,8 @@ function KuMo.show_simulation(path::String; norms=Dict(), interaction=:auto, sel
     return KuMo.show_simulation(df, norms; interaction, select)
 end
 
-function KuMo.show_simulation(s::Scenario=SCENARII[:four_nodes]; norms=Dict(), interaction=:auto, select=nothing)
-    df = simulate(s, ShortestPath())[2]
+function KuMo.show_simulation(s::Symbol=:_four_nodes; norms=Dict(), interaction=:auto, select=nothing)
+    df = KuMo.simulate(KuMo.eval(s)()).df
     return KuMo.show_simulation(df, norms; interaction, select)
 end
 

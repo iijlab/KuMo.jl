@@ -58,6 +58,10 @@ Make a DataFrame from the raw snapshots.
 function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     function shape_entry(s)
         entry = Vector{Pair{String,Float64}}()
+        push!(entry, "selected" => s.selected)
+        push!(entry, "total" => s.total)
+        push!(entry, "duration" => s.duration)
+        push!(entry, "solving_time" => s.solving_time)
         push!(entry, "instant" => s.instant)
 
         for v in keys(topo.nodes)
