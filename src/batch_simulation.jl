@@ -74,8 +74,6 @@ function valid_load(exe, task, args, ii=0)
 
     capacities, demands, g, _, _, state, _ = extract_loop_arguments(args)
 
-    @info "debug valid load" capacities
-
     nodes = exe.infrastructure.topology.nodes
     links = exe.infrastructure.topology.links
 
@@ -91,7 +89,7 @@ end
 
 function execute_loop(exe::BatchSimulation, args, containers, start)
     # extract from args and containers
-    _, demands, g, n, snapshots, _, times = extract_loop_arguments(args)
+    _, demands, g, _, snapshots, _, times = extract_loop_arguments(args)
     infras, loads, queued, unloads = extract_containers(containers)
 
     ii = 0
@@ -116,9 +114,8 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
     last_unload = zero(Float64)
     unchecked_unload = true
 
-    @info "Starting simulation loop" next_infra next_queued next_unload next_load
-
     while ii < 2 * length(loads)
+        n = nv(g) - vtx(exe.algo)
 
         next_infra = iterate(infras, previous_infra)
         if next_infra !== nothing
@@ -141,7 +138,7 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
                 # Add load
                 add_load!(args.state, best_links, j.containers, best_node, n, g)
                 # Snap new state
-                push_snap!(snapshots, args.state, 0, 0, 0, 0, last_unload, n)
+                push_snap!(snapshots, args.state, 0, 0, 0, 0, last_unload, n)args.snapshots[end].state.nodes
                 # Assign unload
                 unload = action(last_unload, j, best_node, best_links)
                 insert_sorted!(unloads, unload, next_unload)
@@ -179,7 +176,6 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
         (task, ts) = next_load
         best_links, best_cost, best_node, is_valid =
             valid_load(exe, task, args)
-        @warn "debug loop $ii - load" next_load is_valid
         if is_valid
             ii += 1
             j = task.job

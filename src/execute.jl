@@ -12,9 +12,9 @@ verbose(execution::AbstractExecution) = execution.verbose
 
 abstract type AbstractContainers end
 
-Base.push!(sv::AbstractContainers, action::LoadJobAction) = push!(sv.loads, action)
-Base.push!(sv::AbstractContainers, action::UnloadJobAction) = push!(sv.unloads, action)
-Base.push!(sv::AbstractContainers, action::AbstractAction) = push!(sv.infras, action)
+Base.push!(sv::AbstractContainers, action::LoadJobAction) = insert_sorted!(sv.loads, action)
+Base.push!(sv::AbstractContainers, action::UnloadJobAction) = insert_sorted!(sv.unloads, action)
+Base.push!(sv::AbstractContainers, action::AbstractAction) = insert_sorted!(sv.infras, action)
 
 include("batch_simulation.jl")
 include("interactive_run.jl")
@@ -201,7 +201,6 @@ mutable struct LoopArguments
         snapshots = Vector{SnapShot}()
 
         push!(times, "start_tasks" => time() - start)
-        @warn "debug" infra.topology
         g, capacities = graph(infra.topology, algo)
         n = nv(g) - vtx(algo)
 
@@ -245,7 +244,6 @@ Post-simulation process that covers cleaning the snapshots and producing an outp
 """
 function execution_results(exe, args)
     verbose = exe.verbose
-    @info "debug state" args.snapshots
     df = make_df(clean(args.snapshots), exe.infrastructure.topology; verbose)
     if !isempty(exe.output)
         CSV.write(joinpath(datadir(), output(exe)), df)
@@ -271,13 +269,9 @@ function execute(exe::AbstractExecution=InteractiveRun())
     # shared init
     args_loop = LoopArguments(infrastructure(exe), algo(exe), start)
 
-    @info "debug execute state" args_loop.state
-
     v && (@info "start execution: $(typeof(exe))" (time() - start))
     # start execution
     execute_loop(exe, args_loop, containers, start)
-
-    @info "debug execute state" args_loop.state
 
     return execution_results(exe, args_loop)
 end

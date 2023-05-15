@@ -40,7 +40,7 @@ Insert element in a sorted collection.
 function insert_sorted!(w, val, it=iterate(w))
     while it !== nothing
         (elt, state) = it
-        if elt.occ ≥ val.occ
+        if elt.occ > val.occ
             insert!(w, state - 1, val)
             return w
         end
@@ -55,5 +55,13 @@ function safe_get_index(M::AbstractMatrix, i, j)
         return zero(eltype(M))
     else
         return M[i, j]
+    end
+end
+
+function safe_get_index(V::AbstractVector, i)
+    if i > length(V)
+        return zero(eltype(V))
+    else
+        return V[i]
     end
 end

@@ -51,7 +51,6 @@ function add_load!(state, _links, containers, v, n, g)
     for i in 1:n, j in 1:n
         increase!(state, i, j, _links[i, j], is_directed(g))
     end
-    @warn "debug state" state
     state.nodes[v] += containers
 end
 

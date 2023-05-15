@@ -58,15 +58,12 @@ Make a DataFrame from the raw snapshots.
 function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     function shape_entry(s)
         entry = Vector{Pair{String,Float64}}()
-        push!(entry, "selected" => s.selected)
-        push!(entry, "total" => s.total)
-        push!(entry, "duration" => s.duration)
-        push!(entry, "solving_time" => s.solving_time)
         push!(entry, "instant" => s.instant)
 
-        foreach(p -> push!(entry, string(p.first) => p.second / capacity(nodes(topo, p.first))), pairs(s.state.nodes))
-
-        # @info "debug links" topo.links s.state.links entry snapshots[end] topo
+        for v in keys(topo.nodes)
+            x = string(v) => safe_get_index(s.state.nodes, v) / capacity(nodes(topo, v))
+            push!(entry, x)
+        end
 
         for (i, j) in keys(topo.links)
             c = safe_get_index(s.state.links, i, j)
@@ -75,7 +72,6 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
 
         return entry
     end
-
 
     df = DataFrame(shape_entry(first(snapshots)))
     foreach(e -> push!(df, Dict(shape_entry(e))), snapshots[2:end])
