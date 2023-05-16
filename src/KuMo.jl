@@ -21,6 +21,14 @@ using TestItems
 using Base.Threads
 
 # SECTION - exports
+export execute
+
+export data!
+export job!
+export link!
+export node!
+export stop!
+export user!
 
 ## SECTION - includes
 

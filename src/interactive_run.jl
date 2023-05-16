@@ -251,6 +251,7 @@ end
 
 # job
 function add_job!(::InteractiveRun, t::Float64, j::J, u_id::Int, d_id::Int) where {J<:AbstractJob}
+    @info "entered add_job"
     return LoadJobAction(t, u_id, j, d_id)
 end
 
@@ -273,19 +274,41 @@ function job!(
     ν=0.0;
     stop=Inf
 )
+    deboolbug = false
+    deboolbug2 = false
     j = job(backend, container, duration, frontend)
     if ν == 0.0
-        add_job!(agent.exe, time() - agent.start, j, user_id, data_id)
+        @warn "ν is 0.0, job will be added only once"
+        t = time() - agent.start
+        action = add_job!(agent.exe, t, j, user_id, data_id)
+        put!(agent.containers.loads, action)
+        put!(agent.containers.has_queue, true)
     else
         @async while true
+            if !deboolbug
+                @warn "ν is $(ν), job will be added every $(ν) seconds"
+                deboolbug = true
+            end
             t = time() - agent.start
             c = (isready(agent.containers.stop) ? take!(agent.containers.stop) : false)
+            @info "reaching that point"
             if c || t > stop
+                @warn "breaking ...." c t stop
                 break
             end
-            add_job!(agent.exe, t, j, user_id, data_id)
+            @info "reaching that other point" c t stop
+            action = add_job!(agent.exe, t, j, user_id, data_id)
+            if !deboolbug2
+                @warn "ν is $(ν), job will be added every $(ν) seconds" action
+                deboolbug2 = true
+            end
+
+            @info "reaching that other other point" agent.containers.loads action agent.containers.has_queue
+            put!(agent.containers.loads, action)
+            put!(agent.containers.has_queue, true)
             sleep(ν)
+            @info "after sleep"
         end
     end
-    return nothing
+    return agent
 end
