@@ -213,7 +213,7 @@ Post-simulation process that covers cleaning the snapshots and producing an outp
 - `verbose`: if set to true, prints information about the output and the snapshots
 - `output`: output path
 """
-function execution_results(exe::BatchSimulation, args, _)
+function execution_results(exe::BatchSimulation, args, _, _)
     verbose = exe.verbose
     df = make_df(clean(args.snapshots), exe.infrastructure.topology; verbose)
     if !isempty(exe.output)

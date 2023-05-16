@@ -249,5 +249,5 @@ function execute(exe::AbstractExecution=InteractiveRun())
     # start execution
     execute_loop(exe, args_loop, containers, start)
 
-    return execution_results(exe, args_loop, containers)
+    return execution_results(exe, args_loop, containers, start)
 end
