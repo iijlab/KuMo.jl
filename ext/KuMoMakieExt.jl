@@ -402,7 +402,7 @@ end
 
 function KuMo.show_interactive_run(;
     fps=60,
-    interval=10.0,
+    interval=Inf,
     norms=Dict()
 )
     function make_ys(toggs, df_no_norm, a, δ)
@@ -445,15 +445,17 @@ function KuMo.show_interactive_run(;
 
     @async begin
         while !isready(agent.containers.stop)
-            take!(agent.containers.results_free)
+            # take!(agent.containers.results_free)
 
             # @warn "debug"
 
             # take!(containers.results_free)
-            if size(df, 1) ≤ 5
+            if size(df, 1) ≤ 5 || !isready(agent.containers.results_free)
                 sleep(1.0 / fps)
                 continue
             end
+
+            take!(agent.containers.results_free)
             # put!(containers.results_free, true)
 
             # @warn "debug"
@@ -504,7 +506,7 @@ function KuMo.show_interactive_run(;
 
             # @warn "debug"
 
-            # df_no_norm = deepcopy(results)
+            df_no_norm = deepcopy(results)
 
             # @warn "debug" df_no_norm results agent.exe.results.df df
             # @show df
