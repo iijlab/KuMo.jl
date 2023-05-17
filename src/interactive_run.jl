@@ -2,6 +2,7 @@ struct InteractiveRun{T<:AbstractTopology} <: AbstractExecution
     algo::AbstractAlgorithm
     infrastructure::Infrastructure{T}
     output::String
+    results::ExecutionResults
     time_limit::Float64
     verbose::Bool
 
@@ -12,7 +13,16 @@ struct InteractiveRun{T<:AbstractTopology} <: AbstractExecution
         time_limit::Float64=Inf,
         verbose::Bool=false
     ) where {T<:AbstractTopology}
-        return new{T}(algo, infrastructure, output, time_limit, verbose)
+        df = DataFrame(
+            selected=Float64[],
+            total=Float64[],
+            duration=Float64[],
+            solving_time=Float64[],
+            instant=Float64[]
+        )
+        times = Dict{String,Float64}()
+        results = ExecutionResults(df, times)
+        return new{T}(algo, infrastructure, output, results, time_limit, verbose)
     end
 end
 
@@ -22,6 +32,7 @@ struct InteractiveChannels <: AbstractContainers
     has_queue::Channel{Bool}
     infras::Channel{StructAction}
     loads::Channel{LoadJobAction}
+    results_free::Channel{Bool}
     stop::Channel{Bool}
     unchecked_unload::Channel{Bool}
     unloads::Channel{UnloadJobAction}
@@ -32,9 +43,11 @@ struct InteractiveChannels <: AbstractContainers
         infras = Channel{StructAction}(channels_size)
         loads = Channel{LoadJobAction}(channels_size)
         stop = Channel{Bool}(1)
+        results_free = Channel{Bool}(1)
+        put!(results_free, true)
         unchecked_unload = Channel{Bool}(1)
         unloads = Channel{UnloadJobAction}(channels_size)
-        return new(has_queue, infras, loads, stop, unchecked_unload, unloads)
+        return new(has_queue, infras, loads, results_free, stop, unchecked_unload, unloads)
     end
 end
 
@@ -42,10 +55,11 @@ function extract_containers(containers::InteractiveChannels)
     has_queue = containers.has_queue
     infras = containers.infras
     loads = containers.loads
+    results_free = containers.results_free
     stop = containers.stop
     unchecked_unload = containers.unchecked_unload
     unloads = containers.unloads
-    return has_queue, infras, loads, stop, unchecked_unload, unloads
+    return has_queue, infras, loads, results_free, stop, unchecked_unload, unloads
 end
 
 """
@@ -99,7 +113,15 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
                 v, c, ls = unload.node, unload.vload, unload.lloads
                 rem_load!(args.state, ls, c, v, n, g)
                 push_snap!(snapshots, args.state, 0, 0, 0, 0, time() - start, n)
-                add_snap_to_df!()
+                links = deepcopy(args.state.links[1:n, 1:n])
+                nodes = deepcopy(args.state.nodes[1:n])
+                snap = SnapShot(State(links, nodes), 0.0, 0.0, 0.0, 0.0, round(time() - start; digits=5))
+                # @warn "debug"
+                take!(containers.results_free)
+                add_snap_to_df!(exe.results.df, snap, exe.infrastructure.topology)
+                put!(containers.results_free, true)
+                # @warn "debug"
+                # @info exe.results.df
 
                 # @warn "debug 2.2: unload"
                 isready(containers.unchecked_unload) || put!(containers.unchecked_unload, true)
@@ -126,6 +148,19 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
 
                     # Snap new state
                     push_snap!(snapshots, args.state, 0, 0, 0, 0, time() - start, n)
+                    # @warn "inner pit stop 2.1"
+                    links = deepcopy(args.state.links[1:n, 1:n])
+                    # @warn "inner pit stop 2.2"
+                    nodes = deepcopy(args.state.nodes[1:n])
+                    # @warn "inner pit stop 2.3"
+                    snap = SnapShot(State(links, nodes), 0.0, 0.0, 0.0, 0.0, round(time() - start; digits=5))
+                    # @warn "inner pit stop 2.4"
+                    # @warn "debug"
+                    take!(containers.results_free)
+                    add_snap_to_df!(exe.results.df, snap, exe.infrastructure.topology)
+                    put!(containers.results_free, true)
+                    # @warn "debug"
+                    # @warn "inner pit stop 2.5"
 
 
                     # @warn "inner pit stop 3"
@@ -155,7 +190,6 @@ struct InteractiveInterface
     args::LoopArguments
     containers::InteractiveChannels
     exe::InteractiveRun
-    results::ExecutionResults
     start::Float64
 end
 
@@ -171,33 +205,26 @@ Post-simulation process that covers cleaning the snapshots and producing an outp
 - `output`: output path
 """
 function execution_results(exe::InteractiveRun, args, containers, start)
-    df = DataFrame(
-        selected=Float64[],
-        total=Float64[],
-        duration=Float64[],
-        solving_time=Float64[],
-        instant=Float64[]
-    )
-    return InteractiveInterface(args, containers, exe, ExecutionResults(df, args.times), start)
+    return InteractiveInterface(args, containers, exe, start)
 end
 
-results(agent::InteractiveInterface) = agent.results
+results(agent::InteractiveInterface) = agent.exe.results.df
 
-function results!(agent::InteractiveInterface)
-    verbose = agent.exe.verbose
-    df = make_df(clean(agent.args.snapshots), agent.exe.infrastructure.topology; verbose)
-    sort!(df, :instant)
+# function results!(agent::InteractiveInterface)
+#     verbose = agent.exe.verbose
+#     df = make_df(clean(agent.args.snapshots), agent.exe.infrastructure.topology; verbose)
+#     sort!(df, :instant)
 
-    if !isempty(agent.exe.output)
-        CSV.write(joinpath(datadir(), output(agent.exe)), df)
-        verbose && (@info "Output written in $(datadir())")
-    end
-    verbose && pretty_table(df)
+#     if !isempty(agent.exe.output)
+#         CSV.write(joinpath(datadir(), output(agent.exe)), df)
+#         verbose && (@info "Output written in $(datadir())")
+#     end
+#     verbose && pretty_table(df)
 
-    agent.results.df = df
+#     agent.results.df = df
 
-    return results(agent)
-end
+#     return results(agent)
+# end
 
 ##SECTION - Interface functions for Interactive runs. Uses the InteractiveInterface struct.
 

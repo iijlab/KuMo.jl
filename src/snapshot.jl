@@ -94,6 +94,18 @@ function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
     return df
 end
 
+function clean!(df::DataFrame)
+    acc = Vector{Symbol}()
+    for (i, col) in enumerate(propertynames(df))
+        if i < 6 || !all(iszero, df[!, col])
+            push!(acc, col)
+        end
+    end
+
+    df = df[!, acc]
+    return df
+end
+
 """
     clean(snaps)
 
@@ -140,7 +152,7 @@ function add_snap_to_df!(df, snap, topo)
             if str ∉ names(df)
                 df[!, str] = zeros(Float64, nrow(df))
             end
-            x = strv => safe_get_index(s.state.nodes, v) / capacity(nodes(topo, v))
+            x = str => safe_get_index(s.state.nodes, v) / capacity(nodes(topo, v))
             push!(entry, x)
         end
 
@@ -155,7 +167,9 @@ function add_snap_to_df!(df, snap, topo)
 
         return entry
     end
+    # @warn "add_snap_to_df! debug" df snap Dict(shape_entry(snap))
 
     push!(df, Dict(shape_entry(snap)))
+    # @warn "add_snap_to_df! debug out" df
 
 end

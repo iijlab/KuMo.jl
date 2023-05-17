@@ -27,9 +27,10 @@ export data!
 export job!
 export link!
 export node!
-export results!
 export stop!
 export user!
+
+export results
 
 export figures
 export show_interactive_run

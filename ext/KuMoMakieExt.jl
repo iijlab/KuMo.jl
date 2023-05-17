@@ -381,12 +381,13 @@ function show_simulation(df, norms, select, ::Val{:static})
 end
 
 function KuMo.show_simulation(df::DataFrame, norms=Dict(); interaction=:auto, select=nothing)
+    cdf = KuMo.clean!(df)
     cb = string(Makie.current_backend())
     is_static = occursin(CAIROMAKIE, cb) || occursin(RPRMAKIE, cb)
     if interaction ∈ [:static] || is_static
-        return show_simulation(df, norms, select, Val(:static))
+        return show_simulation(cdf, norms, select, Val(:static))
     end
-    return show_simulation(df, norms, select, Val(:interactive))
+    return show_simulation(cdf, norms, select, Val(:interactive))
 end
 
 function KuMo.show_simulation(path::String; norms=Dict(), interaction=:auto, select=nothing)
@@ -400,23 +401,193 @@ function KuMo.show_simulation(s::Symbol=:_four_nodes; norms=Dict(), interaction=
 end
 
 function KuMo.show_interactive_run(;
-    fps = 60,
+    fps=60,
+    interval=10.0,
+    norms=Dict()
 )
-    agent = KuMo.execute()
-    results = Observable(agent.results.df)
-
-    interval = 10.0
-
-    while !isready(agent.containers.stop)
-        current = time() - agent.start
-        min_t = min(0, current - interval)
-        results[] = filter(row -> row.instant ∈ min_t:current, agent.results.df)
-
-        df[!, :col]
-        df[(df.A .> 500) .& (300 .< df.C .< 400), :]
-
-        sleep(1/fps)
+    function make_ys(toggs, df_no_norm, a, δ)
+        C = actives(toggs)
+        # @warn "debug"
+        M = zeros(size(df_no_norm, 1), length(a:δ) + 1)
+        # @warn "debug"
+        for (i, c) in enumerate(a:δ)
+            c ∈ C && (M[:, i+1] = df_no_norm[!, c])
+        end
+        # @warn "debug"
+        return cumsum(M, dims=2)
     end
 
+    agent = KuMo.execute()
+    df = agent.exe.results.df
+
+    set_theme!(backgroundcolor=:gray90)
+    fontsize_theme = Theme(fontsize=20)
+    update_theme!(fontsize_theme)
+
+
+
+    fig = Figure(resolution=(1200, 1000))
+    display(fig)
+
+    ax1 = Axis(
+        fig[1, 1];
+        title="Interactive analysis",
+        ylabel="Resource load (normalized)"
+    )
+
+    # axislegend(ax1; position=:lt)
+
+    # ax2 = Axis(
+    #     fig[2, 1];
+    #     xlabel="Time",
+    #     ylabel="Total load"
+    # )
+
+    @async begin
+        while !isready(agent.containers.stop)
+            take!(agent.containers.results_free)
+
+            # @warn "debug"
+
+            # take!(containers.results_free)
+            if size(df, 1) ≤ 5
+                sleep(1.0 / fps)
+                continue
+            end
+            # put!(containers.results_free, true)
+
+            # @warn "debug"
+
+            results = DataFrame()
+
+            current = time() - agent.start
+            min_t = max(0, current - interval)
+            # lock(agent.exe.results.df) do
+            #     results = filter(row -> min_t ≤ row.instant, df)
+            # end
+            # take!(containers.results_free)
+            results = filter(row -> min_t ≤ row.instant, df)
+            # put!(containers.results_free, true)
+
+            # @warn "debug"
+
+            a, b, _, d = marks(results)
+            δ = d === nothing ? b : d
+            colors = make_colors(length(a:δ))
+            labels2 = names(results)
+
+            # @info fieldnames(ax1 |> typeof)
+
+            # axislegend(ax1; position=:lt)
+
+            empty!(fig)
+
+            ax1 = Axis(
+                fig[1, 1];
+            )
+            # @warn "debug"
+
+            _lines = Vector{Any}(fill(nothing, length(a:δ)))
+            toggles = [Toggle(fig, active=i ≤ b) for i in a:δ]
+            labels = map(l -> Label(fig, l), names(results)[a:δ])
+            fig[1, 2][1, 1] = grid!(hcat(toggles, labels), tellheight=false)
+
+            # @warn "debug"
+
+            for c in a:δ
+                γ = c - a + 1
+                _lines[γ] = lines!(results[!, :instant], results[!, c]; color=colors[γ], label=labels2[c])
+                connect!(_lines[γ].visible, toggles[γ].active)
+            end
+
+            # axislegend(ax1; position=:lt)
+
+            # @warn "debug"
+
+            # df_no_norm = deepcopy(results)
+
+            # @warn "debug" df_no_norm results agent.exe.results.df df
+            # @show df
+
+            # for (tag, val) in norms
+            #     df_no_norm[!, Symbol(tag)] = df_no_norm[!, Symbol(tag)] .* val
+            # end
+
+            # # empty!(ax2)
+            # ax2 = Axis(
+            #     fig[2, 1];
+            # )
+
+            # @warn "debug"
+
+            # _areas = Vector{Any}(fill(nothing, length(a:δ)))
+            # @warn "debug"
+            # toggles2 = [Toggle(fig, active=i ≤ b) for i in a:δ]
+            # @warn "debug"
+            # labels2 = map(l -> Label(fig, l), names(results)[a:δ])
+            # @warn "debug"
+            # fig[2, 2][1, 1] = grid!(hcat(to_value(toggles2), labels2), tellheight=false)
+            # @warn "debug"
+            # actives(toggs) = filter(c -> toggs[c-a+1].active[], a:δ)
+            # @warn "debug"
+            # Y = lift((t.active for t in toggles2)...) do actives...
+            #     @warn "debug"
+            #     make_ys(toggles2, df_no_norm, a, δ)
+            #     @warn "debug"
+            # end
+
+            # @warn "debug"
+
+            # @lift begin
+            #     for c in 1:length(a:δ)
+            #         _areas[c] === nothing || delete!(ax2.scene, _areas[c])
+            #         _areas[c] = band!(results[][!, :instant], $Y[:, c], $Y[:, c+1]; color=colors[c])
+            #         connect!(_areas[c].visible, toggles2[c].active)
+            #     end
+            # end
+            put!(agent.containers.results_free, true)
+
+            sleep(1 / fps)
+        end
+    end
+
+    # results = Observable(agent.exe.results.df)
+
+    # interval = 10.0
+
+    # while !isready(agent.containers.stop)
+    #     current = time() - agent.start
+    #     min_t = min(0, current - interval)
+    #     results[] = filter(row -> row.instant ∈ min_t:current, agent.results.df)
+
+    #     df[!, :col]
+    #     df[(df.A.>500).&(300 .< df.C .< 400), :]
+
+    #     sleep(1 / fps)
+    # end
+
+
+
+    # points = Observable(Point2f[randn(2)])
+
+    # fig, ax = scatter(points)
+    # limits!(ax, -4, 4, -4, 4)
+    # display(fig)
+
+    # @async begin
+    #     nframes = 120
+
+    #     for i = 1:nframes
+    #         new_point = Point2f(randn(2))
+    #         points[] = push!(points[], new_point)
+    #         sleep(1 / fps) # refreshes the display!
+    #     end
+    # end
+
+    return agent
 
 end
+
+end # module KuMoMakieExt
+
+(:parent, :layoutobservables, :blockscene, :scene, :xaxislinks, :yaxislinks, :targetlimits, :finallimits, :cycler, :palette, :block_limit_linking, :mouseeventhandle, :scrollevents, :keysevents, :interactions, :xaxis, :yaxis, :elements, :xlabel, :ylabel, :title, :titlefont, :titlesize, :titlegap, :titlevisible, :titlealign, :titlecolor, :titlelineheight, :subtitle, :subtitlefont, :subtitlesize, :subtitlegap, :subtitlevisible, :subtitlecolor, :subtitlelineheight, :xlabelfont, :ylabelfont, :xlabelcolor, :ylabelcolor, :xlabelsize, :ylabelsize, :xlabelvisible, :ylabelvisible, :xlabelpadding, :ylabelpadding, :xlabelrotation, :ylabelrotation, :xticklabelfont, :yticklabelfont, :xticklabelcolor, :yticklabelcolor, :xticklabelsize, :yticklabelsize, :xticklabelsvisible, :yticklabelsvisible, :xticklabelspace, :yticklabelspace, :xticklabelpad, :yticklabelpad, :xticklabelrotation, :yticklabelrotation, :xticklabelalign, :yticklabelalign, :xticksize, :yticksize, :xticksvisible, :yticksvisible, :xtickalign, :ytickalign, :xtickwidth, :ytickwidth, :xtickcolor, :ytickcolor, :xticksmirrored, :yticksmirrored, :xpanlock, :ypanlock, :xzoomlock, :yzoomlock, :xrectzoom, :yrectzoom, :spinewidth, :xgridvisible, :ygridvisible, :xgridwidth, :ygridwidth, :xgridcolor, :ygridcolor, :xgridstyle, :ygridstyle, :xminorgridvisible, :yminorgridvisible, :xminorgridwidth, :yminorgridwidth, :xminorgridcolor, :yminorgridcolor, :xminorgridstyle, :yminorgridstyle, :bottomspinevisible, :leftspinevisible, :topspinevisible, :rightspinevisible, :bottomspinecolor, :leftspinecolor, :topspinecolor, :rightspinecolor, :aspect, :valign, :halign, :width, :height, :tellwidth, :tellheight, :xautolimitmargin, :yautolimitmargin, :xticks, :xtickformat, :yticks, :ytickformat, :panbutton, :xpankey, :ypankey, :xzoomkey, :yzoomkey, :xaxisposition, :yaxisposition, :xtrimspine, :ytrimspine, :backgroundcolor, :flip_ylabel, :autolimitaspect, :limits, :alignmode, :yreversed, :xreversed, :xminorticksvisible, :xminortickalign, :xminorticksize, :xminortickwidth, :xminortickcolor, :xminorticks, :yminorticksvisible, :yminortickalign, :yminorticksize, :yminortickwidth, :yminortickcolor, :yminorticks, :xscale, :yscale)

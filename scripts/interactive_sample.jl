@@ -20,6 +20,5 @@ sleep(5)
 stop!(agent)
 sleep(1)
 
-results!(agent)
 
-KuMo.show_simulation(agent.results.df)
+KuMo.show_simulation(results(agent))
