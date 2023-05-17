@@ -190,6 +190,7 @@ struct InteractiveInterface
     args::LoopArguments
     containers::InteractiveChannels
     exe::InteractiveRun
+    job_channels::Vector{Channel{Bool}}
     start::Float64
 end
 
@@ -205,7 +206,7 @@ Post-simulation process that covers cleaning the snapshots and producing an outp
 - `output`: output path
 """
 function execution_results(exe::InteractiveRun, args, containers, start)
-    return InteractiveInterface(args, containers, exe, start)
+    return InteractiveInterface(args, containers, exe, Vector{Channel{Bool}}(), start)
 end
 
 results(agent::InteractiveInterface) = agent.exe.results.df
@@ -232,6 +233,11 @@ results(agent::InteractiveInterface) = agent.exe.results.df
 function stop!(agent::InteractiveInterface)
     put!(agent.containers.stop, true)
     put!(agent.containers.has_queue, true)
+    return agent
+end
+
+function stop!(agent::InteractiveInterface, job_id::Int)
+    put!(agent.job_channels[job_id], true)
     return agent
 end
 
@@ -349,6 +355,8 @@ function job!(
     # deboolbug = false
     # deboolbug2 = false
     j = job(backend, container, duration, frontend)
+    push!(agent.job_channels, Channel{Bool}(1))
+    job_id = length(agent.job_channels)
     if ν == 0.0
         # @warn "ν is 0.0, job will be added only once"
         t = time() - agent.start
@@ -360,6 +368,9 @@ function job!(
         @spawn while time() - start < stop
             # Check if the stop signal is received
             if isready(agent.containers.stop) ? fetch(agent.containers.stop) : false
+                break
+            end
+            if isready(agent.job_channels[job_id])
                 break
             end
 

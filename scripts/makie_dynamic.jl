@@ -12,10 +12,10 @@ link!(agent, 4, 1, KuMo.FreeLink())
 foreach(_ -> data!(agent, rand(1:4)), 1:2)
 foreach(_ -> user!(agent, rand(1:4)), 1:2)
 
-@async job!(agent, 0, 1, 1, 0, 2, 2, 0.01; stop=10.0)
+@async job!(agent, 0, 1, 1, 0, 2, 2, 0.01)
 
 sleep(2)
 @async job!(agent, 0, 1, 1, 0, 1, 1, 0.01; stop=5.0)
 
-sleep(10)
-stop!(agent)
+# sleep(10)
+# stop!(agent)
