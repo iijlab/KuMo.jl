@@ -17,9 +17,48 @@ Base.push!(sv::AbstractContainers, action::UnloadJobAction) = insert_sorted!(sv.
 Base.push!(sv::AbstractContainers, action::AbstractAction) = insert_sorted!(sv.infras, action)
 
 ## Results
-struct ExecutionResults
+mutable struct ExecutionResults
     df::DataFrame
     times::Dict{String,Float64}
+end
+
+#SECTION - Loop arguments
+mutable struct LoopArguments
+    capacities::SparseMatrixCSC{Float64,Int64}
+    demands::SparseVector{Float64,Int64}
+    g::AbstractGraph
+    n::Int64
+    snapshots::Vector{SnapShot}
+    state::State
+    times::Dict{String,Float64}
+
+    function LoopArguments(infra, algo, start)
+        times = Dict{String,Float64}()
+        snapshots = Vector{SnapShot}()
+
+        push!(times, "start_tasks" => time() - start)
+        g, capacities = graph(infra.topology, algo)
+        n = nv(g) - vtx(algo)
+
+        state = State(nv(g))
+        demands = spzeros(nv(g))
+
+        push_snap!(snapshots, state, 0, 0, 0, 0, 0, n)
+
+        push!(times, "start_queue" => time() - start)
+        return new(capacities, demands, g, n, snapshots, state, times)
+    end
+end
+
+function extract_loop_arguments(args::LoopArguments)
+    capacities = args.capacities
+    demands = args.demands
+    g = args.g
+    n = args.n
+    snapshots = args.snapshots
+    state = args.state
+    times = args.times
+    return capacities, demands, g, n, snapshots, state, times
 end
 
 include("batch_simulation.jl")
@@ -190,45 +229,6 @@ function do!(exe::AbstractExecution, _, action::DataAction)
         insert!(exe.infrastructure.data, action.id, data(action.location))
     end
     return nothing
-end
-
-#SECTION - Loop arguments
-mutable struct LoopArguments
-    capacities::SparseMatrixCSC{Float64,Int64}
-    demands::SparseVector{Float64,Int64}
-    g::AbstractGraph
-    n::Int64
-    snapshots::Vector{SnapShot}
-    state::State
-    times::Dict{String,Float64}
-
-    function LoopArguments(infra, algo, start)
-        times = Dict{String,Float64}()
-        snapshots = Vector{SnapShot}()
-
-        push!(times, "start_tasks" => time() - start)
-        g, capacities = graph(infra.topology, algo)
-        n = nv(g) - vtx(algo)
-
-        state = State(nv(g))
-        demands = spzeros(nv(g))
-
-        push_snap!(snapshots, state, 0, 0, 0, 0, 0, n)
-
-        push!(times, "start_queue" => time() - start)
-        return new(capacities, demands, g, n, snapshots, state, times)
-    end
-end
-
-function extract_loop_arguments(args::LoopArguments)
-    capacities = args.capacities
-    demands = args.demands
-    g = args.g
-    n = args.n
-    snapshots = args.snapshots
-    state = args.state
-    times = args.times
-    return capacities, demands, g, n, snapshots, state, times
 end
 
 ## Execution

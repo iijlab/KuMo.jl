@@ -47,10 +47,12 @@ Adds load to a given state.
 - `v`: node selected to execute a task
 - `n`: amount of available nodes
 """
-function add_load!(state, _links, containers, v, n, g)
+function add_load!(state::State, _links, containers, v, n, g)
+    # @info "debug add_load! 1"
     for i in 1:n, j in 1:n
         increase!(state, i, j, _links[i, j], is_directed(g))
     end
+    # @info "debug add_load! 2"
     state.nodes[v] += containers
 end
 

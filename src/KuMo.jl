@@ -27,6 +27,7 @@ export data!
 export job!
 export link!
 export node!
+export results!
 export stop!
 export user!
 

@@ -27,8 +27,8 @@ struct InteractiveChannels <: AbstractContainers
     unloads::Channel{UnloadJobAction}
 
     function InteractiveChannels()
-        channels_size = Inf
-        has_queue = Channel{Bool}(1)
+        channels_size = typemax(Int)
+        has_queue = Channel{Bool}(channels_size)
         infras = Channel{StructAction}(channels_size)
         loads = Channel{LoadJobAction}(channels_size)
         stop = Channel{Bool}(1)
@@ -63,19 +63,28 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
     push!(times, "start_tasks" => time() - start)
     put!(containers.unchecked_unload, true)
 
-    @async begin
+    # @info containers
+
+    @spawn :interactive begin
         v && println("Interactive loop started.")
         while true
+            # @info "pit stop 1"
             take!(containers.has_queue)
+            n = nv(g) - vtx(exe.algo)
+
+
+            # @info "pit stop 2"
 
             # Check if the stop signal is received
-            if isready(containers.stop) ? take!(containers.stop) : false
-                @info "Stopping the interactive run after $(time() - start) seconds"
+            if isready(containers.stop) ? fetch(containers.stop) : false
+                # @info "pit stop 3"
+                v && (@info "Stopping the interactive run after $(time() - start) seconds")
                 break
             end
 
             # Check if there are any new infrastructures
             if isready(containers.infras)
+                # @info "pit stop 4"
                 infra = take!(containers.infras)
                 do!(exe, args, infra)
                 continue
@@ -83,6 +92,7 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
 
             # Check if there are any jobs to unload
             if isready(containers.unloads)
+                # @warn "debug 2: unload"
                 unload = take!(containers.unloads)
                 take!(containers.has_queue)
                 v, c, ls = unload.node, unload.vload, unload.lloads
@@ -92,22 +102,32 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
                 continue
             end
 
+            # @warn "debug containters" containers.has_queue containers.unchecked_unload containers.loads containers.unloads
+
             # Check if there are any jobs to load
             if isready(containers.loads) && isready(containers.unchecked_unload)
+                # @warn "debug 1: checking if load is valid"
                 task = fetch(containers.loads)
                 best_links, best_cost, best_node, is_valid = valid_load(exe, task, args)
+                # @warn "debug 1: load is valid <- $is_valid"
                 if is_valid
                     take!(containers.loads)
                     j = task.job
+                    # @warn "inner pit stop 1" args.state best_links j.containers best_node n g
 
                     # Add load
                     add_load!(args.state, best_links, j.containers, best_node, n, g)
 
+                    # @warn "inner pit stop 2"
+
                     # Snap new state
                     push_snap!(snapshots, args.state, 0, 0, 0, 0, task.occ, n)
 
+
+                    # @warn "inner pit stop 3"
+
                     # Assign unload
-                    @async begin
+                    @spawn begin
                         wait(j.duration)
                         put!(containers.unloads, UnloadJobAction(time(), best_node, j.containers, best_links))
                         put!(containers.has_queue, true)
@@ -124,8 +144,9 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
 end
 
 struct InteractiveInterface
-    exe::InteractiveRun
+    args::LoopArguments
     containers::InteractiveChannels
+    exe::InteractiveRun
     results::ExecutionResults
     start::Float64
 end
@@ -142,16 +163,24 @@ Post-simulation process that covers cleaning the snapshots and producing an outp
 - `output`: output path
 """
 function execution_results(exe::InteractiveRun, args, containers, start)
-    # verbose = exe.verbose
-    # df = make_df(clean(args.snapshots), exe.infrastructure.topology; verbose)
-    # if !isempty(exe.output)
-    #     CSV.write(joinpath(datadir(), output(exe)), df)
-    #     verbose && (@info "Output written in $(datadir())")
-    # end
+    return InteractiveInterface(args, containers, exe, ExecutionResults(DataFrame(), args.times), start)
+end
 
-    # verbose && pretty_table(df)
+results(agent::InteractiveInterface) = agent.results
 
-    return InteractiveInterface(exe, containers, ExecutionResults(DataFrame(), args.times), start)
+function results!(agent::InteractiveInterface)
+    verbose = agent.exe.verbose
+    df = make_df(clean(agent.args.snapshots), agent.exe.infrastructure.topology; verbose)
+
+    if !isempty(agent.exe.output)
+        CSV.write(joinpath(datadir(), output(agent.exe)), df)
+        verbose && (@info "Output written in $(datadir())")
+    end
+    verbose && pretty_table(df)
+
+    agent.results.df = df
+
+    return results(agent)
 end
 
 ##SECTION - Interface functions for Interactive runs. Uses the InteractiveInterface struct.
@@ -251,7 +280,7 @@ end
 
 # job
 function add_job!(::InteractiveRun, t::Float64, j::J, u_id::Int, d_id::Int) where {J<:AbstractJob}
-    @info "entered add_job"
+    # @info "entered add_job" LoadJobAction(t, u_id, j, d_id)
     return LoadJobAction(t, u_id, j, d_id)
 end
 
@@ -274,8 +303,8 @@ function job!(
     ν=0.0;
     stop=Inf
 )
-    deboolbug = false
-    deboolbug2 = false
+    # deboolbug = false
+    # deboolbug2 = false
     j = job(backend, container, duration, frontend)
     if ν == 0.0
         @warn "ν is 0.0, job will be added only once"
@@ -284,30 +313,25 @@ function job!(
         put!(agent.containers.loads, action)
         put!(agent.containers.has_queue, true)
     else
-        @async while true
-            if !deboolbug
-                @warn "ν is $(ν), job will be added every $(ν) seconds"
-                deboolbug = true
-            end
-            t = time() - agent.start
-            c = (isready(agent.containers.stop) ? take!(agent.containers.stop) : false)
-            @info "reaching that point"
-            if c || t > stop
-                @warn "breaking ...." c t stop
+        @spawn while true
+            # Check if the stop signal is received
+            if isready(agent.containers.stop) ? fetch(agent.containers.stop) : false
                 break
             end
-            @info "reaching that other point" c t stop
-            action = add_job!(agent.exe, t, j, user_id, data_id)
-            if !deboolbug2
-                @warn "ν is $(ν), job will be added every $(ν) seconds" action
-                deboolbug2 = true
-            end
 
-            @info "reaching that other other point" agent.containers.loads action agent.containers.has_queue
+            # if !deboolbug
+            #     @warn "ν is $(ν), job will be added every $(ν) seconds"
+            #     deboolbug = true
+            # end
+            t = time() - agent.start
+            action = add_job!(agent.exe, t, j, user_id, data_id)
+            # if !deboolbug2
+            #     @warn "ν is $(ν), job will be added every $(ν) seconds" action
+            #     deboolbug2 = true
+            # end
             put!(agent.containers.loads, action)
             put!(agent.containers.has_queue, true)
             sleep(ν)
-            @info "after sleep"
         end
     end
     return agent
