@@ -94,10 +94,14 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
             if isready(containers.unloads)
                 # @warn "debug 2: unload"
                 unload = take!(containers.unloads)
-                take!(containers.has_queue)
+                # take!(containers.has_queue)
+                # @warn "debug 2.1: unload"
                 v, c, ls = unload.node, unload.vload, unload.lloads
                 rem_load!(args.state, ls, c, v, n, g)
-                push_snap!(snapshots, args.state, 0, 0, 0, 0, unload.occ, n)
+                push_snap!(snapshots, args.state, 0, 0, 0, 0, time() - start, n)
+                add_snap_to_df!()
+
+                # @warn "debug 2.2: unload"
                 isready(containers.unchecked_unload) || put!(containers.unchecked_unload, true)
                 continue
             end
@@ -121,16 +125,20 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
                     # @warn "inner pit stop 2"
 
                     # Snap new state
-                    push_snap!(snapshots, args.state, 0, 0, 0, 0, task.occ, n)
+                    push_snap!(snapshots, args.state, 0, 0, 0, 0, time() - start, n)
 
 
                     # @warn "inner pit stop 3"
 
                     # Assign unload
                     @spawn begin
-                        wait(j.duration)
-                        put!(containers.unloads, UnloadJobAction(time(), best_node, j.containers, best_links))
+                        # @info "assigning unload start" containers.has_queue containers.unloads
+                        sleep(j.duration)
+                        # @info "inner unload assignment 1"
+                        put!(containers.unloads, UnloadJobAction(time() - start, best_node, j.containers, best_links))
+                        # @info "inner unload assignment 2"
                         put!(containers.has_queue, true)
+                        # @info "assigning unload stop" containers.has_queue containers.unloads
                     end
                 else
                     put!(containers.has_queue, true)
@@ -163,7 +171,14 @@ Post-simulation process that covers cleaning the snapshots and producing an outp
 - `output`: output path
 """
 function execution_results(exe::InteractiveRun, args, containers, start)
-    return InteractiveInterface(args, containers, exe, ExecutionResults(DataFrame(), args.times), start)
+    df = DataFrame(
+        selected=Float64[],
+        total=Float64[],
+        duration=Float64[],
+        solving_time=Float64[],
+        instant=Float64[]
+    )
+    return InteractiveInterface(args, containers, exe, ExecutionResults(df, args.times), start)
 end
 
 results(agent::InteractiveInterface) = agent.results
@@ -171,6 +186,7 @@ results(agent::InteractiveInterface) = agent.results
 function results!(agent::InteractiveInterface)
     verbose = agent.exe.verbose
     df = make_df(clean(agent.args.snapshots), agent.exe.infrastructure.topology; verbose)
+    sort!(df, :instant)
 
     if !isempty(agent.exe.output)
         CSV.write(joinpath(datadir(), output(agent.exe)), df)
@@ -307,13 +323,14 @@ function job!(
     # deboolbug2 = false
     j = job(backend, container, duration, frontend)
     if ν == 0.0
-        @warn "ν is 0.0, job will be added only once"
+        # @warn "ν is 0.0, job will be added only once"
         t = time() - agent.start
         action = add_job!(agent.exe, t, j, user_id, data_id)
         put!(agent.containers.loads, action)
         put!(agent.containers.has_queue, true)
     else
-        @spawn while true
+        start = time()
+        @spawn while time() - start < stop
             # Check if the stop signal is received
             if isready(agent.containers.stop) ? fetch(agent.containers.stop) : false
                 break

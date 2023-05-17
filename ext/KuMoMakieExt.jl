@@ -380,7 +380,7 @@ function show_simulation(df, norms, select, ::Val{:static})
     return fig
 end
 
-function KuMo.show_simulation(df, norms; interaction=:auto, select=nothing)
+function KuMo.show_simulation(df::DataFrame, norms=Dict(); interaction=:auto, select=nothing)
     cb = string(Makie.current_backend())
     is_static = occursin(CAIROMAKIE, cb) || occursin(RPRMAKIE, cb)
     if interaction ∈ [:static] || is_static
@@ -398,5 +398,25 @@ function KuMo.show_simulation(s::Symbol=:_four_nodes; norms=Dict(), interaction=
     df = KuMo.simulate(KuMo.eval(s)()).df
     return KuMo.show_simulation(df, norms; interaction, select)
 end
+
+function KuMo.show_interactive_run(;
+    fps = 60,
+)
+    agent = KuMo.execute()
+    results = Observable(agent.results.df)
+
+    interval = 10.0
+
+    while !isready(agent.containers.stop)
+        current = time() - agent.start
+        min_t = min(0, current - interval)
+        results[] = filter(row -> row.instant ∈ min_t:current, agent.results.df)
+
+        df[!, :col]
+        df[(df.A .> 500) .& (300 .< df.C .< 400), :]
+
+        sleep(1/fps)
+    end
+
 
 end

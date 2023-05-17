@@ -31,6 +31,12 @@ export results!
 export stop!
 export user!
 
+export figures
+export show_interactive_run
+export show_pseudo_costs
+export show_simulation
+export simulate_and_plot
+
 ## SECTION - includes
 
 # utilities
@@ -64,6 +70,7 @@ include("execute.jl")
 include("scenarii/basic.jl")
 
 # functions definition for extensions
+function show_interactive_run end
 function show_pseudo_costs end
 function show_simulation end
 function simulate_and_plot end

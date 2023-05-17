@@ -125,3 +125,37 @@ function clean(snaps)
 
     return snapshots
 end
+
+function add_snap_to_df!(df, snap, topo)
+    function shape_entry(s)
+        entry = Vector{Pair{String,Float64}}()
+        push!(entry, "selected" => s.selected)
+        push!(entry, "total" => s.total)
+        push!(entry, "duration" => s.duration)
+        push!(entry, "solving_time" => s.solving_time)
+        push!(entry, "instant" => s.instant)
+
+        for v in keys(topo.nodes)
+            str = string(v)
+            if str ∉ names(df)
+                df[!, str] = zeros(Float64, nrow(df))
+            end
+            x = strv => safe_get_index(s.state.nodes, v) / capacity(nodes(topo, v))
+            push!(entry, x)
+        end
+
+        for (i, j) in keys(topo.links)
+            str = string((i, j))
+            if str ∉ names(df)
+                df[!, str] = zeros(Float64, nrow(df))
+            end
+            c = safe_get_index(s.state.links, i, j)
+            push!(entry, str => c / capacity(links(topo, i, j)))
+        end
+
+        return entry
+    end
+
+    push!(df, Dict(shape_entry(snap)))
+
+end
