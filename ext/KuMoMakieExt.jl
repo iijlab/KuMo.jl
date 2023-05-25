@@ -402,7 +402,7 @@ end
 
 function KuMo.show_interactive_run(;
     fps=60,
-    interval=Inf,
+    interval=60,
     norms=Dict()
 )
     function make_ys(toggs, df_no_norm, a, δ)
@@ -420,19 +420,21 @@ function KuMo.show_interactive_run(;
     agent = KuMo.execute()
     df = agent.exe.results.df
 
-    set_theme!(backgroundcolor=:gray90)
+    set_theme!(backgroundcolor=:gray90, fullscreen=true)
     fontsize_theme = Theme(fontsize=20)
     update_theme!(fontsize_theme)
 
 
 
-    fig = Figure(resolution=(1200, 1000))
+    fig = Figure(resolution=(3960, 2160))
     display(fig)
 
     ax1 = Axis(
         fig[1, 1];
         title="Interactive analysis",
-        ylabel="Resource load (normalized)"
+        ylabel="Resource load (normalized)",
+        xlabel="Time",
+        limits=(0, 60, 0, 1)
     )
 
     # axislegend(ax1; position=:lt)
@@ -464,6 +466,7 @@ function KuMo.show_interactive_run(;
 
             current = time() - agent.start
             min_t = max(0, current - interval)
+            max_t = max(current, interval)
             # lock(agent.exe.results.df) do
             #     results = filter(row -> min_t ≤ row.instant, df)
             # end
@@ -486,13 +489,18 @@ function KuMo.show_interactive_run(;
 
             ax1 = Axis(
                 fig[1, 1];
+                title="Interactive analysis",
+                ylabel="Resource load (normalized)",
+                xlabel="Time",
+                limits=(min_t, max_t, 0, 1)
             )
+
             # @warn "debug"
 
             _lines = Vector{Any}(fill(nothing, length(a:δ)))
             toggles = [Toggle(fig, active=i ≤ b) for i in a:δ]
             labels = map(l -> Label(fig, l), names(results)[a:δ])
-            fig[1, 2][1, 1] = grid!(hcat(toggles, labels), tellheight=false)
+            # fig[1, 2][1, 1] = grid!(hcat(toggles, labels), tellheight=false)
 
             # @warn "debug"
 
@@ -506,7 +514,7 @@ function KuMo.show_interactive_run(;
 
             # @warn "debug"
 
-            df_no_norm = deepcopy(results)
+            # df_no_norm = deepcopy(results)
 
             # @warn "debug" df_no_norm results agent.exe.results.df df
             # @show df
@@ -591,5 +599,3 @@ function KuMo.show_interactive_run(;
 end
 
 end # module KuMoMakieExt
-
-(:parent, :layoutobservables, :blockscene, :scene, :xaxislinks, :yaxislinks, :targetlimits, :finallimits, :cycler, :palette, :block_limit_linking, :mouseeventhandle, :scrollevents, :keysevents, :interactions, :xaxis, :yaxis, :elements, :xlabel, :ylabel, :title, :titlefont, :titlesize, :titlegap, :titlevisible, :titlealign, :titlecolor, :titlelineheight, :subtitle, :subtitlefont, :subtitlesize, :subtitlegap, :subtitlevisible, :subtitlecolor, :subtitlelineheight, :xlabelfont, :ylabelfont, :xlabelcolor, :ylabelcolor, :xlabelsize, :ylabelsize, :xlabelvisible, :ylabelvisible, :xlabelpadding, :ylabelpadding, :xlabelrotation, :ylabelrotation, :xticklabelfont, :yticklabelfont, :xticklabelcolor, :yticklabelcolor, :xticklabelsize, :yticklabelsize, :xticklabelsvisible, :yticklabelsvisible, :xticklabelspace, :yticklabelspace, :xticklabelpad, :yticklabelpad, :xticklabelrotation, :yticklabelrotation, :xticklabelalign, :yticklabelalign, :xticksize, :yticksize, :xticksvisible, :yticksvisible, :xtickalign, :ytickalign, :xtickwidth, :ytickwidth, :xtickcolor, :ytickcolor, :xticksmirrored, :yticksmirrored, :xpanlock, :ypanlock, :xzoomlock, :yzoomlock, :xrectzoom, :yrectzoom, :spinewidth, :xgridvisible, :ygridvisible, :xgridwidth, :ygridwidth, :xgridcolor, :ygridcolor, :xgridstyle, :ygridstyle, :xminorgridvisible, :yminorgridvisible, :xminorgridwidth, :yminorgridwidth, :xminorgridcolor, :yminorgridcolor, :xminorgridstyle, :yminorgridstyle, :bottomspinevisible, :leftspinevisible, :topspinevisible, :rightspinevisible, :bottomspinecolor, :leftspinecolor, :topspinecolor, :rightspinecolor, :aspect, :valign, :halign, :width, :height, :tellwidth, :tellheight, :xautolimitmargin, :yautolimitmargin, :xticks, :xtickformat, :yticks, :ytickformat, :panbutton, :xpankey, :ypankey, :xzoomkey, :yzoomkey, :xaxisposition, :yaxisposition, :xtrimspine, :ytrimspine, :backgroundcolor, :flip_ylabel, :autolimitaspect, :limits, :alignmode, :yreversed, :xreversed, :xminorticksvisible, :xminortickalign, :xminorticksize, :xminortickwidth, :xminortickcolor, :xminorticks, :yminorticksvisible, :yminortickalign, :yminorticksize, :yminortickwidth, :yminortickcolor, :yminorticks, :xscale, :yscale)
