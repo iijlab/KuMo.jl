@@ -21,11 +21,6 @@ struct Job <: AbstractJob
     containers::Int
     duration::Float64
     frontend::Int
-    # stop::Channel{Bool}
-
-    # function Job(backend::Int, containers::Int, duration::Float64, frontend::Int)
-    #     return new(backend, containers, duration, frontend, Channel{Bool}(1))
-    # end
 end
 
 """

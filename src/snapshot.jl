@@ -167,9 +167,7 @@ function add_snap_to_df!(df, snap, topo)
 
         return entry
     end
-    # @warn "add_snap_to_df! debug" df snap Dict(shape_entry(snap))
 
     push!(df, Dict(shape_entry(snap)))
-    # @warn "add_snap_to_df! debug out" df
 
 end
