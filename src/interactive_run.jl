@@ -8,7 +8,9 @@ struct InteractiveRun{T<:AbstractTopology} <: AbstractExecution
 
     function InteractiveRun(;
         algo::AbstractAlgorithm=ShortestPath(),
-        infrastructure::Infrastructure{T}=Infrastructure{DirectedTopology}(),
+        directed=true,
+        infrastructure::Infrastructure{T}=
+        Infrastructure{directed ? DirectedTopology : Topology}(),
         output::String="",
         time_limit::Float64=Inf,
         verbose::Bool=false

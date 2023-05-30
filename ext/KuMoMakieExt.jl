@@ -403,7 +403,8 @@ end
 function KuMo.show_interactive_run(;
     fps=60,
     interval=60,
-    norms=Dict()
+    norms=Dict(),
+    keyargs...
 )
     function make_ys(toggs, df_no_norm, a, δ)
         C = actives(toggs)
@@ -417,7 +418,7 @@ function KuMo.show_interactive_run(;
         return cumsum(M, dims=2)
     end
 
-    agent = KuMo.execute()
+    agent = KuMo.execute(KuMo.InteractiveRun(; keyargs...))
     df = agent.exe.results.df
 
     set_theme!(backgroundcolor=:gray90, fullscreen=true)

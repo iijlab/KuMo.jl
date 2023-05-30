@@ -138,7 +138,7 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
                 # Add load
                 add_load!(args.state, best_links, j.containers, best_node, n, g)
                 # Snap new state
-                push_snap!(snapshots, args.state, 0, 0, 0, 0, last_unload, n)args.snapshots[end].state.nodes
+                push_snap!(snapshots, args.state, 0, 0, 0, 0, last_unload, n)
                 # Assign unload
                 unload = action(last_unload, j, best_node, best_links)
                 insert_sorted!(unloads, unload, next_unload)

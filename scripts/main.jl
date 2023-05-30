@@ -52,9 +52,9 @@ function main(; title=true, latex=true)
         :figure_3,
         :figure_4,
         :figure_5,
-        :figure_6,
-        :figure_7,
-        :figure_8,
+        # :figure_6,
+        # :figure_7,
+        # :figure_8,
     ]
 
     foreach(f -> figures(f; title, latex), F)

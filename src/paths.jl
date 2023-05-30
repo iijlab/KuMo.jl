@@ -52,7 +52,7 @@ DOCSTRING
 - `links`: description of the links topology
 """
 function inner_queue(exe, task, args, nodes, ii=0; lck=ReentrantLock(), links, demands)
-    u, j = task.user, task.job
+    u, j = user_location(exe, task.user), task.job
     capacities, demands, g, _, _, state, _ = extract_loop_arguments(args)
     data_loc = exe.infrastructure.data[task.data].location
 

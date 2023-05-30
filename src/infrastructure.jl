@@ -24,3 +24,5 @@ mutable struct Infrastructure{T<:AbstractTopology}
         return new{T}(d, data, n, m, topology, u, users)
     end
 end
+
+user_location(i::Infrastructure, id::Int) = i.users[id].location

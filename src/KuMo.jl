@@ -22,6 +22,8 @@ using Base.Threads
 
 # SECTION - exports
 export execute
+export simulate
+export simulation
 
 export data!
 export job!
@@ -29,6 +31,24 @@ export link!
 export node!
 export stop!
 export user!
+
+export user_location
+
+export Node
+export AdditiveNode
+export EqualLoadBalancingNode
+export FlatNode
+export IdleStateNode
+export MultiplicativeNode
+export PremiumNode
+
+export Link
+export ConvexLink
+export FreeLink
+export FlatLink
+
+export BatchSimulation
+export InteractiveRun
 
 export results
 
@@ -66,6 +86,9 @@ include("paths.jl")
 include("state.jl")
 include("snapshot.jl")
 include("execute.jl")
+
+# extras
+include("flock.jl")
 
 # scenarii (dictionaries)
 include("scenarii/basic.jl")

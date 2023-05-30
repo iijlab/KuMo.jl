@@ -10,6 +10,8 @@ output(execution::AbstractExecution) = execution.output
 
 verbose(execution::AbstractExecution) = execution.verbose
 
+user_location(exe::AbstractExecution, id::Int) = user_location(infrastructure(exe), id)
+
 abstract type AbstractContainers end
 
 Base.push!(sv::AbstractContainers, action::LoadJobAction) = insert_sorted!(sv.loads, action)

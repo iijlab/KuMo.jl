@@ -1,21 +1,27 @@
 using GLMakie
 using KuMo
 
-agent = show_interactive_run(; fps=10)
-foreach(_ -> node!(agent, KuMo.Node(50)), 1:4)
+agent = show_interactive_run(;)
+foreach(_ -> node!(agent, Node(100)), 1:2)
 
-link!(agent, 1, 2, KuMo.FreeLink())
-link!(agent, 2, 3, KuMo.FreeLink())
-link!(agent, 3, 4, KuMo.FreeLink())
-link!(agent, 4, 1, KuMo.FreeLink())
+link!(agent, 2, 1, FlatLink(25.0, 1.0))
+link!(agent, 1, 2, Link(75.0))
 
-foreach(_ -> data!(agent, rand(1:4)), 1:2)
-foreach(_ -> user!(agent, rand(1:4)), 1:2)
+user!(agent, 1);
+data!(agent, 1);
 
-@async job!(agent, 0, 1, 1, 0, 2, 2, 0.01)
+# job!(agent, backend, container, duration, frontend, data_id, user_id, ν; stop = Inf)
+job!(agent, 0, 2, 1, 1, 1, 1, 0.001);
 
-sleep(2)
-@async job!(agent, 0, 1, 1, 0, 1, 1, 0.01; stop=5.0)
+sleep(10)
 
-# sleep(10)
-# stop!(agent)
+data!(agent, 1, 2)
+user!(agent, 1, 2)
+
+sleep(10);
+stop!(agent, 1);
+
+sleep(5)
+stop!(agent)
+
+show_simulation(results(agent))

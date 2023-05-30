@@ -8,6 +8,10 @@ using KuMo
 using PrettyTables
 using StatsPlots
 
+import KuMo: job
+import KuMo: marks
+import KuMo: pseudo_cost
+
 # exports
 export figures
 export simulate_and_plot
@@ -139,6 +143,7 @@ function figure_3(;
     select=:all, # use :standard or :variants to plot respective pseudocosts
     title=true
 )
+    @info "Plotting Figure 3∈[3-8]"
 
     pcs = Vector{Function}()
     labels = Vector{String}()
@@ -213,38 +218,43 @@ function figure_4(;
     output=joinpath(figuresdir(), "figure4_equivalent_nodes.pdf"),
     title=false
 )
+    @info "Plotting Figure 4∈[3-8]"
+
     function local_scenario()
-        # maximum duration
-        duration = 1000
+        # create simulation
+        s = simulation(; directed=false)
 
-        # default constructor (convex node) => Node(...)
-        nodes = (4, 100)
+        # Add 4 nodes - simulation, time, node
+        node!(s, 0.0, Node(100))
+        node!(s, 0.0, Node(100))
+        node!(s, 0.0, Node(100))
+        node!(s, 0.0, Node(100))
 
-        # job(backend, containers, data_location, duration, frontend)
-        j = job(0, 1, rand(1:4), 3.25, 0)
-
-        # storage for requests
-        _requests = Vector{KuMo.Request{KuMo.Job}}()
-
-        λ = 3.50
-        rate = 0.01
-        δ = j.duration
-        π1 = λ / rate
-        π2 = (2 * nodes[1] - λ) / rate
-
-        for i in 0:π1+π2
-            for t in i:δ:π1+π2-i
-                i ≤ π1 && push!(_requests, KuMo.Request(j, t))
-            end
+        # Add freelinks
+        for i in 1:4, j in i:4
+            i == j || link!(s, 0.0, i, j, FreeLink())
         end
 
-        users = [user(KuMo.Requests(_requests), 1)]
+        # Add a user and data
+        user!(s, 0.0, rand(1:4)) # id = 1
+        data!(s, 0.0, rand(1:4)) # id = 1
 
-        return scenario(; duration, nodes, users)
+        # Add a job
+        λ = 3.50
+        rate = 0.01
+        δ = 3.25
+        π1 = λ / rate
+        π2 = (2 * s.infrastructure.n - λ) / rate
+
+        for i in 0:π1+π2, t in i:δ:π1+π2-i
+            i ≤ π1 && job!(s, t, 0, 1, δ, 0, 1, 1)
+        end
+
+        return s
     end
 
     # DataFrame to store simualtion results
-    df = simulate(local_scenario())[2]
+    df = simulate(local_scenario()).df
 
     # Plot
     lab = ["r0" "r1" "r3" "r4"]
@@ -297,43 +307,43 @@ function figure_5(;
     output=joinpath(figuresdir(), "figure5_proportional_nodes.pdf"),
     title=false
 )
+    @info "Plotting Figure 5∈[3-8]"
+
     function local_scenario()
-        # maximum duration
-        duration = 1000
+        # create simulation
+        s = simulation(; directed=false)
 
-        # Proportional nodes
-        nodes = [
-            MultiplicativeNode(100, 1),
-            MultiplicativeNode(100, 2),
-            MultiplicativeNode(100, 4),
-            MultiplicativeNode(100, 8),
-        ]
+        # Add 4 multiplicative nodes - simulation, time, node
+        node!(s, 0.0, MultiplicativeNode(100, 1))
+        node!(s, 0.0, MultiplicativeNode(100, 2))
+        node!(s, 0.0, MultiplicativeNode(100, 4))
+        node!(s, 0.0, MultiplicativeNode(100, 8))
 
-        # job(backend, containers, data_location, duration, frontend)
-        j = job(0, 1, rand(1:4), 3.25, 0)
-
-        # storage for requests
-        _requests = Vector{KuMo.Request{KuMo.Job}}()
-
-        λ = 3.50
-        rate = 0.01
-        δ = j.duration
-        π1 = λ / rate
-        π2 = (2 * length(nodes) - λ) / rate
-
-        for i in 0:π1+π2
-            for t in i:δ:π1+π2-i
-                i ≤ π1 && push!(_requests, KuMo.Request(j, t))
-            end
+        # Add freelinks
+        for i in 1:4, j in i:4
+            i == j || link!(s, 0.0, i, j, FreeLink())
         end
 
-        users = [user(KuMo.Requests(_requests), 1)]
+        # Add a user and data
+        user!(s, 0.0, rand(1:4)) # id = 1
+        data!(s, 0.0, rand(1:4)) # id = 1
 
-        return scenario(; duration, nodes, users)
+        # Add a job
+        λ = 3.50
+        rate = 0.01
+        δ = 3.25
+        π1 = λ / rate
+        π2 = (2 * s.infrastructure.n - λ) / rate
+
+        for i in 0:π1+π2, t in i:δ:π1+π2-i
+            i ≤ π1 && job!(s, t, 0, 1, δ, 0, 1, 1)
+        end
+
+        return s
     end
 
     # DataFrame to store simualtion results
-    df = simulate(local_scenario())[2]
+    df = simulate(local_scenario()).df
 
     # Plot
     lab = ["r0" "r1" "r3" "r4"]
@@ -386,6 +396,8 @@ function figure_6(;
     output=joinpath(figuresdir(), "figure6_edge.pdf"),
     title=false
 )
+    @info "Plotting Figure 6∈[3-8]"
+
     function core_scenario(
         nodes,
         links;
@@ -395,26 +407,51 @@ function figure_6(;
         rate,
         jd
     )
-        j = job(0, 1, 1, jd, 1.0)
-        R = map(_ -> Vector{Request{KuMo.Job}}(), 1:3)
+        # create simulation
+        s = simulation(; directed=false)
 
-        for τ in 0:rate:duration, u in 1:drones
-            t = τ + rate / drones * (u - 1)
-            i = 0
-            if 0 ≤ t < 20
-                i = t < 0 + phase / drones * (u - 1) ? 1 : 2
-            elseif 20 ≤ t < 40
-                i = t < 20 + phase / drones * (u - 1) ? 2 : 3
-                # elseif 50 ≤ t < 75
-                #     i = t ≤ 50 + phase / drones * (u - 1) ? 3 : 1
-            end
-            i == 0 || push!(R[i], Request(j, t))
+        # Add nodes
+        for i in eachindex(nodes)
+            node!(s, 0.0, nodes[i])
         end
 
-        users = map(i -> user(R[i], i), 1:length(nodes))
-        directed = false
+        # Add links
+        for i in eachindex(links)
+            link!(s, 0.0, links[i]...)
+        end
 
-        return scenario(; duration, nodes, links, users, directed)
+        # Add users
+        users_location = [1 for _ in 1:drones]
+        for _ in 1:drones
+            user!(s, 0.0, 1)
+        end
+
+        # move users
+        d = 0
+        μ = phase / drones
+        for t in μ:μ:duration
+            d = d % drones + 1
+            # d == 1 && (@info users_location)
+            users_location[d] = users_location[d] % length(nodes) + 1
+            user!(s, t, d, users_location[d])
+        end
+
+        # @info users_location
+
+        # Add data
+        data!(s, 0.0, 1) # fake data because no backend is used
+
+        # Add jobs
+        for u in 1:drones
+            start = rate / drones * (u - 1)
+            job!(s, 0, 1, jd, 1.0, 1, u, rate; start, stop=duration)
+        end
+
+        for r in s.requests
+            @info r
+        end
+
+        return s
     end
 
     function edge_simulation()
@@ -451,9 +488,9 @@ function figure_6(;
         ]
 
         monotonic_links = [
-            (1, 2, c),
-            (1, 3, c),
-            (2, 3, c),
+            (1, 2, Link(c)),
+            (1, 3, Link(c)),
+            (2, 3, Link(c)),
         ]
 
         resources = Dict([
@@ -467,7 +504,7 @@ function figure_6(;
 
         function simu(r)
             s = core_scenario(r...; duration, rate, jd, drones, phase)
-            return simulate(s, ShortestPath();)[2]
+            return simulate(s).df
         end
 
         return map(simu, values(resources))
@@ -475,15 +512,20 @@ function figure_6(;
 
     DF = edge_simulation()
 
+    pretty_table(DF[1])
+    pretty_table(DF[2])
+    pretty_table(DF[3])
+
     seriestype = :steppre
     linestyle = :solid
     w = 1
     ylabel = "load"
 
     # convex monotonic
+    a, b, c, d = marks(DF[3])
     p_convex_monotonic = @df DF[3] plot(
         :instant,
-        cols(6:8);
+        cols(a:b);
         linestyle,
         seriestype,
         title="(c) convex",
@@ -494,9 +536,10 @@ function figure_6(;
 
 
     # monotonic monotonic
-    p_monotonic_monotonic = @df DF[1] plot(
+    a, b, c, d = marks(DF[2])
+    p_monotonic_monotonic = @df DF[2] plot(
         :instant,
-        cols(6:8);
+        cols(a:b);
         linestyle,
         seriestype,
         title="(b) monotonic",
@@ -505,9 +548,10 @@ function figure_6(;
     )
 
     # flat flat
-    p_flat_flat = @df DF[2] plot(
+    a, b, c, d = marks(DF[1])
+    p_flat_flat = @df DF[1] plot(
         :instant,
-        cols(6:8);
+        cols(a:b);
         linestyle,
         seriestype,
         title="(a) constant",
@@ -546,6 +590,8 @@ function figure_7(;
     output=joinpath(figuresdir(), "figure7_cost_manipulations.pdf"),
     title=true
 )
+    @info "Plotting Figure 7∈[3-8]"
+
     function scenario6a(;)
         reqs = Vector{Request{<:KuMo.AbstractJob}}()
 
@@ -850,6 +896,8 @@ function figure_8(;
     output=joinpath(figuresdir(), "figure8_mixed_load.pdf"),
     title=true
 )
+    @info "Plotting Figure 8∈[3-8]"
+
     df = DataFrame(CSV.File(joinpath(datadir(), "figure8.csv")))
 
     df_no_norm = deepcopy(df)
@@ -914,8 +962,8 @@ const FIGURES = Dict(
     :figure_4 => figure_4,
     :figure_5 => figure_5,
     :figure_6 => figure_6,
-    :figure_7 => figure_7,
-    :figure_8 => figure_8,
+    # :figure_7 => figure_7,
+    # :figure_8 => figure_8,
 )
 
 KuMo.figures(symb::Symbol; kwargs...) = FIGURES[symb](; kwargs...)
