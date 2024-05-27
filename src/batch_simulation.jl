@@ -1,6 +1,6 @@
 # SECTION - Initialization
 
-struct BatchSimulation{T<:AbstractTopology} <: AbstractExecution
+struct BatchSimulation{T <: AbstractTopology} <: AbstractExecution
     algo::AbstractAlgorithm
     infrastructure::Infrastructure{T}
     output::String
@@ -8,12 +8,12 @@ struct BatchSimulation{T<:AbstractTopology} <: AbstractExecution
     verbose::Bool
 
     function BatchSimulation(;
-        algo::AbstractAlgorithm=ShortestPath(),
-        infrastructure::Infrastructure{T}=Infrastructure{DirectedTopology}(),
-        output::String="",
-        requests::Requests=Requests(),
-        verbose::Bool=false
-    ) where {T<:AbstractTopology}
+            algo::AbstractAlgorithm = ShortestPath(),
+            infrastructure::Infrastructure{T} = Infrastructure{DirectedTopology}(),
+            output::String = "",
+            requests::Requests = Requests(),
+            verbose::Bool = false
+    ) where {T <: AbstractTopology}
         return new{T}(algo, infrastructure, output, requests, verbose)
     end
 end
@@ -69,7 +69,7 @@ Compute the best load allocation and return if it is a valid one.
 - `demands`: if algo is `KuMoFlowExt.MinCostFlow`, demands are required
 - `ii`: a counter to measure the approximative progress of the simulation
 """
-function valid_load(exe, task, args, ii=0)
+function valid_load(exe, task, args, ii = 0)
     occ, u, j = task.occ, task.user, task.job
 
     capacities, demands, g, _, _, state, _ = extract_loop_arguments(args)
@@ -77,12 +77,12 @@ function valid_load(exe, task, args, ii=0)
     nodes = exe.infrastructure.topology.nodes
     links = exe.infrastructure.topology.links
 
-    best_links, best_cost, best_node =
-        inner_queue(exe, task, args, nodes, ii; links, demands)
+    best_links, best_cost, best_node = inner_queue(
+        exe, task, args, nodes, ii; links, demands)
     compare_links(i, j) = state.links[i, j] + best_links[i, j] .< capacities[i, j]
     valid_links = mapreduce(e -> compare_links(src(e), dst(e)), *, edges(g))
-    valid_nodes =
-        state.nodes[best_node] + j.containers ≤ capacity(exe.infrastructure.topology.nodes[best_node])
+    valid_nodes = state.nodes[best_node] + j.containers ≤
+                  capacity(exe.infrastructure.topology.nodes[best_node])
 
     return (best_links, best_cost, best_node, valid_links && valid_nodes)
 end
@@ -95,7 +95,7 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
     ii = 0
     p = Progress(
         2 * length(loads);
-        desc="Simulating with $algo synchronously", showspeed=true, color=:normal
+        desc = "Simulating with $algo synchronously", showspeed = true, color = :normal
     )
 
     push!(times, "start_tasks" => time() - start)
@@ -130,8 +130,8 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
         next_queued = iterate(queued, previous_queued)
         if next_queued !== nothing && unchecked_unload
             (task, _) = next_queued
-            best_links, best_cost, best_node, is_valid =
-                valid_load(exe, task, args, demands)
+            best_links, best_cost, best_node, is_valid = valid_load(
+                exe, task, args, demands)
 
             if is_valid
                 j = task.job
@@ -174,8 +174,7 @@ function execute_loop(exe::BatchSimulation, args, containers, start)
 
         # Nothing can be unload or executed from the queue => load new task
         (task, ts) = next_load
-        best_links, best_cost, best_node, is_valid =
-            valid_load(exe, task, args)
+        best_links, best_cost, best_node, is_valid = valid_load(exe, task, args)
         if is_valid
             ii += 1
             j = task.job
@@ -228,7 +227,7 @@ end
 
 #SECTION - Requests API
 
-function add_node!(exe::BatchSimulation, t::Float64, r::N) where {N<:AbstractNode}
+function add_node!(exe::BatchSimulation, t::Float64, r::N) where {N <: AbstractNode}
     exe.infrastructure.n += 1
     req = NodeRequest(exe.infrastructure.n, r, t)
     push!(exe.requests, req)
@@ -240,19 +239,19 @@ function rem_node!(exe::BatchSimulation, t::Float64, id::Int)
 end
 
 function change_node!(
-    exe::BatchSimulation, t::Float64, id::Int, r::N
-) where {N<:AbstractNode}
+        exe::BatchSimulation, t::Float64, id::Int, r::N
+) where {N <: AbstractNode}
     req = NodeRequest(id, r, t)
     push!(exe.requests, req)
 end
 
 function add_link!(
-    exe::BatchSimulation,
-    t::Float64,
-    source::Int,
-    target::Int,
-    r::L,
-) where {L<:AbstractLink}
+        exe::BatchSimulation,
+        t::Float64,
+        source::Int,
+        target::Int,
+        r::L
+) where {L <: AbstractLink}
     exe.infrastructure.m += 1
     req = LinkRequest(r, source, t, target)
     push!(exe.requests, req)
@@ -264,12 +263,12 @@ function rem_link!(exe::BatchSimulation, t::Float64, source::Int, target::Int)
 end
 
 function change_link!(
-    exe::BatchSimulation,
-    t::Float64,
-    source::Int,
-    target::Int,
-    r::L,
-) where {L<:AbstractLink}
+        exe::BatchSimulation,
+        t::Float64,
+        source::Int,
+        target::Int,
+        r::L
+) where {L <: AbstractLink}
     req = LinkRequest(r, source, t, target)
     push!(exe.requests, req)
 end
@@ -314,11 +313,11 @@ function add_job!(exe::BatchSimulation, t::Float64, j::Job, u_id::Int, d_id::Int
 end
 
 function simulation(;
-    algo::AbstractAlgorithm=ShortestPath(),
-    directed::Bool=true,
-    output::String="",
-    requests::Requests=Requests(),
-    verbose::Bool=false
+        algo::AbstractAlgorithm = ShortestPath(),
+        directed::Bool = true,
+        output::String = "",
+        requests::Requests = Requests(),
+        verbose::Bool = false
 )
     infrastructure = Infrastructure{directed ? DirectedTopology : Topology}()
     return BatchSimulation(; algo, infrastructure, output, requests, verbose)
@@ -327,11 +326,11 @@ end
 simulate(s::BatchSimulation) = execute(s)
 
 function simulate(;
-    algo::AbstractAlgorithm=ShortestPath(),
-    directed::Bool=true,
-    output="",
-    requests::Requests=Requests(),
-    verbose=false
+        algo::AbstractAlgorithm = ShortestPath(),
+        directed::Bool = true,
+        output = "",
+        requests::Requests = Requests(),
+        verbose = false
 )
     return execute(simulation(; algo, directed, output, requests, verbose))
 end

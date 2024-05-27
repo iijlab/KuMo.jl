@@ -72,8 +72,6 @@ include("entity.jl")
 include("topology.jl")
 include("infrastructure.jl")
 
-
-
 # defines jobs, requests, and actions
 include("job.jl")
 include("request.jl")

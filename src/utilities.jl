@@ -37,7 +37,7 @@ Insert element in a sorted collection.
 - `val`: value to be inserted
 - `it`: optional iterator
 """
-function insert_sorted!(w, val, it=iterate(w))
+function insert_sorted!(w, val, it = iterate(w))
     while it !== nothing
         (elt, state) = it
         if elt.occ > val.occ

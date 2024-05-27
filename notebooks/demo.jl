@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.26
+# v0.19.42
 
 using Markdown
 using InteractiveUtils
@@ -7,9 +7,9 @@ using InteractiveUtils
 # ╔═╡ 1e980354-f51c-11ed-2b39-112a878daeb1
 # ╠═╡ show_logs = false
 begin
-	using Pkg
-	Pkg.develop("KuMo")
-	using KuMo, GLMakie
+    using Pkg
+    Pkg.develop("KuMo")
+    using KuMo, GLMakie
 end;
 
 # ╔═╡ b274c32b-f57c-4be1-aea4-e9df8a32f876
@@ -50,7 +50,8 @@ To interact with our interface we create an interactive graphical `agent`. All o
 """
 
 # ╔═╡ e1704f31-4434-4437-97aa-3a09a3a9adfc
-agent = show_interactive_run(); sleep(5)
+agent = show_interactive_run();
+sleep(5);
 
 # ╔═╡ 78c80be4-d041-40ea-9c47-f021d5fccbb4
 md"""
@@ -75,10 +76,10 @@ We should also connect those nodes together. For the sake of simplicity, let's g
 
 # ╔═╡ e528edae-c223-4870-b699-bc614c0d12b3
 begin
-	link!(agent, 1, 2, KuMo.FreeLink())
-	link!(agent, 2, 3, KuMo.FreeLink())
-	link!(agent, 3, 4, KuMo.FreeLink())
-	link!(agent, 4, 1, KuMo.FreeLink())
+    link!(agent, 1, 2, KuMo.FreeLink())
+    link!(agent, 2, 3, KuMo.FreeLink())
+    link!(agent, 3, 4, KuMo.FreeLink())
+    link!(agent, 4, 1, KuMo.FreeLink())
 end;
 
 # ╔═╡ 59fddd58-8bae-4d37-a076-2576387dd1d8
@@ -123,7 +124,8 @@ And now for the real calls.
 job!(agent, 0, 2, 1, 0, 2, 2, 0.02);
 
 # ╔═╡ aaa97db5-3a6d-4ceb-a8f3-85425e93649a
-sleep(2); job!(agent, 0, 1, 1, 0, 1, 1, 0.01; stop=5.0);
+sleep(2);
+job!(agent, 0, 1, 1, 0, 1, 1, 0.01; stop = 5.0);
 
 # ╔═╡ 8927ec93-88d3-4aa0-ab00-a8eaad495e11
 md"""
@@ -261,7 +263,10 @@ data!(agent, time, id, location) # move
 """
 
 # ╔═╡ b37bb832-f185-4e49-a9f4-769c15b78e47
+# ╠═╡ disabled = true
+#=╠═╡
 stop!(agent)
+  ╠═╡ =#
 
 # ╔═╡ 2bb9377a-73ac-4017-ac6a-d1995a0617e0
 # ╠═╡ disabled = true

@@ -1,4 +1,4 @@
-struct InteractiveRun{T<:AbstractTopology} <: AbstractExecution
+struct InteractiveRun{T <: AbstractTopology} <: AbstractExecution
     algo::AbstractAlgorithm
     infrastructure::Infrastructure{T}
     output::String
@@ -7,22 +7,22 @@ struct InteractiveRun{T<:AbstractTopology} <: AbstractExecution
     verbose::Bool
 
     function InteractiveRun(;
-        algo::AbstractAlgorithm=ShortestPath(),
-        directed=true,
-        infrastructure::Infrastructure{T}=
-        Infrastructure{directed ? DirectedTopology : Topology}(),
-        output::String="",
-        time_limit::Float64=Inf,
-        verbose::Bool=false
-    ) where {T<:AbstractTopology}
+            algo::AbstractAlgorithm = ShortestPath(),
+            directed = true,
+            infrastructure::Infrastructure{T} =
+            Infrastructure{directed ? DirectedTopology : Topology}(),
+            output::String = "",
+            time_limit::Float64 = Inf,
+            verbose::Bool = false
+    ) where {T <: AbstractTopology}
         df = DataFrame(
-            selected=Float64[],
-            total=Float64[],
-            duration=Float64[],
-            solving_time=Float64[],
-            instant=Float64[]
+            selected = Float64[],
+            total = Float64[],
+            duration = Float64[],
+            solving_time = Float64[],
+            instant = Float64[]
         )
-        times = Dict{String,Float64}()
+        times = Dict{String, Float64}()
         results = ExecutionResults(df, times)
         return new{T}(algo, infrastructure, output, results, time_limit, verbose)
     end
@@ -107,12 +107,14 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
                 push_snap!(snapshots, args.state, 0, 0, 0, 0, time() - start, n)
                 links = deepcopy(args.state.links[1:n, 1:n])
                 nodes = deepcopy(args.state.nodes[1:n])
-                snap = SnapShot(State(links, nodes), 0.0, 0.0, 0.0, 0.0, round(time() - start; digits=5))
+                snap = SnapShot(State(links, nodes), 0.0, 0.0, 0.0,
+                    0.0, round(time() - start; digits = 5))
                 take!(containers.results_free)
                 add_snap_to_df!(exe.results.df, snap, exe.infrastructure.topology)
                 put!(containers.results_free, true)
 
-                isready(containers.unchecked_unload) || put!(containers.unchecked_unload, true)
+                isready(containers.unchecked_unload) ||
+                    put!(containers.unchecked_unload, true)
                 continue
             end
 
@@ -131,7 +133,8 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
                     push_snap!(snapshots, args.state, 0, 0, 0, 0, time() - start, n)
                     links = deepcopy(args.state.links[1:n, 1:n])
                     nodes = deepcopy(args.state.nodes[1:n])
-                    snap = SnapShot(State(links, nodes), 0.0, 0.0, 0.0, 0.0, round(time() - start; digits=5))
+                    snap = SnapShot(State(links, nodes), 0.0, 0.0, 0.0,
+                        0.0, round(time() - start; digits = 5))
                     take!(containers.results_free)
                     add_snap_to_df!(exe.results.df, snap, exe.infrastructure.topology)
                     put!(containers.results_free, true)
@@ -139,7 +142,9 @@ function execute_loop(exe::InteractiveRun, args, containers, start)
                     # Assign unload
                     @spawn begin
                         sleep(j.duration)
-                        put!(containers.unloads, UnloadJobAction(time() - start, best_node, j.containers, best_links))
+                        put!(containers.unloads,
+                            UnloadJobAction(
+                                time() - start, best_node, j.containers, best_links))
                         put!(containers.has_queue, true)
                     end
                 else
@@ -193,14 +198,15 @@ function stop!(agent::InteractiveInterface, job_id::Int)
 end
 
 # node
-function add_node!(exe::InteractiveRun, t::Float64, r::N) where {N<:AbstractNode}
+function add_node!(exe::InteractiveRun, t::Float64, r::N) where {N <: AbstractNode}
     exe.infrastructure.n += 1
     return NodeAction(exe.infrastructure.n, t, r)
 end
 
 rem_node!(::InteractiveRun, t::Float64, id::Int64) = NodeAction(id, t, nothing)
 
-function change_node!(::InteractiveRun, t::Float64, id::Int64, r::N) where {N<:AbstractNode}
+function change_node!(
+        ::InteractiveRun, t::Float64, id::Int64, r::N) where {N <: AbstractNode}
     return NodeAction(id, t, r)
 end
 
@@ -213,7 +219,8 @@ function node!(agent::InteractiveInterface, args...)
 end
 
 # link
-function add_link!(exe::InteractiveRun, t::Float64, source::Int, target::Int, r::L) where {L<:AbstractLink}
+function add_link!(exe::InteractiveRun, t::Float64, source::Int,
+        target::Int, r::L) where {L <: AbstractLink}
     exe.infrastructure.m += 1
     return LinkAction(t, r, source, target)
 end
@@ -222,7 +229,8 @@ function rem_link!(::InteractiveRun, t::Float64, source::Int, target::Int)
     return LinkAction(t, nothing, source, target)
 end
 
-function change_link!(::InteractiveRun, t::Float64, source::Int, target::Int, r::L) where {L<:AbstractLink}
+function change_link!(::InteractiveRun, t::Float64, source::Int,
+        target::Int, r::L) where {L <: AbstractLink}
     return LinkAction(t, r, source, target)
 end
 
@@ -279,7 +287,8 @@ function data!(agent::InteractiveInterface, args...)
 end
 
 # job
-function add_job!(::InteractiveRun, t::Float64, j::J, u_id::Int, d_id::Int) where {J<:AbstractJob}
+function add_job!(
+        ::InteractiveRun, t::Float64, j::J, u_id::Int, d_id::Int) where {J <: AbstractJob}
     # @info "entered add_job" LoadJobAction(t, u_id, j, d_id)
     return LoadJobAction(t, u_id, j, d_id)
 end
@@ -293,15 +302,15 @@ function job!(agent::InteractiveInterface, args...)
 end
 
 function job!(
-    agent::InteractiveInterface,
-    backend,
-    container,
-    duration,
-    frontend,
-    data_id,
-    user_id,
-    ν=0.0;
-    stop=Inf
+        agent::InteractiveInterface,
+        backend,
+        container,
+        duration,
+        frontend,
+        data_id,
+        user_id,
+        ν = 0.0;
+        stop = Inf
 )
     j = job(backend, container, duration, frontend)
     push!(agent.job_channels, Channel{Bool}(1))

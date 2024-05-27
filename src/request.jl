@@ -10,7 +10,7 @@ start(r::AbstractRequest) = r.start
 struct Requests
     requests::Vector{AbstractRequest}
 
-    Requests(r::Vector{AbstractRequest}=Vector{AbstractRequest}()) = new(r)
+    Requests(r::Vector{AbstractRequest} = Vector{AbstractRequest}()) = new(r)
 end
 
 Base.push!(reqs::Requests, r) = push!(reqs.requests, r)
@@ -107,20 +107,20 @@ Base.iterate(reqs::Requests, args...) = iterate(reqs.requests, args...)
 #     return reqs
 # end
 
-struct JobRequest{J<:AbstractJob} <: AbstractRequest
+struct JobRequest{J <: AbstractJob} <: AbstractRequest
     data::Int
     job::J
     start::Float64
     user::Int
 end
 
-struct NodeRequest{R<:Union{AbstractNode,Nothing}} <: AbstractRequest
+struct NodeRequest{R <: Union{AbstractNode, Nothing}} <: AbstractRequest
     id::Int
     resource::R
     start::Float64
 end
 
-struct LinkRequest{R<:Union{AbstractLink,Nothing}} <: AbstractRequest
+struct LinkRequest{R <: Union{AbstractLink, Nothing}} <: AbstractRequest
     resource::R
     source::Int
     start::Float64

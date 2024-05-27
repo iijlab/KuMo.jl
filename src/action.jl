@@ -4,7 +4,7 @@ occ(action::AbstractAction) = action.occ
 
 Base.isless(x::AbstractAction, y::AbstractAction) = isless(occ(x), occ(y))
 
-struct LoadJobAction{J<:AbstractJob} <: AbstractAction
+struct LoadJobAction{J <: AbstractJob} <: AbstractAction
     occ::Float64
     data::Int
     job::J
@@ -16,7 +16,7 @@ struct UnloadJobAction <: AbstractAction
     occ::Float64
     node::Int
     vload::Int
-    lloads::SparseMatrixCSC{Float64,Int64}
+    lloads::SparseMatrixCSC{Float64, Int64}
 end
 function action(last_unload, j::AbstractJob, node_id, links)
     return UnloadJobAction(last_unload + j.duration, node_id, j.containers, links)
@@ -24,14 +24,14 @@ end
 
 abstract type StructAction <: AbstractAction end
 
-struct NodeAction{R<:Union{AbstractNode,Nothing}} <: StructAction
+struct NodeAction{R <: Union{AbstractNode, Nothing}} <: StructAction
     id::Int
     occ::Float64
     resource::R
 end
 action(r::NodeRequest) = NodeAction(r.id, r.start, r.resource)
 
-struct LinkAction{R<:Union{AbstractLink,Nothing}} <: StructAction
+struct LinkAction{R <: Union{AbstractLink, Nothing}} <: StructAction
     occ::Float64
     resource::R
     source::Int

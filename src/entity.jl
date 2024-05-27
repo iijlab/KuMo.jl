@@ -38,7 +38,7 @@ user(loc) = user(rand(loc))
 
 #SECTION - Test Items
 
-@testitem "Entities: Data" tags = [:entity, :data] begin
+@testitem "Entities: Data" tags=[:entity, :data] begin
     import KuMo: data, location, location!
     d = data(42)
     @test location(d) == 42
@@ -46,7 +46,7 @@ user(loc) = user(rand(loc))
     @test location(d) == 1
 end
 
-@testitem "Entities: User" tags = [:entity, :user] begin
+@testitem "Entities: User" tags=[:entity, :user] begin
     import KuMo: user, location, location!
     u = user(42)
     @test location(u) == 42

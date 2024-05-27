@@ -23,7 +23,7 @@ Retrieves the path from `u` to `v`.
 - `paths`: list of shortest paths within a network
 """
 function retrieve_path(u, v, paths)
-    path = Vector{Pair{Int,Int}}()
+    path = Vector{Pair{Int, Int}}()
     w = v
     while w != u
         x = paths.parents[w]
@@ -51,7 +51,7 @@ DOCSTRING
 - `demands`: not needed for `ShortestPath` algorithm
 - `links`: description of the links topology
 """
-function inner_queue(exe, task, args, nodes, ii=0; lck=ReentrantLock(), links, demands)
+function inner_queue(exe, task, args, nodes, ii = 0; lck = ReentrantLock(), links, demands)
     u, j = user_location(exe, task.user), task.job
     capacities, demands, g, _, _, state, _ = extract_loop_arguments(args)
     data_loc = exe.infrastructure.data[task.data].location
@@ -66,8 +66,8 @@ function inner_queue(exe, task, args, nodes, ii=0; lck=ReentrantLock(), links, d
     user_costs = nothing
     total_cost = Inf
 
-    data_path = Vector{Pair{Int,Int}}()
-    user_path = Vector{Pair{Int,Int}}()
+    data_path = Vector{Pair{Int, Int}}()
+    user_path = Vector{Pair{Int, Int}}()
 
     lock(lck)
     try
@@ -77,17 +77,15 @@ function inner_queue(exe, task, args, nodes, ii=0; lck=ReentrantLock(), links, d
         )
         user_costs = zeros(size(capacities))
         j.frontend == 0 || for i in 1:size(state.links, 1), k in 1:size(state.links, 1)
-
             if (i, k) ∈ keys(links)
-                user_costs[i, k] =
-                    pseudo_cost(links[(i, k)], state.links[i, k] + j.frontend)
+                user_costs[i, k] = pseudo_cost(links[(i, k)], state.links[i, k] + j.frontend)
             end
         end
     finally
         unlock(lck)
     end
 
-    paths_user = dijkstra_shortest_paths(g, u, user_costs; trackvertices=true)
+    paths_user = dijkstra_shortest_paths(g, u, user_costs; trackvertices = true)
 
     for v in keys(node_costs)
         current_path = retrieve_path(u, v, paths_user)
@@ -112,7 +110,7 @@ function inner_queue(exe, task, args, nodes, ii=0; lck=ReentrantLock(), links, d
 
         paths_data = dijkstra_shortest_paths(
             g, data_loc, data_costs;
-            trackvertices=true
+            trackvertices = true
         )
 
         current_cost = paths_user.dists[v] + paths_data.dists[v] + node_costs[v]
@@ -137,7 +135,7 @@ function inner_queue(exe, task, args, nodes, ii=0; lck=ReentrantLock(), links, d
     finally
         unlock(lck)
     end
-    paths_data = dijkstra_shortest_paths(g, data_loc, data_costs; trackvertices=true)
+    paths_data = dijkstra_shortest_paths(g, data_loc, data_costs; trackvertices = true)
 
     for v in keys(node_costs)
         current_path = retrieve_path(data_loc, v, paths_data)
@@ -162,7 +160,7 @@ function inner_queue(exe, task, args, nodes, ii=0; lck=ReentrantLock(), links, d
 
         paths_user = dijkstra_shortest_paths(
             g, u, user_costs;
-            trackvertices=true
+            trackvertices = true
         )
 
         current_cost = paths_user.dists[v] + paths_data.dists[v] + node_costs[v]

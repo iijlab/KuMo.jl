@@ -10,8 +10,8 @@ A structure to store the state of the different resources, e.g. nodes and links,
 - `State(links, nodes)`: inner constructor given the `links` and `nodes` of an existing state
 """
 struct State
-    links::SparseMatrixCSC{Float64,Int64}
-    nodes::SparseVector{Float64,Int64}
+    links::SparseMatrixCSC{Float64, Int64}
+    nodes::SparseVector{Float64, Int64}
 
     State(n) = new(spzeros(n, n), spzeros(n))
 
@@ -21,7 +21,7 @@ end
 links(s::State) = s.links
 links(s, i, j, ::Val{true}) = s.links[i, j]
 
-links(s, i, j, directed=true) = links(s, i, j, Val(directed))
+links(s, i, j, directed = true) = links(s, i, j, Val(directed))
 
 function links(s, i, j, ::Val{false})
     a, b = minmax(i, j)

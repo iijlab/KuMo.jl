@@ -1,7 +1,7 @@
 name = "KuMo"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
 authors = ["azzaare <jf@baffier.fr> and contributors"]
-version = "0.1.40"
+version = "0.2.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -33,20 +33,24 @@ CSV = "0.10"
 Colors = "0.12"
 DataFrames = "1"
 DataStructures = "0.18"
-Dictionaries = "0.3"
+Dictionaries = "0.4"
 Distributions = "0.25"
 DrWatson = "2"
 Graphs = "1"
-Makie = "0.19"
+Makie = "0.21"
 PrettyTables = "2"
 ProgressMeter = "1"
+Random = "1"
+ResizableArrays = "0.3"
+SparseArrays = "1"
 StatsPlots = "0.15"
 TestItemRunner = "0.2"
 TestItems = "0.1"
 julia = "1.9"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Aqua", "Test"]

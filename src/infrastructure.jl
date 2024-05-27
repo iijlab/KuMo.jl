@@ -1,7 +1,7 @@
-mutable struct Infrastructure{T<:AbstractTopology}
+mutable struct Infrastructure{T <: AbstractTopology}
     # Data
     d::Int # |data|
-    data::Dictionary{Int,Data}
+    data::Dictionary{Int, Data}
 
     # Topology
     n::Int # |nodes|
@@ -10,13 +10,13 @@ mutable struct Infrastructure{T<:AbstractTopology}
 
     # Users
     u::Int # |users|
-    users::Dictionary{Int,User}
+    users::Dictionary{Int, User}
 
     function Infrastructure{T}(;
-        data=Dictionary{Int,Data}(),
-        topology=T(),
-        users=Dictionary{Int,User}()
-    ) where {T<:AbstractTopology}
+            data = Dictionary{Int, Data}(),
+            topology = T(),
+            users = Dictionary{Int, User}()
+    ) where {T <: AbstractTopology}
         d = length(data)
         n = topology |> nodes |> length
         m = topology |> links |> length

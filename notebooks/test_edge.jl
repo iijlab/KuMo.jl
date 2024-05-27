@@ -123,7 +123,8 @@ And now for the real calls.
 job!(agent, 0, 2, 1, 0, 2, 2, 0.02);
 
 # ╔═╡ aaa97db5-3a6d-4ceb-a8f3-85425e93649a
-sleep(2); job!(agent, 0, 1, 1, 0, 1, 1, 0.01; stop=5.0);
+sleep(2);
+job!(agent, 0, 1, 1, 0, 1, 1, 0.01; stop = 5.0);
 
 # ╔═╡ 8927ec93-88d3-4aa0-ab00-a8eaad495e11
 md"""
@@ -262,10 +263,10 @@ data!(agent, time, id, location) # move
 
 # ╔═╡ 5d6aef5c-6fc0-4337-875c-583e3c7f2258
 begin
-	link!(agent, 1, 2, Link(1))
-	link!(agent, 2, 3, Link(1))
-	link!(agent, 3, 4, Link(1))
-	link!(agent, 4, 1, Link(1))
+    link!(agent, 1, 2, Link(1))
+    link!(agent, 2, 3, Link(1))
+    link!(agent, 3, 4, Link(1))
+    link!(agent, 4, 1, Link(1))
 end
 
 # ╔═╡ a0d9dc9d-bd45-428d-b3f3-3146d8dc6d1d

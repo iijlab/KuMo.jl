@@ -15,27 +15,31 @@ user_location(exe::AbstractExecution, id::Int) = user_location(infrastructure(ex
 abstract type AbstractContainers end
 
 Base.push!(sv::AbstractContainers, action::LoadJobAction) = insert_sorted!(sv.loads, action)
-Base.push!(sv::AbstractContainers, action::UnloadJobAction) = insert_sorted!(sv.unloads, action)
-Base.push!(sv::AbstractContainers, action::AbstractAction) = insert_sorted!(sv.infras, action)
+function Base.push!(sv::AbstractContainers, action::UnloadJobAction)
+    insert_sorted!(sv.unloads, action)
+end
+function Base.push!(sv::AbstractContainers, action::AbstractAction)
+    insert_sorted!(sv.infras, action)
+end
 
 ## Results
 mutable struct ExecutionResults
     df::DataFrame
-    times::Dict{String,Float64}
+    times::Dict{String, Float64}
 end
 
 #SECTION - Loop arguments
 mutable struct LoopArguments
-    capacities::SparseMatrixCSC{Float64,Int64}
-    demands::SparseVector{Float64,Int64}
+    capacities::SparseMatrixCSC{Float64, Int64}
+    demands::SparseVector{Float64, Int64}
     g::AbstractGraph
     n::Int64
     snapshots::Vector{SnapShot}
     state::State
-    times::Dict{String,Float64}
+    times::Dict{String, Float64}
 
     function LoopArguments(infra, algo, start)
-        times = Dict{String,Float64}()
+        times = Dict{String, Float64}()
         snapshots = Vector{SnapShot}()
 
         push!(times, "start_tasks" => time() - start)
@@ -78,7 +82,7 @@ function link!(exe::AbstractExecution, t::Float64, source::Int, target::Int)
     return rem_link!(exe, t, source, target)
 end
 function link!(
-    exe::AbstractExecution, t::Float64, source::Int, target::Int, r::AbstractLink
+        exe::AbstractExecution, t::Float64, source::Int, target::Int, r::AbstractLink
 )
     if (source, target) ∈ exe.infrastructure.topology |> links |> keys
         return change_link!(exe, t, source, target, r)
@@ -93,16 +97,16 @@ data!(exe::AbstractExecution, t::Float64, loc::Int) = add_data!(exe, t, loc)
 data!(exe::AbstractExecution, t::Float64, id::Int, loc::Int) = move_data!(exe, t, id, loc)
 
 function job!(
-    exe::AbstractExecution,
-    backend,
-    container,
-    duration,
-    frontend,
-    data_id,
-    user_id,
-    ν;
-    start=0.0,
-    stop=start
+        exe::AbstractExecution,
+        backend,
+        container,
+        duration,
+        frontend,
+        data_id,
+        user_id,
+        ν;
+        start = 0.0,
+        stop = start
 )
     j = job(backend, container, duration, frontend)
     for t in start:ν:stop
@@ -111,14 +115,14 @@ function job!(
 end
 
 function job!(
-    exe::AbstractExecution,
-    t::Float64,
-    backend,
-    container,
-    duration,
-    frontend,
-    data_id,
-    user_id;
+        exe::AbstractExecution,
+        t::Float64,
+        backend,
+        container,
+        duration,
+        frontend,
+        data_id,
+        user_id;
 )
     j = job(backend, container, duration, frontend)
     add_job!(exe, t, j, user_id, data_id)
@@ -147,18 +151,18 @@ function do!(exe::AbstractExecution, args, action::NodeAction)
         insert!(exe.infrastructure.topology.nodes, action.id, action.resource)
         add_vertex!(args.g)
         D = spzeros(args.demands.n + 1)
-        foreach(i -> D[i] = args.demands[i], 1:args.demands.n)
+        foreach(i -> D[i] = args.demands[i], 1:(args.demands.n))
         args.demands = D
         SN = spzeros(args.state.nodes.n + 1)
-        foreach(i -> SN[i] = args.state.nodes[i], 1:args.state.nodes.n)
+        foreach(i -> SN[i] = args.state.nodes[i], 1:(args.state.nodes.n))
 
         C = spzeros(args.capacities.n + 1, args.capacities.m + 1)
-        for i in 1:args.capacities.n, j in 1:args.capacities.m
+        for i in 1:(args.capacities.n), j in 1:(args.capacities.m)
             C[i, j] = args.capacities[i, j]
         end
         args.capacities = C
         SL = spzeros(args.state.links.n + 1, args.state.links.m + 1)
-        for i in 1:args.state.links.n, j in 1:args.state.links.m
+        for i in 1:(args.state.links.n), j in 1:(args.state.links.m)
             SL[i, j] = args.state.links[i, j]
         end
         args.state = State(SL, SN)
@@ -181,8 +185,7 @@ function do!(exe::AbstractExecution, args, action::LinkAction)
             end
         else
             # change link
-            exe.infrastructure.topology.links[(action.source, action.target)] =
-                action.resource
+            exe.infrastructure.topology.links[(action.source, action.target)] = action.resource
         end
     else
         # add link
@@ -235,19 +238,19 @@ end
 
 ## Execution
 
-function execute(exe::AbstractExecution=InteractiveRun())
+function execute(exe::AbstractExecution = InteractiveRun())
     start = time()
     v = verbose(exe)
 
-    v && (@info "containers stuff start" (time() - start))
+    v && (@info "containers stuff start" (time()-start))
     # dispatched containers
     containers = init_execution(exe)
 
-    v && (@info "args loop stuff start" (time() - start))
+    v && (@info "args loop stuff start" (time()-start))
     # shared init
     args_loop = LoopArguments(infrastructure(exe), algo(exe), start)
 
-    v && (@info "start execution: $(typeof(exe))" (time() - start))
+    v && (@info "start execution: $(typeof(exe))" (time()-start))
     # start execution
     execute_loop(exe, args_loop, containers, start)
 

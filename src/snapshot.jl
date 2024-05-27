@@ -39,10 +39,10 @@ Add a snapshot to an existing collection of snapshots.
 function push_snap!(snapshots, state, total, selected, duration, solving_time, instant, n)
     links = deepcopy(state.links[1:n, 1:n])
     nodes = deepcopy(state.nodes[1:n])
-    snap = SnapShot(State(links, nodes), total, selected, duration, solving_time, round(instant; digits=5))
+    snap = SnapShot(State(links, nodes), total, selected, duration,
+        solving_time, round(instant; digits = 5))
     push!(snapshots, snap)
 end
-
 
 # FIXME - links indices
 """
@@ -55,9 +55,9 @@ Make a DataFrame from the raw snapshots.
 - `topo`: topology of the network
 - `verbose`: if set to true, it will print a description of the snapshots in the terminal
 """
-function make_df(snapshots::Vector{SnapShot}, topo; verbose=true)
+function make_df(snapshots::Vector{SnapShot}, topo; verbose = true)
     function shape_entry(s)
-        entry = Vector{Pair{String,Float64}}()
+        entry = Vector{Pair{String, Float64}}()
         push!(entry, "selected" => s.selected)
         push!(entry, "total" => s.total)
         push!(entry, "duration" => s.duration)
@@ -140,7 +140,7 @@ end
 
 function add_snap_to_df!(df, snap, topo)
     function shape_entry(s)
-        entry = Vector{Pair{String,Float64}}()
+        entry = Vector{Pair{String, Float64}}()
         push!(entry, "selected" => s.selected)
         push!(entry, "total" => s.total)
         push!(entry, "duration" => s.duration)
@@ -169,5 +169,4 @@ function add_snap_to_df!(df, snap, topo)
     end
 
     push!(df, Dict(shape_entry(snap)))
-
 end

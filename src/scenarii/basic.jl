@@ -5,7 +5,7 @@ Collection of scenarii.
 """
 
 function _four_nodes()
-    s = simulation(; directed=false)
+    s = simulation(; directed = false)
     # Add 4 nodes
     node!(s, 0.0, Node(75))
     node!(s, 0.0, Node(75))
@@ -27,8 +27,8 @@ function _four_nodes()
     data!(s, 0.0, rand(1:4))
 
     # Add jobs
-    job!(s, 0, 1, 1, 0, 1, 1, 0.01; start=10.5, stop=20.5)
-    job!(s, 0, 1, 1, 0, 2, 2, 0.01; start=0.0, stop=40.0)
+    job!(s, 0, 1, 1, 0, 1, 1, 0.01; start = 10.5, stop = 20.5)
+    job!(s, 0, 1, 1, 0, 2, 2, 0.01; start = 0.0, stop = 40.0)
 
     return s
 end

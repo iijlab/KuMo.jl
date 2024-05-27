@@ -37,10 +37,10 @@ Construct a dictionary with random distributions to generate new jobs. Beside da
 """
 function job_distributions(; backend, container, duration, frontend)
     return Dict(
-        :backend => censored(Normal(backend[1], backend[2]); lower=1),
-        :container => censored(Normal(container[1], container[2]); lower=1),
-        :duration => censored(Normal(duration[1], duration[2]); lower=1),
-        :frontend => censored(Normal(frontend[1], frontend[2]); lower=1),
+        :backend => censored(Normal(backend[1], backend[2]); lower = 1),
+        :container => censored(Normal(container[1], container[2]); lower = 1),
+        :duration => censored(Normal(duration[1], duration[2]); lower = 1),
+        :frontend => censored(Normal(frontend[1], frontend[2]); lower = 1)
     )
 end
 
@@ -61,6 +61,6 @@ function rand_job(jd)
         round(rand(jd[:backend])),
         round(rand(jd[:container])),
         round(rand(jd[:duration])),
-        round(rand(jd[:frontend])),
+        round(rand(jd[:frontend]))
     )
 end
