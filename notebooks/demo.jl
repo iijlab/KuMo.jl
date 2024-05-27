@@ -26,7 +26,7 @@ We expect an increase in cloud computing use and resources in the coming decade.
 
 Allocating these requests optimally is not feasible. However, we want to allocate resources efficiently while taking into account
 - cost of using network resources
-- user requirements and specifities
+- user requirements and specificities
 - job specificities (backend/frontend, duration, etc.)
 - adaptive and self-stabilizing
 
@@ -102,9 +102,9 @@ foreach(_ -> user!(agent, rand(1:4)), 1:2)
 
 # ╔═╡ b3fc29e5-da48-4e93-90a3-ee6c5132961d
 md"""
-Let's add some jobs. Jobs can be periodic (with an optional time limit) or a single occurence.
+Let's add some jobs. Jobs can be periodic (with an optional time limit) or a single occurrence.
 
-For a single occurence job, we can call
+For a single occurrence job, we can call
 
 ```julia
 job!(agent, backend, container, duration, frontend, data_id, user_id)
@@ -129,7 +129,7 @@ job!(agent, 0, 1, 1, 0, 1, 1, 0.01; stop = 5.0);
 
 # ╔═╡ 8927ec93-88d3-4aa0-ab00-a8eaad495e11
 md"""
-### Pseudo-cost functions (advanced use of resources) 
+### Pseudo-cost functions (advanced use of resources)
 
 Our adaptive allocation model is based on the use of simple yet self-stabilizing resources through the definition of their pseudo-cost functions.
 
@@ -174,7 +174,7 @@ node_resource = KuMo.MultiplicativeNode(capacity, param)
 
 **Convex pseudo-cost: IdleState**
 
-Node structure that stays iddle until a bigger system load than the default node. The `param` field is used to set the activation treshold.
+Node structure that stays iddle until a bigger system load than the default node. The `param` field is used to set the activation threshold.
 
 ```julia
 node_resource = KuMo.IdleStateNode(capacity, param)
@@ -182,7 +182,7 @@ node_resource = KuMo.IdleStateNode(capacity, param)
 
 **Convex pseudo-cost: Premium**
 
-A node structure for premium resources. The `param` field set the premium treshold.
+A node structure for premium resources. The `param` field set the premium threshold.
 
 ```julia
 node_resource = KuMo.PremiumNode(capacity, param)

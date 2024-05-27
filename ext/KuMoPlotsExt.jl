@@ -82,7 +82,7 @@ plot_snaps(df, kind, ::Val{:resources}) = plot_resources(df; kind)
     plot_snaps(df::DataFrame; target=:all, plot_type=:all, title="")
 
 Plots the snapshots in `df` in a single multiplot figure.
-- `target` defines the targetted resources: `:all` (default), `:nodes`, `:links`, `resources`
+- `target` defines the targeted resources: `:all` (default), `:nodes`, `:links`, `resources`
 - `plot_type` defines the kind of plots that will be generated: `:all` (default), `:plot`, `:areaplot`
 - an optional `title`
 """
@@ -117,7 +117,7 @@ end
 
 Simulate and plot the snapshots generate through `scenario` in a single multiplot figure.
 - `verbose` defines if the simulation is verbose or not (default to `true`)
-- `target` defines the targetted resources: `:all` (default), `:nodes`, `:links`, `resources`
+- `target` defines the targeted resources: `:all` (default), `:nodes`, `:links`, `resources`
 - `plot_type` defines the kind of plots that will be generated: `:all` (default), `:plot`, `:areaplot`
 - an optional `title`
 """
@@ -264,7 +264,7 @@ function figure_4(;
         return s
     end
 
-    # DataFrame to store simualtion results
+    # DataFrame to store simulation results
     df = simulate(local_scenario()).df
 
     # Plot
@@ -353,7 +353,7 @@ function figure_5(;
         return s
     end
 
-    # DataFrame to store simualtion results
+    # DataFrame to store simulation results
     df = simulate(local_scenario()).df
 
     # Plot

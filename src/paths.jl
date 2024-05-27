@@ -46,7 +46,7 @@ DOCSTRING
 - `capacities`: links capacities
 - `state`: current state of the network
 - `algo`: `ShortestPath <: AbstractAlgorithm`
-- `ii`: a counter to mesure the progress in the simulation
+- `ii`: a counter to measure the progress in the simulation
 - `lck`: a lck for asynchronous simulation
 - `demands`: not needed for `ShortestPath` algorithm
 - `links`: description of the links topology

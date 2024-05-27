@@ -109,7 +109,7 @@ end
 """
     clean(snaps)
 
-Clean the snapshots by merging snaps occuring at the same time.
+Clean the snapshots by merging snaps occurring at the same time.
 """
 function clean(snaps)
     snapshots = Vector{SnapShot}()

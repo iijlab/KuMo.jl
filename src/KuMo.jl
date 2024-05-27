@@ -17,7 +17,7 @@ using SparseArrays
 using TestItemRunner
 using TestItems
 
-# SECTION - improts from Base
+# SECTION - imports from Base
 using Base.Threads
 
 # SECTION - exports

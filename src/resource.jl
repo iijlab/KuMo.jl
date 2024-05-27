@@ -70,7 +70,7 @@ end
 """
     IdleStateNode{T1 <: Number, T2 <: Number} <: AbstractNode
 
-Node structure that stays iddle until a bigger system load than the default node. The `param` field is used to set the activation treshold.
+Node structure that stays iddle until a bigger system load than the default node. The `param` field is used to set the activation threshold.
 """
 struct IdleStateNode{T1 <: Number, T2 <: Number} <: AbstractNode
     capacity::T1
@@ -84,7 +84,7 @@ end
 """
     PremiumNode{T1 <: Number, T2 <: Number} <: AbstractNode
 
-A node structure for premium resources. The `param` field set the premium treshold.
+A node structure for premium resources. The `param` field set the premium threshold.
 """
 struct PremiumNode{T1 <: Number, T2 <: Number} <: AbstractNode
     capacity::T1
