@@ -7,7 +7,8 @@ Pkg.update()
 try
     using DrWatson
 catch e
-    @warn "Installing DrWatson (catching package missing error)" exception = (e, catch_backtrace())
+    @warn "Installing DrWatson (catching package missing error)" exception=(
+        e, catch_backtrace())
     Pkg.add("DrWatson")
     using DrWatson
 end
@@ -15,7 +16,8 @@ end
 try
     using StatsPlots
 catch e
-    @warn "Installing StatsPlots (catching package missing error)" exception = (e, catch_backtrace())
+    @warn "Installing StatsPlots (catching package missing error)" exception=(
+        e, catch_backtrace())
     Pkg.add("FileIO")
     Pkg.add("Plots")
     Pkg.add("StatsPlots")
@@ -25,8 +27,9 @@ end
 try
     using KuMo
 catch e
-    @warn "Installing KuMo (catching package missing error)" exception = (e, catch_backtrace())
-    Pkg.add(url="https://github.com/Azzaare/KuMo.jl")
+    @warn "Installing KuMo (catching package missing error)" exception=(
+        e, catch_backtrace())
+    Pkg.add(url = "https://github.com/Azzaare/KuMo.jl")
     using KuMo
 end
 
@@ -38,7 +41,8 @@ if LATEX
         try
             using PGFPlotsX
         catch e
-            @warn "Installing PGFPlotsX (catching package missing error)" exception = (e, catch_backtrace())
+            @warn "Installing PGFPlotsX (catching package missing error)" exception=(
+                e, catch_backtrace())
             Pkg.add("PGFPlotsX")
             using PGFPlotsX
         end
@@ -58,11 +62,13 @@ function main(; title = true, latex = true)
 
     # foreach(f -> figures(f; title, latex), F)
 
-    figures(:figure_3; select=:standard, title, latex)
-    figures(:figure_3; select=:variants, output=joinpath(pwd(), "..", "figures", "figure3_pseudocosts_variants.pdf"), title, latex)
+    figures(:figure_3; select = :standard, title, latex)
+    figures(:figure_3; select = :variants,
+        output = joinpath(pwd(), "..", "figures", "figure3_pseudocosts_variants.pdf"),
+        title, latex)
 
     return nothing
 end
 
 # main(; title=true, latex=LATEX) # with titles for review
-main(; title=false, latex=LATEX) # without titles for integration in the paper
+main(; title = false, latex = LATEX) # without titles for integration in the paper
