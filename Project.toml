@@ -1,7 +1,7 @@
-authors = ["azzaare <jf@baffier.fr> and contributors"]
 name = "KuMo"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
-version = "0.1.40"
+authors = ["azzaare <jf@baffier.fr> and contributors"]
+version = "0.2.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -11,12 +11,10 @@ Dictionaries = "85a47980-9c8c-11e8-2b9f-f7ca1fa99fb4"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
-PackageCompatUI = "65465c31-362d-417a-a2f0-7fa38ae507b9"
 PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-SimpleTraits = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
+ResizableArrays = "df514bf8-98b6-11e9-19f1-af1e340ea726"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
@@ -35,23 +33,24 @@ CSV = "0.10"
 Colors = "0.12"
 DataFrames = "1"
 DataStructures = "0.18"
-Dictionaries = "0.3"
+Dictionaries = "0.4"
 Distributions = "0.25"
 DrWatson = "2"
 Graphs = "1"
-Makie = "0.19"
-PackageCompatUI = "1"
+Makie = "0.21"
 PrettyTables = "2"
 ProgressMeter = "1"
-RecipesBase = "1"
-SimpleTraits = "0.9"
+Random = "1"
+ResizableArrays = "0.3"
+SparseArrays = "1"
 StatsPlots = "0.15"
 TestItemRunner = "0.2"
 TestItems = "0.1"
 julia = "1.9"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Aqua", "Test"]

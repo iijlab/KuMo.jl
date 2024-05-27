@@ -26,3 +26,42 @@ end
 Return the min of `x` and `y` if `b` is `false`, and the max of `x` and `y` otherwise.
 """
 cond_minmax(x, y, b) = b ? (x, y) : minmax(x, y)
+
+"""
+    insert_sorted!(w, val, it = iterate(w))
+
+Insert element in a sorted collection.
+
+# Arguments:
+- `w`: sorted collection
+- `val`: value to be inserted
+- `it`: optional iterator
+"""
+function insert_sorted!(w, val, it = iterate(w))
+    while it !== nothing
+        (elt, state) = it
+        if elt.occ > val.occ
+            insert!(w, state - 1, val)
+            return w
+        end
+        it = iterate(w, state)
+    end
+    push!(w, val)
+    return w
+end
+
+function safe_get_index(M::AbstractMatrix, i, j)
+    if i > size(M, 1) || j > size(M, 2)
+        return zero(eltype(M))
+    else
+        return M[i, j]
+    end
+end
+
+function safe_get_index(V::AbstractVector, i)
+    if i > length(V)
+        return zero(eltype(V))
+    else
+        return V[i]
+    end
+end

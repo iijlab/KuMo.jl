@@ -5,6 +5,7 @@
 *.jl.mem
 /Manifest.toml
 test/Manifest.toml
+docs/Manifest.toml
 *Manifest.toml
 scripts/Manifest.toml
 /docs/build/

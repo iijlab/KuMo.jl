@@ -1,6 +1,6 @@
 module KuMo
 
-# SECTION - usings and imports
+## SECTION - usings and imports
 
 using CSV
 using DataFrames
@@ -9,55 +9,30 @@ using Dictionaries
 using Distributions
 using DrWatson
 using Graphs
-# using JuMP
-# using MathOptInterface
 using PrettyTables
 using ProgressMeter
 using Random
-using SimpleTraits
+using ResizableArrays
 using SparseArrays
 using TestItemRunner
 using TestItems
 
+# SECTION - imports from Base
+using Base.Threads
+
 # SECTION - exports
-export figures
-export job
-export job_distributions
-export make_df
-export make_links
-export make_nodes
-export marks
-# export mincost_flow
-# export plot_links
-# export plot_nodes
-# export plot_resources
-export predict_cost
-export predict_best_cost
-export pseudo_cost
-export requests
-export scenario
+export execute
 export simulate
-export simulate_and_plot
-export show_pseudo_costs
-export show_simulation
-export smooth
-export spike
-export steady
-export user
+export simulation
 
-export Scenario
+export data!
+export job!
+export link!
+export node!
+export stop!
+export user!
 
-export MinCostFlow
-export ShortestPath
-
-export Request
-export Requests
-export PeriodicRequests
-
-export Link
-export ConvexLink
-export FlatLink
-export FreeLink
+export user_location
 
 export Node
 export AdditiveNode
@@ -67,46 +42,57 @@ export IdleStateNode
 export MultiplicativeNode
 export PremiumNode
 
-export SCENARII
+export Link
+export ConvexLink
+export FreeLink
+export FlatLink
 
+export BatchSimulation
+export InteractiveRun
+
+export results
+
+export figures
+export show_interactive_run
+export show_pseudo_costs
+export show_simulation
+export simulate_and_plot
 
 ## SECTION - includes
 
 # utilities
 include("utilities.jl")
 
-# defines structure for data items
-include("data.jl")
-
 # defines resources and list of generic and specialized pseudo-cost functions for those
 include("pseudocosts.jl")
 include("resource.jl")
 
-# defines jobs, requests, and users
+# defines infrastructure, and entities
+include("entity.jl")
+include("topology.jl")
+include("infrastructure.jl")
+
+# defines jobs, requests, and actions
 include("job.jl")
 include("request.jl")
-include("user.jl")
+include("action.jl")
 
-# algorithms to compute paths (shortest, mincostflow) in the network
+# algorithms to compute paths (shortest, mincostflow [extension]) in the network
 include("paths.jl")
 
-# network topology and scenario
-include("topology.jl")
-include("scenario.jl")
+# execution
+include("state.jl")
+include("snapshot.jl")
+include("execute.jl")
+
+# extras
+include("flock.jl")
 
 # scenarii (dictionaries)
 include("scenarii/basic.jl")
 
-# simulation
-include("simulate.jl")
-
-# # visualization
-# include("visualization/statsplots.jl")
-# include("visualization/makie.jl")
-
-# using .VizStatsPlots: simulate_and_plot, plot_links, plot_nodes, plot_resources
-# using .VizMakie: show_pseudo_costs, show_simulation
-
+# functions definition for extensions
+function show_interactive_run end
 function show_pseudo_costs end
 function show_simulation end
 function simulate_and_plot end

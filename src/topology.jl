@@ -11,9 +11,16 @@ links(topo::AbstractTopology, i, j) = topo.links[(i, j)]
 
 A structure to store the topology of a network. Beside the graph structure itself, it also stores the kinds of all nodes and links.
 """
-struct DirectedTopology{N<:AbstractNode,L<:AbstractLink} <: AbstractTopology
-    nodes::Dictionary{Int,N}
-    links::Dictionary{Tuple{Int,Int},L}
+struct DirectedTopology <: AbstractTopology
+    nodes::Dictionary{Int, AbstractNode}
+    links::Dictionary{Tuple{Int, Int}, AbstractLink}
+end
+
+function DirectedTopology(;
+        nodes = Dictionary{Int, AbstractNode}(),
+        links = Dictionary{Tuple{Int, Int}, AbstractLink}()
+)
+    return DirectedTopology(nodes, links)
 end
 
 """
@@ -21,9 +28,16 @@ end
 
 A structure to store the topology of a network. Beside the graph structure itself, it also stores the kinds of all nodes and links.
 """
-struct Topology{N<:AbstractNode,L<:AbstractLink} <: AbstractTopology
-    nodes::Dictionary{Int,N}
-    links::Dictionary{Tuple{Int,Int},L}
+struct Topology{N <: AbstractNode, L <: AbstractLink} <: AbstractTopology
+    nodes::Dictionary{Int, N}
+    links::Dictionary{Tuple{Int, Int}, L}
+end
+
+function Topology(;
+        nodes = Dictionary{Int, AbstractNode}(),
+        links = Dictionary{Tuple{Int, Int}, AbstractLink}()
+)
+    return Topology(nodes, links)
 end
 
 links(topo::Topology, i, j) = topo.links[minmax(i, j)]

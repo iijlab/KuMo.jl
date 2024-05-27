@@ -13,14 +13,12 @@ The most generic job type.
 # Arguments:
 - `backend::Int`: size of the backend data to be sent from data location to the server
 - `containers::Int`: number of containers required to execute the job
-- `data_location::Int`: location of the data (node id)
 - `duration::Float64`: job duration
 - `frontend::Int`: size of the frontend data to be sent from the user location to the server
 """
 struct Job <: AbstractJob
     backend::Int
     containers::Int
-    data_location::Int
     duration::Float64
     frontend::Int
 end
@@ -37,13 +35,12 @@ Construct a dictionary with random distributions to generate new jobs. Beside da
 - `duration`
 - `frontend`
 """
-function job_distributions(; backend, container, data_locations, duration, frontend)
+function job_distributions(; backend, container, duration, frontend)
     return Dict(
-        :backend => censored(Normal(backend[1], backend[2]); lower=1),
-        :container => censored(Normal(container[1], container[2]); lower=1),
-        :data_location => data_locations,
-        :duration => censored(Normal(duration[1], duration[2]); lower=1),
-        :frontend => censored(Normal(frontend[1], frontend[2]); lower=1),
+        :backend => censored(Normal(backend[1], backend[2]); lower = 1),
+        :container => censored(Normal(container[1], container[2]); lower = 1),
+        :duration => censored(Normal(duration[1], duration[2]); lower = 1),
+        :frontend => censored(Normal(frontend[1], frontend[2]); lower = 1)
     )
 end
 
@@ -63,8 +60,7 @@ function rand_job(jd)
     return Job(
         round(rand(jd[:backend])),
         round(rand(jd[:container])),
-        round(rand(jd[:data_location])),
         round(rand(jd[:duration])),
-        round(rand(jd[:frontend])),
+        round(rand(jd[:frontend]))
     )
 end
