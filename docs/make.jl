@@ -6,11 +6,11 @@ DocMeta.setdocmeta!(KuMo, :DocTestSetup, :(using KuMo); recursive = true)
 makedocs(;
     modules = [KuMo],
     authors = "azzaare <jf@baffier.fr> and contributors",
-    repo = "https://github.com/Azzaare/KuMo.jl/blob/{commit}{path}#{line}",
+    repo = "https://github.com/iijlab/KuMo.jl/blob/{commit}{path}#{line}",
     sitename = "KuMo.jl",
     format = Documenter.HTML(;
         prettyurls = get(ENV, "CI", "false") == "true",
-        canonical = "https://Azzaare.github.io/KuMo.jl",
+        canonical = "https://iijlab.github.io/KuMo.jl",
         assets = String[]
     ),
     pages = [
@@ -19,6 +19,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo = "github.com/Azzaare/KuMo.jl",
+    repo = "github.com/iijlab/KuMo.jl",
     devbranch = "main"
 )
