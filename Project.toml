@@ -45,7 +45,7 @@ ResizableArrays = "0.3"
 SparseArrays = "1"
 StatsPlots = "0.15"
 TestItemRunner = "0.2"
-TestItems = "0.1"
+TestItems = "0.1, 1"
 julia = "1.9"
 
 [extras]
