@@ -1,7 +1,7 @@
 name = "KuMo"
 uuid = "b681f84e-bd48-4deb-8595-d3e0ff1e4a55"
 authors = ["azzaare <jf@baffier.fr> and contributors"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -16,7 +16,6 @@ ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 ResizableArrays = "df514bf8-98b6-11e9-19f1-af1e340ea726"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 
 [weakdeps]
@@ -44,13 +43,13 @@ Random = "1"
 ResizableArrays = "0.3"
 SparseArrays = "1"
 StatsPlots = "0.15"
-TestItemRunner = "0.2"
-TestItems = "0.1"
+TestItems = "1"
 julia = "1.9"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 
 [targets]
-test = ["Aqua", "Test"]
+test = ["Aqua", "Test", "TestItemRunner"]

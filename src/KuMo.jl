@@ -14,7 +14,6 @@ using ProgressMeter
 using Random
 using ResizableArrays
 using SparseArrays
-using TestItemRunner
 using TestItems
 
 # SECTION - imports from Base

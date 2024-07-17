@@ -37,8 +37,8 @@ function show_pseudo_costs(pseudo_costs, ::Val{:interactive})
     ax = Axis(
         fig[1, 1];
         title = "Pseudo-costs sandbox",
-        xlabel = "Pseudo-cost",
-        ylabel = "Resource load",
+        xlabel = "Resource load",
+        ylabel = "Pseudo-cost",
         xticks = 0:0.1:1,
         yticks = 0:1:10,
         xminorticksvisible = true,
@@ -130,8 +130,8 @@ function show_pseudo_costs(pseudo_costs, ::Val{:static})
     ax = Axis(
         fig[1, 1];
         title = "Pseudo-costs",
-        xlabel = "Pseudo-cost",
-        ylabel = "Resource load",
+        xlabel = "Resource load",
+        ylabel = "Pseudo-cost",
         xticks = 0:0.1:1,
         yticks = 0:1:10,
         xminorticksvisible = true,
